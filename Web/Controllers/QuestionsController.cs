@@ -1,14 +1,27 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ApplicationCore.Entities;
+using ApplicationCore.Interfaces;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Web.ViewModels;
 
 namespace Web.Controllers
 {
     public class QuestionsController : Controller
     {
+        private readonly IAsyncRepository _repository;
+        private readonly IMapper _mapper;
+
+        public QuestionsController(IAsyncRepository repository,
+                                   IMapper mapper)
+        {
+            _repository = repository;
+            _mapper = mapper;
+        }
         // GET: QuestionsController
         public ActionResult Index()
         {
@@ -16,10 +29,12 @@ namespace Web.Controllers
         }
 
         // GET: QuestionsController/Details/5
-        [Route("questions/details/{questionId}")]
-        public ActionResult Details(int questionId)
+        [Route("questions/{questionId}")]
+        public async Task<IActionResult> Details(int questionId)
         {
-            return View();
+            var question = await _repository.GetQuestionByIdAsync(questionId);
+            var questionsViewModel = _mapper.Map<Question, QuestionViewModel>(question);
+            return View(questionsViewModel);
         }
 
         // GET: QuestionsController/Create

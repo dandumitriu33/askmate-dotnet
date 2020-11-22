@@ -9,5 +9,6 @@ namespace ApplicationCore.Interfaces
     public interface IAsyncRepository
     {
         Task<List<Question>> ListAllAsync();
+        Task<Question> GetQuestionByIdAsync(int questionId);
     }
 }

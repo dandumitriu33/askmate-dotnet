@@ -21,5 +21,10 @@ namespace Infrastructure.Data
         {
             return await _dbContext.Questions.OrderByDescending(q => q.DateAdded).ToListAsync();
         }
+
+        public async Task<Question> GetQuestionByIdAsync(int questionId)
+        {
+            return await _dbContext.Questions.Where(q => q.Id == questionId).FirstOrDefaultAsync();
+        }
     }
 }
