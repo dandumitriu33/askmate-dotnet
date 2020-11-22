@@ -24,7 +24,12 @@ namespace Infrastructure.Data
 
         public async Task<Question> GetQuestionByIdAsync(int questionId)
         {
-            return await _dbContext.Questions.Where(q => q.Id == questionId).FirstOrDefaultAsync();
+            var answers = await _dbContext.Answers.Where(a => a.QuestionId == questionId).OrderByDescending(a => a.DateAdded).ToListAsync();
+            var question = await _dbContext.Questions.Where(q => q.Id == questionId).FirstOrDefaultAsync();
+            question.Answers = answers;
+            return question;
         }
+
+        
     }
 }

@@ -13,6 +13,7 @@ namespace Web.ViewModels
         public string Body { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime DateAdded { get; set; }
+        public int QuestionId { get; set; }
         public List<CommentViewModel> Comments { get; set; }
     }
 }

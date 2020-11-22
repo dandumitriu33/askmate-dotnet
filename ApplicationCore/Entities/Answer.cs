@@ -11,6 +11,7 @@ namespace ApplicationCore.Entities
         public string Body { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime DateAdded { get; set; }
+        public int QuestionId { get; set; }
         public bool IsRemoved { get; set; }
         public List<Comment> Comments { get; set; }
     }

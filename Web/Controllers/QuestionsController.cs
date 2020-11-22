@@ -33,8 +33,10 @@ namespace Web.Controllers
         public async Task<IActionResult> Details(int questionId)
         {
             var question = await _repository.GetQuestionByIdAsync(questionId);
-            var questionsViewModel = _mapper.Map<Question, QuestionViewModel>(question);
-            return View(questionsViewModel);
+            var answersViewModel = _mapper.Map<List<Answer>, List<AnswerViewModel>>(question.Answers);
+            var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
+            questionViewModel.Answers = answersViewModel;
+            return View(questionViewModel);
         }
 
         // GET: QuestionsController/Create

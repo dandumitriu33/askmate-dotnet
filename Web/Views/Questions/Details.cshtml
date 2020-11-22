@@ -4,3 +4,12 @@
 <p>@Model.Title</p>
 <p>@Model.Body</p>
 <p>@Model.DateAdded</p>
+<hr />
+@foreach (var answer in Model.Answers)
+{
+    <div>
+        <hr />
+        <p>@answer.Body</p>
+        <p>@answer.DateAdded</p>
+    </div>
+}
