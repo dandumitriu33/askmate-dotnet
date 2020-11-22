@@ -16,7 +16,8 @@ namespace Web.Controllers
         }
 
         // GET: QuestionsController/Details/5
-        public ActionResult Details(int id)
+        [Route("questions/details/{questionId}")]
+        public ActionResult Details(int questionId)
         {
             return View();
         }
