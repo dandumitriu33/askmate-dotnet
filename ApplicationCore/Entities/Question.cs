@@ -4,9 +4,8 @@ using System.Text;
 
 namespace ApplicationCore.Entities
 {
-    public class Question
+    public class Question : BaseEntity
     {
-        public int Id { get; set; }
         public string Title { get; set; }
         public string Body { get; set; }
         public DateTime DateAdded { get; set; }
