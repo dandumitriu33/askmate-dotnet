@@ -11,6 +11,7 @@ namespace ApplicationCore.Entities
         [Required]
         [Column(TypeName = ("varchar(100)"))]
         public string Title { get; set; }
+        [Column(TypeName = ("varchar(1000)"))]
         public string Body { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime DateAdded { get; set; }
