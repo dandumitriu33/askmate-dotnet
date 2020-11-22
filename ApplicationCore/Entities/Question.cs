@@ -11,5 +11,6 @@ namespace ApplicationCore.Entities
         public DateTime DateAdded { get; set; }
         public bool IsRemoved { get; set; } = false;
         public List<Comment> Comments { get; set; }
+        public List<Answer> Answers { get; set; }
     }
 }
