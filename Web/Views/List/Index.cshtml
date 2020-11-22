@@ -5,6 +5,7 @@
 
 <div class="text-center">
     <h1 class="display-4">All questions</h1>
+    <a class="btn btn-light" asp-area="" asp-controller="Questions" asp-action="AddQuestion">Add Question</a>
     @foreach (var item in Model)
     {
         @if (String.IsNullOrEmpty(item.Title))

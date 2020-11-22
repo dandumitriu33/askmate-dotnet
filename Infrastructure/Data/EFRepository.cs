@@ -26,7 +26,10 @@ namespace Infrastructure.Data
         {
             var answers = await _dbContext.Answers.Where(a => a.QuestionId == questionId).OrderByDescending(a => a.DateAdded).ToListAsync();
             var question = await _dbContext.Questions.Where(q => q.Id == questionId).FirstOrDefaultAsync();
-            question.Answers = answers;
+            if (answers != null && answers.Count != 0)
+            {
+                question.Answers = answers;
+            }
             return question;
         }
 

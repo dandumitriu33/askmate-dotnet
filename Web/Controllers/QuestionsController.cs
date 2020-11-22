@@ -33,7 +33,11 @@ namespace Web.Controllers
         public async Task<IActionResult> Details(int questionId)
         {
             var question = await _repository.GetQuestionByIdAsync(questionId);
-            var answersViewModel = _mapper.Map<List<Answer>, List<AnswerViewModel>>(question.Answers);
+            var answersViewModel = new List<AnswerViewModel>();
+            if (question.Answers != null && question.Answers.Count != 0)
+            {
+                answersViewModel = _mapper.Map<List<Answer>, List<AnswerViewModel>>(question.Answers);
+            }
             var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
             questionViewModel.Answers = answersViewModel;
             return View(questionViewModel);
@@ -55,8 +59,7 @@ namespace Web.Controllers
             {
                 var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
                 var resultQuestion = await _repository.AddQuestionAsync(question);
-                return View();
-                //return RedirectToAction("Details", resultQuestion.Id);
+                return RedirectToAction("Details", new { questionId = resultQuestion.Id });
             }
             return View();
         }
