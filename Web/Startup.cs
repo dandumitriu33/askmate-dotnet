@@ -1,3 +1,6 @@
+using ApplicationCore.Entities;
+using ApplicationCore.Interfaces;
+using AutoMapper;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,6 +32,8 @@ namespace Web
                 {
                     options.UseSqlServer(Configuration.GetConnectionString("Default"));
                 });
+            services.AddScoped<IAsyncRepository, EFRepository>();
+            services.AddAutoMapper(typeof(Startup));
             services.AddControllersWithViews();
         }
 

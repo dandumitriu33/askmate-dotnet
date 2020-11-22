@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Data
 {
-    public class EFRepository<T> : IAsyncRepository<T> where T : BaseEntity 
+    public class EFRepository : IAsyncRepository
     {
         private readonly AskMateContext _dbContext;
 
@@ -16,9 +16,9 @@ namespace Infrastructure.Data
         {
             _dbContext = dbContext;
         }
-        public async Task<List<T>> ListAllAsync()
+        public async Task<List<Question>> ListAllAsync()
         {
-            return await _dbContext.Set<T>().ToListAsync();
+            return await _dbContext.Questions.ToListAsync();
         }
     }
 }

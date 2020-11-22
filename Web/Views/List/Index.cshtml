@@ -1,0 +1,20 @@
+﻿@model List<QuestionViewModel> 
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">All questions</h1>
+    @foreach (var item in Model)
+    {
+        @if (String.IsNullOrEmpty(item.Title))
+        {
+            <p>no title</p>
+        }
+        else
+        {
+            <p>@item.Title</p>
+        }
+
+    }
+</div>

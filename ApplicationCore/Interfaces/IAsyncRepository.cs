@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace ApplicationCore.Interfaces
 {
-    public interface IAsyncRepository<T> where T : BaseEntity
+    public interface IAsyncRepository
     {
-        Task<List<T>> ListAllAsync();
+        Task<List<Question>> ListAllAsync();
     }
 }
