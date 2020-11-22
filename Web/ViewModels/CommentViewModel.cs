@@ -8,6 +8,7 @@ namespace Web.ViewModels
 {
     public class CommentViewModel
     {
+        public int Id { get; set; }
         [Column(TypeName = ("varchar(1000)"))]
         public string Body { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]

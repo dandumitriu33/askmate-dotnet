@@ -13,7 +13,14 @@
         }
         else
         {
-            <p>@item.Title</p>
+            <p>
+                <a asp-area=""
+                   asp-controller="Questions"
+                   asp-action="Details"
+                   asp-route-questionId=@item.Id>@item.Title</a>
+            </p>
+            <p>@item.Body</p>
+            <p>@item.DateAdded</p>
         }
 
     }

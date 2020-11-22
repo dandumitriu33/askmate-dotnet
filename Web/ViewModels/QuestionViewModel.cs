@@ -8,6 +8,7 @@ namespace Web.ViewModels
 {
     public class QuestionViewModel
     {
+        public int Id { get; set; }
         [Column(TypeName = ("varchar(100)"))]
         public string Title { get; set; }
         [Column(TypeName = ("varchar(1000)"))]
