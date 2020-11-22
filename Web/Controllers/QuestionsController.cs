@@ -40,8 +40,24 @@ namespace Web.Controllers
         }
 
         // GET: QuestionsController/Create
-        public ActionResult AddQuestion()
+        [HttpGet]
+        public IActionResult AddQuestion()
         {
+            return View();
+        }
+
+        // POST: QuestionsController/AddQuestion
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddQuestion(QuestionViewModel questionViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
+                var resultQuestion = await _repository.AddQuestionAsync(question);
+                return View();
+                //return RedirectToAction("Details", resultQuestion.Id);
+            }
             return View();
         }
 

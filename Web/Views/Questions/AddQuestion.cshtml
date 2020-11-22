@@ -22,18 +22,17 @@
                 <label asp-for="Body"></label>
                 <input asp-for="Body"
                         class="form-control"
-                        name="LengthInMinutes"
+                        name="Body"
                         data-val="true"
-                        data-val-required="The movie runtime (minutes) is required."
-                        data-val-number="The movie runtime must be a number. Example: 120"
-                        aria-describedby="length-in-minutes-error"
+                        data-val-required="The body of the question is required."
+                        aria-describedby="body-error"
                         aria-invalid="true" />
                 <span asp-validation-for="Body"
                         class="field-validation-error text-danger ml-2 text-danger"
-                        data-valmsg-for="LengthInMinutes"
+                        data-valmsg-for="Body"
                         data-valmsg-replace="true"></span>
             </div>
-            <button type="submit" class="btn btn-primary">Add Question</button>
+            <button name="SubmitNewMovie" type="submit" class="btn btn-primary">Add Question</button>
         </form>
     </div>
 </div>

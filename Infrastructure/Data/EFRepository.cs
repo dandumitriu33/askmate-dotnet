@@ -30,6 +30,27 @@ namespace Infrastructure.Data
             return question;
         }
 
-        
+        public async Task<Question> AddQuestionAsync(Question question)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                await _dbContext.Questions.AddAsync(question);
+                await _dbContext.SaveChangesAsync();
+
+                // Commit transaction if all commands succeed, transaction will auto-rollback
+                // when disposed if either commands fails
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+            return question;
+
+        }
+
+
     }
 }

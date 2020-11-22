@@ -10,5 +10,6 @@ namespace ApplicationCore.Interfaces
     {
         Task<List<Question>> ListAllAsync();
         Task<Question> GetQuestionByIdAsync(int questionId);
+        Task<Question> AddQuestionAsync(Question question);
     }
 }
