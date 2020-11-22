@@ -3,6 +3,7 @@ using ApplicationCore.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,7 +19,7 @@ namespace Infrastructure.Data
         }
         public async Task<List<Question>> ListAllAsync()
         {
-            return await _dbContext.Questions.ToListAsync();
+            return await _dbContext.Questions.OrderByDescending(q => q.DateAdded).ToListAsync();
         }
     }
 }
