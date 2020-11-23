@@ -24,6 +24,8 @@ namespace ApplicationCore.Entities
             get { return dateAdded; }
             set { } 
         }
+        public int Views { get; set; }
+        public int Votes { get; set; }
         public bool IsRemoved { get; set; } = false;
         public List<Comment> Comments { get; set; }
         public List<Answer> Answers { get; set; }
