@@ -24,15 +24,15 @@ namespace Infrastructure.Data
                 switch (orderBy)
                 {
                     case "Title":
-                        return await _dbContext.Questions.OrderByDescending(q => q.Title).ToListAsync();
+                        return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderByDescending(q => q.Title).ToListAsync();
                     case "Body":
-                        return await _dbContext.Questions.OrderByDescending(q => q.Body).ToListAsync();
+                        return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderByDescending(q => q.Body).ToListAsync();
                     case "Votes":
-                        return await _dbContext.Questions.OrderByDescending(q => q.Votes).ToListAsync();
+                        return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderByDescending(q => q.Votes).ToListAsync();
                     case "Views":
-                        return await _dbContext.Questions.OrderByDescending(q => q.Views).ToListAsync();
+                        return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderByDescending(q => q.Views).ToListAsync();
                     default:
-                        return await _dbContext.Questions.OrderByDescending(q => q.DateAdded).ToListAsync();
+                        return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderByDescending(q => q.DateAdded).ToListAsync();
                 }
             }
             else
@@ -40,15 +40,15 @@ namespace Infrastructure.Data
                 switch (orderBy)
                 {
                     case "Title":
-                        return await _dbContext.Questions.OrderBy(q => q.Title).ToListAsync();
+                        return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderBy(q => q.Title).ToListAsync();
                     case "Body":
-                        return await _dbContext.Questions.OrderBy(q => q.Body).ToListAsync();
+                        return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderBy(q => q.Body).ToListAsync();
                     case "Votes":
-                        return await _dbContext.Questions.OrderBy(q => q.Votes).ToListAsync();
+                        return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderBy(q => q.Votes).ToListAsync();
                     case "Views":
-                        return await _dbContext.Questions.OrderBy(q => q.Views).ToListAsync();
+                        return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderBy(q => q.Views).ToListAsync();
                     default:
-                        return await _dbContext.Questions.OrderBy(q => q.DateAdded).ToListAsync();
+                        return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderBy(q => q.DateAdded).ToListAsync();
                 }
             }
         }
@@ -59,8 +59,8 @@ namespace Infrastructure.Data
             var question = new Question();
             try
             {
-                var answers = await _dbContext.Answers.Where(a => a.QuestionId == questionId).OrderByDescending(a => a.DateAdded).ToListAsync();
-                question = await _dbContext.Questions.Where(q => q.Id == questionId).FirstOrDefaultAsync();
+                var answers = await _dbContext.Answers.Where(a => a.QuestionId == questionId && a.IsRemoved == false).OrderByDescending(a => a.DateAdded).ToListAsync();
+                question = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
                 // increment view count for the extracted question
                 question.Views += 1;
 
@@ -83,7 +83,7 @@ namespace Infrastructure.Data
 
         public async Task<Question> GetQuestionByIdWithoutDetailsAsync(int questionId)
         {
-            return await _dbContext.Questions.Where(q => q.Id == questionId).FirstOrDefaultAsync();
+            return await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
         }
 
         private Task<bool> TryUpdateModelAsync<T>(T question, string v, Func<object, object> p1, Func<object, object> p2, Func<object, object> p3)
@@ -117,10 +117,31 @@ namespace Infrastructure.Data
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
-                var questionFromDb = await _dbContext.Questions.Where(q => q.Id == question.Id).FirstOrDefaultAsync();
+                var questionFromDb = await _dbContext.Questions.Where(q => q.Id == question.Id && q.IsRemoved == false).FirstOrDefaultAsync();
 
                 questionFromDb.Title = question.Title;
                 questionFromDb.Body = question.Body;
+                _dbContext.Questions.Attach(questionFromDb);
+                _dbContext.Entry(questionFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task RemoveQuestionById(int questionId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var questionFromDb = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
+
+                questionFromDb.IsRemoved = true;
                 _dbContext.Questions.Attach(questionFromDb);
                 _dbContext.Entry(questionFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();

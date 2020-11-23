@@ -1,6 +1,7 @@
 ﻿@model QuestionViewModel
 
 <p>Details</p>
+<p>@Model.Id</p>
 <p>@Model.Title</p>
 <p>@Model.Views</p>
 <p>@Model.Body</p>
@@ -11,6 +12,13 @@
    asp-action="Edit"
    asp-route-questionId="@Model.Id"
    >Edit
+</a>
+<a class="btn btn-danger"
+   asp-area=""
+   asp-controller="Questions"
+   asp-action="Remove"
+   asp-route-questionId="@Model.Id">
+    Remove
 </a>
 <hr />
 @foreach (var answer in Model.Answers)

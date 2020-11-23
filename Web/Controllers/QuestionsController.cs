@@ -104,25 +104,14 @@ namespace Web.Controllers
             return View(questionViewModel.Id);
         }
 
-        // GET: QuestionsController/Delete/5
-        public ActionResult Delete(int id)
+        // Get: QuestionsController/5/Remove
+        [HttpGet]
+        [Route("questions/remove/{questionId}")]
+        public async Task<IActionResult> Remove(int questionId)
         {
-            return View();
-        }
-
-        // POST: QuestionsController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            await _repository.RemoveQuestionById(questionId);
+            
+            return RedirectToAction("Index", "List");
         }
     }
 }
