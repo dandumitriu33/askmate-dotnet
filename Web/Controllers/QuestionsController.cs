@@ -89,19 +89,19 @@ namespace Web.Controllers
             return View(questionViewModel);
         }
 
-        // POST: QuestionsController/Edit/5
+        // POST: QuestionsController/5/Edit
         [HttpPost]
+        [Route("questions/{questionId}/edit")]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<IActionResult> Edit(QuestionViewModel questionViewModel)
         {
-            try
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
+                await _repository.EditQuestionAsync(question);
+                return RedirectToAction("Details", new { questionId = questionViewModel.Id });
             }
-            catch
-            {
-                return View();
-            }
+            return View(questionViewModel.Id);
         }
 
         // GET: QuestionsController/Delete/5

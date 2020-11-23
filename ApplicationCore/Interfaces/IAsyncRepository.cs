@@ -12,5 +12,6 @@ namespace ApplicationCore.Interfaces
         Task<Question> GetQuestionByIdAsync(int questionId);
         Task<Question> AddQuestionAsync(Question question);
         Task<Question> GetQuestionByIdWithoutDetailsAsync(int questionId);
+        Task EditQuestionAsync(Question question);
     }
 }
