@@ -62,7 +62,19 @@
                        asp-route-orderBy="Views"
                        asp-route-direction="Ascending">^</a>
                 </th>
-                <th scope="col">Added</th>
+                <th scope="col">
+                    Added
+                    <a asp-area=""
+                       asp-controller="List"
+                       asp-action="Index"
+                       asp-route-orderBy="DateAdded"
+                       asp-route-direction="Descending">v</a>
+                    <a asp-area=""
+                       asp-controller="List"
+                       asp-action="Index"
+                       asp-route-orderBy="DateAdded"
+                       asp-route-direction="Ascending">^</a>
+                </th>
             </tr>
         </thead>
         <tbody>
