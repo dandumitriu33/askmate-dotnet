@@ -17,9 +17,41 @@ namespace Infrastructure.Data
         {
             _dbContext = dbContext;
         }
-        public async Task<List<Question>> ListAllAsync()
+        public async Task<List<Question>> ListAllAsync(string orderBy, string direction)
         {
-            return await _dbContext.Questions.OrderByDescending(q => q.DateAdded).ToListAsync();
+            if (String.Equals("Descending", direction))
+            {
+                switch (orderBy)
+                {
+                    case "Title":
+                        return await _dbContext.Questions.OrderByDescending(q => q.Title).ToListAsync();
+                    case "Body":
+                        return await _dbContext.Questions.OrderByDescending(q => q.Body).ToListAsync();
+                    case "Votes":
+                        return await _dbContext.Questions.OrderByDescending(q => q.Votes).ToListAsync();
+                    case "Views":
+                        return await _dbContext.Questions.OrderByDescending(q => q.Views).ToListAsync();
+                    default:
+                        return await _dbContext.Questions.OrderByDescending(q => q.DateAdded).ToListAsync();
+                }
+            }
+            else
+            {
+                switch (orderBy)
+                {
+                    case "Title":
+                        return await _dbContext.Questions.OrderBy(q => q.Title).ToListAsync();
+                    case "Body":
+                        return await _dbContext.Questions.OrderBy(q => q.Body).ToListAsync();
+                    case "Votes":
+                        return await _dbContext.Questions.OrderBy(q => q.Votes).ToListAsync();
+                    case "Views":
+                        return await _dbContext.Questions.OrderBy(q => q.Views).ToListAsync();
+                    default:
+                        return await _dbContext.Questions.OrderBy(q => q.DateAdded).ToListAsync();
+                }
+            }
+            
         }
 
         public async Task<Question> GetQuestionByIdAsync(int questionId)

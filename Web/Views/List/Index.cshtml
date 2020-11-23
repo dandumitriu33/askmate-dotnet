@@ -10,7 +10,19 @@
     <table class="table table-striped mt-2">
         <thead>
             <tr>
-                <th scope="col">Votes</th>
+                <th scope="col">
+                    Votes
+                    <a asp-area=""
+                       asp-controller="List"
+                       asp-action="Index"
+                       asp-route-orderBy="Votes"
+                       asp-route-direction="Descending">v</a>
+                    <a asp-area=""
+                       asp-controller="List"
+                       asp-action="Index"
+                       asp-route-orderBy="Votes"
+                       asp-route-direction="Ascending">^</a>
+                </th>
                 <th scope="col">Title</th>
                 <th scope="col">Body</th>
                 <th scope="col">Views</th>

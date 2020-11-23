@@ -24,9 +24,9 @@ namespace Web.Controllers
             _mapper = mapper;
         }
         // GET: ListController
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string orderBy="DateAdded", string direction="Descending")
         {
-            var questions = await _repository.ListAllAsync();
+            var questions = await _repository.ListAllAsync(orderBy, direction);
             var questionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(questions);
             return View(questionsViewModel);
         }
