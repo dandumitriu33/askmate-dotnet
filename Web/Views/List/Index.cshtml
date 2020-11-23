@@ -23,7 +23,19 @@
                        asp-route-orderBy="Votes"
                        asp-route-direction="Ascending">^</a>
                 </th>
-                <th scope="col">Title</th>
+                <th scope="col">
+                    Title
+                    <a asp-area=""
+                       asp-controller="List"
+                       asp-action="Index"
+                       asp-route-orderBy="Title"
+                       asp-route-direction="Descending">v</a>
+                    <a asp-area=""
+                       asp-controller="List"
+                       asp-action="Index"
+                       asp-route-orderBy="Title"
+                       asp-route-direction="Ascending">^</a>
+                </th>
                 <th scope="col">Body</th>
                 <th scope="col">Views</th>
                 <th scope="col">Added</th>
