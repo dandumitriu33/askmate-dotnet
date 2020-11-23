@@ -10,8 +10,8 @@
    asp-area=""
    asp-controller="Questions"
    asp-action="Edit"
-   asp-route-questionId="@Model.Id"
-   >Edit
+   asp-route-questionId="@Model.Id">
+    Edit
 </a>
 <a class="btn btn-danger"
    asp-area=""
@@ -21,6 +21,7 @@
     Remove
 </a>
 <hr />
+
 @foreach (var answer in Model.Answers)
 {
     <div>
@@ -29,3 +30,12 @@
         <p>@answer.DateAdded</p>
     </div>
 }
+<hr />
+<a class="btn btn-primary"
+   asp-area=""
+   asp-controller="Answers"
+   asp-action="AddAnswer"
+   asp-route-questionId="@Model.Id">
+    Answer
+</a>
+<hr />

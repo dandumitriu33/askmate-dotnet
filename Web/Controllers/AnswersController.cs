@@ -1,0 +1,49 @@
+﻿using ApplicationCore.Entities;
+using ApplicationCore.Interfaces;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Web.ViewModels;
+
+namespace Web.Controllers
+{
+    public class AnswersController : Controller
+    {
+        private readonly IAsyncRepository _repository;
+        private readonly IMapper _mapper;
+
+        public AnswersController(IAsyncRepository repository,
+                                 IMapper mapper)
+        {
+            _repository = repository;
+            _mapper = mapper;
+        }
+
+        // Get
+        [HttpGet]
+        [Route("answers/addanswer/{questionId}")]
+        public IActionResult AddAnswer(int questionId)
+        {
+            var answerViewModel = new AnswerViewModel();
+            answerViewModel.QuestionId = questionId;
+            return View(answerViewModel);
+        }
+
+        // POST: AnswersController/AddAnswer
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("answers/addanswer/{questionId}")]
+        public async Task<IActionResult> AddAnswer(AnswerViewModel answerViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
+                await _repository.AddAnswerAsync(answer);
+            }
+            return RedirectToAction("Details", "Questions", new { questionId = answerViewModel.QuestionId });
+        }
+    }
+}

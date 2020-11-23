@@ -155,5 +155,26 @@ namespace Infrastructure.Data
             }
         }
 
+        public async Task<Answer> AddAnswerAsync(Answer answer)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                answer.DateAdded = DateTime.Now;
+                await _dbContext.Answers.AddAsync(answer);
+                await _dbContext.SaveChangesAsync();
+
+                // Commit transaction if all commands succeed, transaction will auto-rollback
+                // when disposed if either commands fails
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+            return answer;
+        }
+
     }
 }

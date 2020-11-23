@@ -14,5 +14,6 @@ namespace ApplicationCore.Interfaces
         Task<Question> GetQuestionByIdWithoutDetailsAsync(int questionId);
         Task EditQuestionAsync(Question question);
         Task RemoveQuestionById(int questionId);
+        Task<Answer> AddAnswerAsync(Answer answer);
     }
 }

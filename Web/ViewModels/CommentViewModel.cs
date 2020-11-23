@@ -11,7 +11,6 @@ namespace Web.ViewModels
         public int Id { get; set; }
         [Column(TypeName = ("varchar(1000)"))]
         public string Body { get; set; }
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime DateAdded { get; set; }
     }
 }
