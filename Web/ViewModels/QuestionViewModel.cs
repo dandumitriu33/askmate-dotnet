@@ -24,6 +24,8 @@ namespace Web.ViewModels
             get { return dateAdded; }
             set { } 
         }
+        public int Views { get; set; }
+        public int Votes { get; set; }
         public List<CommentViewModel> Comments { get; set; }
         public List<AnswerViewModel> Answers { get; set; }
     }
