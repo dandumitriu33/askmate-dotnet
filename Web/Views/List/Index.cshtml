@@ -5,24 +5,33 @@
 
 <div class="text-center">
     <h1 class="display-4">All questions</h1>
-    <a class="btn btn-light" asp-area="" asp-controller="Questions" asp-action="AddQuestion">Add Question</a>
-    @foreach (var item in Model)
-    {
-        @if (String.IsNullOrEmpty(item.Title))
-        {
-            <p>no title</p>
-        }
-        else
-        {
-            <p>
-                <a asp-area=""
-                   asp-controller="Questions"
-                   asp-action="Details"
-                   asp-route-questionId=@item.Id>@item.Title</a>
-            </p>
-            <p>@item.Body</p>
-            <p>@item.DateAdded</p>
-        }
-
-    }
+    <a class="btn btn-outline-secondary" asp-area="" asp-controller="Questions" asp-action="AddQuestion">Add Question</a>
+    <br />
+    <table class="table table-striped mt-2">
+        <thead>
+            <tr>
+                <th scope="col">Votes</th>
+                <th scope="col">Title</th>
+                <th scope="col">Body</th>
+                <th scope="col">Views</th>
+                <th scope="col">Added</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var question in Model)
+            {
+                <tr>
+                    <th scope="row">@question.Votes</th>
+                    <td><a asp-area=""
+                           asp-controller="Questions"
+                           asp-action="Details"
+                           asp-route-questionId=@question.Id>@question.Title</a>
+                    </td>
+                    <td>@question.Body</td>
+                    <td>@question.Views</td>
+                    <td>@question.DateAdded</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
