@@ -70,6 +70,7 @@ namespace Infrastructure.Data
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
+                question.DateAdded = DateTime.Now;
                 await _dbContext.Questions.AddAsync(question);
                 await _dbContext.SaveChangesAsync();
 

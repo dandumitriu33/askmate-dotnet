@@ -9,21 +9,13 @@ namespace ApplicationCore.Entities
     public class Question
     {
         public int Id { get; set; }
-        private readonly DateTime dateAdded;
-        public Question()
-        {
-            this.dateAdded = DateTime.Now;
-        }
+        
         [Required]
         [Column(TypeName = ("varchar(100)"))]
         public string Title { get; set; }
         [Column(TypeName = ("varchar(1000)"))]
         public string Body { get; set; }
-        public DateTime DateAdded 
-        {
-            get { return dateAdded; }
-            set { } 
-        }
+        public DateTime DateAdded { get; set; }
         public int Views { get; set; }
         public int Votes { get; set; }
         public bool IsRemoved { get; set; } = false;
