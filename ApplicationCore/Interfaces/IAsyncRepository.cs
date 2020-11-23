@@ -11,5 +11,6 @@ namespace ApplicationCore.Interfaces
         Task<List<Question>> ListAllAsync(string orderBy, string direction);
         Task<Question> GetQuestionByIdAsync(int questionId);
         Task<Question> AddQuestionAsync(Question question);
+        Task<Question> GetQuestionByIdWithoutDetailsAsync(int questionId);
     }
 }

@@ -79,10 +79,14 @@ namespace Web.Controllers
             }
         }
 
-        // GET: QuestionsController/Edit/5
-        public ActionResult Edit(int id)
+        // GET: QuestionsController/5/Edit
+        [HttpGet]
+        [Route("questions/{questionId}/edit")]
+        public async Task<IActionResult> Edit(int questionId)
         {
-            return View();
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
+            return View(questionViewModel);
         }
 
         // POST: QuestionsController/Edit/5

@@ -51,7 +51,6 @@ namespace Infrastructure.Data
                         return await _dbContext.Questions.OrderBy(q => q.DateAdded).ToListAsync();
                 }
             }
-            
         }
 
         public async Task<Question> GetQuestionByIdAsync(int questionId)
@@ -80,6 +79,11 @@ namespace Infrastructure.Data
                 transaction.Rollback();
             }
             return question;
+        }
+
+        public async Task<Question> GetQuestionByIdWithoutDetailsAsync(int questionId)
+        {
+            return await _dbContext.Questions.Where(q => q.Id == questionId).FirstOrDefaultAsync();
         }
 
         private Task<bool> TryUpdateModelAsync<T>(T question, string v, Func<object, object> p1, Func<object, object> p2, Func<object, object> p3)

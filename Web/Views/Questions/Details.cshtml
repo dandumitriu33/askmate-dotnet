@@ -5,6 +5,13 @@
 <p>@Model.Views</p>
 <p>@Model.Body</p>
 <p>@Model.DateAdded</p>
+<a class="btn btn-warning"
+   asp-area=""
+   asp-controller="Questions"
+   asp-action="Edit"
+   asp-route-questionId="@Model.Id"
+   >Edit
+</a>
 <hr />
 @foreach (var answer in Model.Answers)
 {
