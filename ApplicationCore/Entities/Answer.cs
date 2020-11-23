@@ -9,7 +9,6 @@ namespace ApplicationCore.Entities
     {
         [Column(TypeName = ("varchar(1000)"))]
         public string Body { get; set; }
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public DateTime DateAdded { get; set; }
         public int QuestionId { get; set; }
         public bool IsRemoved { get; set; }

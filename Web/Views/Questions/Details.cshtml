@@ -1,11 +1,27 @@
 ﻿@model QuestionViewModel
 
 <p>Details</p>
+<p>@Model.Id</p>
 <p>@Model.Title</p>
 <p>@Model.Views</p>
 <p>@Model.Body</p>
 <p>@Model.DateAdded</p>
+<a class="btn btn-warning"
+   asp-area=""
+   asp-controller="Questions"
+   asp-action="Edit"
+   asp-route-questionId="@Model.Id">
+    Edit
+</a>
+<a class="btn btn-danger"
+   asp-area=""
+   asp-controller="Questions"
+   asp-action="Remove"
+   asp-route-questionId="@Model.Id">
+    Remove
+</a>
 <hr />
+
 @foreach (var answer in Model.Answers)
 {
     <div>
@@ -14,3 +30,12 @@
         <p>@answer.DateAdded</p>
     </div>
 }
+<hr />
+<a class="btn btn-primary"
+   asp-area=""
+   asp-controller="Answers"
+   asp-action="AddAnswer"
+   asp-route-questionId="@Model.Id">
+    Answer
+</a>
+<hr />

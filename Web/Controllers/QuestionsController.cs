@@ -79,46 +79,39 @@ namespace Web.Controllers
             }
         }
 
-        // GET: QuestionsController/Edit/5
-        public ActionResult Edit(int id)
+        // GET: QuestionsController/5/Edit
+        [HttpGet]
+        [Route("questions/{questionId}/edit")]
+        public async Task<IActionResult> Edit(int questionId)
         {
-            return View();
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
+            return View(questionViewModel);
         }
 
-        // POST: QuestionsController/Edit/5
+        // POST: QuestionsController/5/Edit
         [HttpPost]
+        [Route("questions/{questionId}/edit")]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<IActionResult> Edit(QuestionViewModel questionViewModel)
         {
-            try
+            if (ModelState.IsValid)
             {
-                return RedirectToAction(nameof(Index));
+                var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
+                await _repository.EditQuestionAsync(question);
+                return RedirectToAction("Details", new { questionId = questionViewModel.Id });
             }
-            catch
-            {
-                return View();
-            }
+            return View(questionViewModel.Id);
         }
 
-        // GET: QuestionsController/Delete/5
-        public ActionResult Delete(int id)
+        // Get: QuestionsController/5/Remove
+        [HttpGet]
+        [Route("questions/remove/{questionId}")]
+        public async Task<IActionResult> Remove(int questionId)
         {
-            return View();
-        }
-
-        // POST: QuestionsController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            await _repository.RemoveQuestionById(questionId);
+            
+            return RedirectToAction("Index", "List");
         }
     }
 }
