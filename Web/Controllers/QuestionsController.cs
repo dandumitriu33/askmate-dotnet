@@ -18,17 +18,17 @@ namespace Web.Controllers
         private readonly IAsyncRepository _repository;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly IFileTypeChecker _fileTypeChecker;
+        private readonly IFileOperations _fileOperations;
 
         public QuestionsController(IAsyncRepository repository,
                                    IMapper mapper,
                                    IWebHostEnvironment webHostEnvironment,
-                                   IFileTypeChecker fileTypeChecker)
+                                   IFileOperations fileOperations)
         {
             _repository = repository;
             _mapper = mapper;
             _webHostEnvironment = webHostEnvironment;
-            _fileTypeChecker = fileTypeChecker;
+            _fileOperations = fileOperations;
         }
         // GET: QuestionsController
         public ActionResult Index()
@@ -63,7 +63,7 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddQuestion(QuestionViewModel questionViewModel)
         {
-            if (ModelState.IsValid && _fileTypeChecker.ValidateImageType(questionViewModel.Image.FileName) == true)
+            if (ModelState.IsValid && _fileOperations.ValidateImageType(questionViewModel.Image.FileName) == true)
             {
                 string uniqueFileName = null;
                 if (questionViewModel.Image != null)

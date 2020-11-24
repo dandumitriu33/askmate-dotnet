@@ -34,7 +34,7 @@ namespace Web
                     options.UseSqlServer(Configuration.GetConnectionString("Default"));
                 });
             services.AddScoped<IAsyncRepository, EFRepository>();
-            services.AddScoped<IFileTypeChecker, FileTypeChecker>();
+            services.AddScoped<IFileOperations, FileOperations>();
             services.AddAutoMapper(typeof(Startup));
             services.AddControllersWithViews();
         }

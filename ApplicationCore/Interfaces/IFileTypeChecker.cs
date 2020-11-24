@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ApplicationCore.Interfaces
 {
-    public interface IFileTypeChecker
+    public interface IFileOperations
     {
         bool ValidateImageType(string fileName);
     }

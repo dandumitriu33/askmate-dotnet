@@ -5,7 +5,7 @@ using System.Text;
 
 namespace ApplicationCore.Services
 {
-    public class FileTypeChecker : IFileTypeChecker
+    public class FileOperations : IFileOperations
     {
         public bool ValidateImageType(string fileName)
         {

@@ -17,17 +17,17 @@ namespace Web.Controllers
         private readonly IAsyncRepository _repository;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly IFileTypeChecker _fileTypeChecker;
+        private readonly IFileOperations _fileOperations;
 
         public AnswersController(IAsyncRepository repository,
                                  IMapper mapper,
                                  IWebHostEnvironment webHostEnvironment,
-                                 IFileTypeChecker fileTypeChecker)
+                                 IFileOperations fileOperations)
         {
             _repository = repository;
             _mapper = mapper;
             _webHostEnvironment = webHostEnvironment;
-            _fileTypeChecker = fileTypeChecker;
+            _fileOperations = fileOperations;
         }
 
         // Get
@@ -46,7 +46,7 @@ namespace Web.Controllers
         [Route("answers/addanswer/{questionId}")]
         public async Task<IActionResult> AddAnswer(AnswerViewModel answerViewModel)
         {
-            if (ModelState.IsValid && _fileTypeChecker.ValidateImageType(answerViewModel.Image.FileName) == true)
+            if (ModelState.IsValid && _fileOperations.ValidateImageType(answerViewModel.Image.FileName) == true)
             {
                 string uniqueFileName = null;
                 if (answerViewModel.Image != null)
