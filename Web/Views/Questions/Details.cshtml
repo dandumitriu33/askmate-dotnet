@@ -28,6 +28,14 @@
         <hr />
         <p>@answer.Body</p>
         <p>@answer.DateAdded</p>
+        <a class="btn btn-danger"
+           asp-area=""
+           asp-controller="Answers"
+           asp-action="Remove"
+           asp-route-questionId="@Model.Id"
+           asp-route-answerId="@answer.Id">
+            Remove
+        </a>
     </div>
 }
 <hr />

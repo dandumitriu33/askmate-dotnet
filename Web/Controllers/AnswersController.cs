@@ -45,5 +45,15 @@ namespace Web.Controllers
             }
             return RedirectToAction("Details", "Questions", new { questionId = answerViewModel.QuestionId });
         }
+
+        // Get: AnswersController/5/Remove
+        [HttpGet]
+        [Route("answers/remove/{answerId}")]
+        public async Task<IActionResult> Remove(int answerId, int questionId)
+        {
+            await _repository.RemoveAnswerById(answerId);
+
+            return RedirectToAction("Details", "Questions", new { questionId = questionId });
+        }
     }
 }
