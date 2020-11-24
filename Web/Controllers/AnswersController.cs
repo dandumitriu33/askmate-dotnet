@@ -76,6 +76,32 @@ namespace Web.Controllers
             return View(answerViewModel);
         }
 
+        // POST: AnswersController/5/Edit
+        [HttpPost]
+        [Route("answers/{answerId}/edit")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAnswer(AnswerViewModel answerViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                string uniqueFileName = null;
+                if (answerViewModel.Image != null)
+                {
+                    // for more advanced projects add a composite file provider - for now wwwroot
+                    // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
+                    string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                    uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.QuestionId, answerViewModel.Image.FileName);
+                    string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+                    await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                }
+                var answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
+                answer.ImageNamePath = uniqueFileName;
+                await _repository.EditAnswerAsync(answer);
+                return RedirectToAction("Details", "Questions", new { questionId = answerViewModel.QuestionId });
+            }
+            return View(answerViewModel);
+        }
+
         // Get: AnswersController/5/Remove
         [HttpGet]
         [Route("answers/remove/{answerId}")]

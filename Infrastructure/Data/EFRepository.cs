@@ -224,6 +224,28 @@ namespace Infrastructure.Data
             return await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
         }
 
+        public async Task EditAnswerAsync(Answer answer)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answer.Id && a.IsRemoved == false).FirstOrDefaultAsync();
+
+                answerFromDb.Body = answer.Body;
+                answerFromDb.ImageNamePath = answer.ImageNamePath;
+                _dbContext.Answers.Attach(answerFromDb);
+                _dbContext.Entry(answerFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
         public async Task RemoveAnswerById(int answerId)
         {
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();

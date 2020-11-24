@@ -5,7 +5,10 @@
         <form enctype="multipart/form-data" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
-                <input type="hidden" name="questionId" value="@Model.QuestionId">
+                <input type="hidden" asp-for="Id" name="Id" value="@Model.Id">
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="QuestionId" name="QuestionId" value="@Model.QuestionId">
             </div>
             <div class="form-group">
                 <label asp-for="Body"></label>

@@ -18,6 +18,7 @@ namespace ApplicationCore.Interfaces
         Task VoteDownQuestionById(int questionId);
         Task<Answer> AddAnswerAsync(Answer answer);
         Task<Answer> GetAnswerByIdWithoutDetailsAsync(int answerId);
+        Task EditAnswerAsync(Answer answer);
         Task RemoveAnswerById(int answerId);
         Task VoteUpAnswerById(int answerId);
         Task VoteDownAnswerById(int answerId);
