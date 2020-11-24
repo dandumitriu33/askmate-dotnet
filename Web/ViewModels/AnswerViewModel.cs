@@ -17,6 +17,6 @@ namespace Web.ViewModels
         public int Votes { get; set; }
         public List<CommentViewModel> Comments { get; set; }
         public IFormFile Image { get; set; }
-        public string ImagePath { get; set; }
+        public string ImageNamePath { get; set; }
     }
 }
