@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Web.ViewModels;
@@ -57,7 +58,25 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                string uniqueFileName = null;
+                if (questionViewModel.Image != null)
+                {
+                    // absolute path for now
+                    string serverImagesDirectory = @"C:\Users\Dan\Projects\askmate-dotnet\Infrastructure\Images";
+                    uniqueFileName = "QTitle_" 
+                                    + questionViewModel.Title + "_" 
+                                    + DateTime.Now.Year.ToString() + "_" 
+                                    + DateTime.Now.Month.ToString() + "_" 
+                                    + DateTime.Now.Day.ToString() + "_" 
+                                    + DateTime.Now.Hour.ToString() + "_" 
+                                    + DateTime.Now.Minute.ToString() + "_" 
+                                    + DateTime.Now.Second.ToString() + "_" 
+                                    + Guid.NewGuid().ToString() + "_" + questionViewModel.Image.FileName;
+                    string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+                    await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                }
                 var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
+                question.ImagePath = uniqueFileName;
                 var resultQuestion = await _repository.AddQuestionAsync(question);
                 return RedirectToAction("Details", new { questionId = resultQuestion.Id });
             }
