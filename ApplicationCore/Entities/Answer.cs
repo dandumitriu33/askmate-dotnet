@@ -12,6 +12,7 @@ namespace ApplicationCore.Entities
         public DateTime DateAdded { get; set; }
         public int QuestionId { get; set; }
         public bool IsRemoved { get; set; }
+        public int Votes { get; set; }
         public List<Comment> Comments { get; set; }
     }
 }

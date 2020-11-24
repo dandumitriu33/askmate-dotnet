@@ -13,6 +13,7 @@ namespace Web.ViewModels
         public string Body { get; set; }
         public DateTime DateAdded { get; set; }
         public int QuestionId { get; set; }
+        public int Votes { get; set; }
         public List<CommentViewModel> Comments { get; set; }
     }
 }
