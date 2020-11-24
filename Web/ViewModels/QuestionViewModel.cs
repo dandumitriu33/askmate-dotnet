@@ -21,5 +21,6 @@ namespace Web.ViewModels
         public List<CommentViewModel> Comments { get; set; }
         public List<AnswerViewModel> Answers { get; set; }
         public IFormFile Image { get; set; }
+        public string ImagePath { get; set; }
     }
 }

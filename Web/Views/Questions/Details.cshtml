@@ -1,11 +1,20 @@
 ﻿@model QuestionViewModel
 
+@{ 
+    
+}
+
 <p>Details</p>
 <p>@Model.Id</p>
 <p>@Model.Title</p>
 <p>@Model.Views</p>
 <p>@Model.Body</p>
 <p>@Model.DateAdded</p>
+@if (Model.ImagePath != null)
+{
+    <img src="~/uploads/@Model.ImagePath" alt="Image related to the question."/>
+}
+<br />
 <a class="btn btn-warning"
    asp-area=""
    asp-controller="Questions"
@@ -35,6 +44,9 @@
                 Added
             </th>
             <th scope="col">
+                Image
+            </th>
+            <th scope="col">
                 Actions
             </th>
         </tr>
@@ -62,6 +74,9 @@
                 </th>
                 <td>@answer.Body</td>
                 <td>@answer.DateAdded</td>
+                <td>
+                    -
+                </td>
                 <td><a class="btn btn-danger"
                        asp-area=""
                        asp-controller="Answers"

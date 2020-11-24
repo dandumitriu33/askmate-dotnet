@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -16,12 +17,15 @@ namespace Web.Controllers
     {
         private readonly IAsyncRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public QuestionsController(IAsyncRepository repository,
-                                   IMapper mapper)
+                                   IMapper mapper,
+                                   IWebHostEnvironment webHostEnvironment)
         {
             _repository = repository;
             _mapper = mapper;
+            _webHostEnvironment = webHostEnvironment;
         }
         // GET: QuestionsController
         public ActionResult Index()
@@ -61,8 +65,9 @@ namespace Web.Controllers
                 string uniqueFileName = null;
                 if (questionViewModel.Image != null)
                 {
-                    // absolute path for now
-                    string serverImagesDirectory = @"C:\Users\Dan\Projects\askmate-dotnet\Infrastructure\Images";
+                    // for more advanced projects add a composite file provider - for now wwwroot
+                    // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
+                    string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
                     uniqueFileName = "QTitle_" 
                                     + questionViewModel.Title + "_" 
                                     + DateTime.Now.Year.ToString() + "_" 
