@@ -55,5 +55,15 @@ namespace Web.Controllers
 
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
+
+        // Get: AnswersController/5/VoteUp
+        [HttpGet]
+        [Route("answers/{answerId}/voteup")]
+        public async Task<IActionResult> VoteUpAnswer(int answerId, int questionId)
+        {
+            await _repository.VoteUpAnswerById(answerId);
+
+            return RedirectToAction("Details", "Questions", new { questionId = questionId });
+        }
     }
 }

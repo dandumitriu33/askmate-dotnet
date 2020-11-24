@@ -47,14 +47,16 @@
                     <a asp-area=""
                        asp-controller="Answers"
                        asp-action="VoteUpAnswer"
-                       asp-route-questionId="@answer.Id">
+                       asp-route-answerId="@answer.Id"
+                       asp-route-questionId="@Model.Id">
                         ^
                     </a>
                     @answer.Votes
                     <a asp-area=""
                        asp-controller="Answers"
                        asp-action="VoteDownAnswer"
-                       asp-route-questionId="@answer.Id">
+                       asp-route-answerId="@answer.Id"
+                       asp-route-questionId="@Model.Id">
                         v
                     </a>
                 </th>
