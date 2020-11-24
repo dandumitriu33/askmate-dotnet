@@ -81,7 +81,7 @@ namespace Web.Controllers
                     await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
                 }
                 var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
-                question.ImagePath = uniqueFileName;
+                question.ImageNamePath = uniqueFileName;
                 var resultQuestion = await _repository.AddQuestionAsync(question);
                 return RedirectToAction("Details", new { questionId = resultQuestion.Id });
             }

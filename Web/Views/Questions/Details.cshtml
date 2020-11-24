@@ -10,9 +10,9 @@
 <p>@Model.Views</p>
 <p>@Model.Body</p>
 <p>@Model.DateAdded</p>
-@if (Model.ImagePath != null)
+@if (Model.ImageNamePath != null)
 {
-    <img src="~/uploads/@Model.ImagePath" alt="Image related to the question."/>
+    <img src="~/uploads/@Model.ImageNamePath" alt="Image related to the question."/>
 }
 <br />
 <a class="btn btn-warning"
