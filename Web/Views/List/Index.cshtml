@@ -89,6 +89,12 @@
                             ^
                         </a>
                         @question.Votes
+                        <a asp-area=""
+                           asp-controller="Questions"
+                           asp-action="VoteDownQuestion"
+                           asp-route-questionId="@question.Id">
+                            v
+                        </a>
                     </th>
                     <td><a asp-area=""
                            asp-controller="Questions"
