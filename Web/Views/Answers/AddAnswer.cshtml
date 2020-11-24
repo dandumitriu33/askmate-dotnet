@@ -22,6 +22,14 @@
                       data-valmsg-for="Body"
                       data-valmsg-replace="true"></span>
             </div>
+            <div class="form-group">
+                <div class="custom-file">
+                    <label asp-for="Image" class="custom-file-label">Choose file...</label>
+                    <input asp-for="Image"
+                           class="form-control custom-file-input"
+                           name="Image" />
+                </div>
+            </div>
             <button name="SubmitNewAnswer" type="submit" class="btn btn-primary">Submit Answer</button>
         </form>
     </div>
