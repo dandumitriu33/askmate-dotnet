@@ -121,6 +121,7 @@ namespace Infrastructure.Data
 
                 questionFromDb.Title = question.Title;
                 questionFromDb.Body = question.Body;
+                questionFromDb.ImageNamePath = question.ImageNamePath;
                 _dbContext.Questions.Attach(questionFromDb);
                 _dbContext.Entry(questionFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();

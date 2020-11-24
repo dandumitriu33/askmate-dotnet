@@ -116,7 +116,18 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                string uniqueFileName = null;
+                if (questionViewModel.Image != null)
+                {
+                    // for more advanced projects add a composite file provider - for now wwwroot
+                    // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
+                    string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                    uniqueFileName = _fileOperations.AssembleQuestionUploadedFileName(questionViewModel.Title, questionViewModel.Image.FileName);
+                    string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+                    await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                }
                 var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
+                question.ImageNamePath = uniqueFileName;
                 await _repository.EditQuestionAsync(question);
                 return RedirectToAction("Details", new { questionId = questionViewModel.Id });
             }
