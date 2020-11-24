@@ -87,6 +87,13 @@
                 </td>
             }
             <td>
+                <a class="btn btn-warning"
+                   asp-area=""
+                   asp-controller="Answers"
+                   asp-action="EditAnswer"
+                   asp-route-answerId="@answer.Id">
+                    Edit
+                </a>
                 <a class="btn btn-danger"
                    asp-area=""
                    asp-controller="Answers"

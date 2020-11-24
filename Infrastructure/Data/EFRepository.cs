@@ -219,6 +219,11 @@ namespace Infrastructure.Data
             return answer;
         }
 
+        public async Task<Answer> GetAnswerByIdWithoutDetailsAsync(int answerId)
+        {
+            return await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
+        }
+
         public async Task RemoveAnswerById(int answerId)
         {
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();

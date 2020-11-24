@@ -66,6 +66,16 @@ namespace Web.Controllers
             return View(answerViewModel);
         }
 
+        // GET: AnswersController/5/Edit
+        [HttpGet]
+        [Route("answers/{answerId}/edit")]
+        public async Task<IActionResult> EditAnswer(int answerId)
+        {
+            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+            var answerViewModel = _mapper.Map<Answer, AnswerViewModel>(answer);
+            return View(answerViewModel);
+        }
+
         // Get: AnswersController/5/Remove
         [HttpGet]
         [Route("answers/remove/{answerId}")]
