@@ -1,11 +1,20 @@
 ﻿@model QuestionViewModel
 
+@{ 
+    
+}
+
 <p>Details</p>
 <p>@Model.Id</p>
 <p>@Model.Title</p>
 <p>@Model.Views</p>
 <p>@Model.Body</p>
 <p>@Model.DateAdded</p>
+@if (Model.ImageNamePath != null)
+{
+    <img src="~/uploads/@Model.ImageNamePath" alt="Image related to the question."/>
+}
+<br />
 <a class="btn btn-warning"
    asp-area=""
    asp-controller="Questions"
@@ -22,14 +31,83 @@
 </a>
 <hr />
 
-@foreach (var answer in Model.Answers)
-{
-    <div>
-        <hr />
-        <p>@answer.Body</p>
-        <p>@answer.DateAdded</p>
-    </div>
-}
+<table class="table table-striped mt-2">
+    <thead>
+        <tr>
+            <th scope="col">
+                Votes
+            </th>
+            <th scope="col">
+                Body
+            </th>
+            <th scope="col">
+                Added
+            </th>
+            <th scope="col">
+                Image
+            </th>
+            <th scope="col">
+                Actions
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var answer in Model.Answers)
+        {
+        <tr>
+            <th scope="row">
+                <a asp-area=""
+                   asp-controller="Answers"
+                   asp-action="VoteUpAnswer"
+                   asp-route-answerId="@answer.Id"
+                   asp-route-questionId="@Model.Id">
+                    ^
+                </a>
+                @answer.Votes
+                <a asp-area=""
+                   asp-controller="Answers"
+                   asp-action="VoteDownAnswer"
+                   asp-route-answerId="@answer.Id"
+                   asp-route-questionId="@Model.Id">
+                    v
+                </a>
+            </th>
+            <td>@answer.Body</td>
+            <td>@answer.DateAdded</td>
+            @if (answer.ImageNamePath == null)
+            {
+                <td>
+                    -
+                </td>
+            }
+            else
+            {
+                <td>
+                    <a href="~/uploads/@answer.ImageNamePath" target="_blank"><img class="answerImageThumbnail" src="~/uploads/@answer.ImageNamePath" alt="Image related to the answer." /></a>
+                </td>
+            }
+            <td>
+                <a class="btn btn-warning"
+                   asp-area=""
+                   asp-controller="Answers"
+                   asp-action="EditAnswer"
+                   asp-route-answerId="@answer.Id">
+                    Edit
+                </a>
+                <a class="btn btn-danger"
+                   asp-area=""
+                   asp-controller="Answers"
+                   asp-action="Remove"
+                   asp-route-questionId="@Model.Id"
+                   asp-route-answerId="@answer.Id">
+                    Remove
+                </a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>
+
 <hr />
 <a class="btn btn-primary"
    asp-area=""

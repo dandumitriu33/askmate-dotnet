@@ -1,30 +1,23 @@
-﻿@model QuestionViewModel
+﻿@model AnswerViewModel
 
 <div class="row">
     <div class="col-md-12">
         <form enctype="multipart/form-data" method="post">
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="Title"></label>
-                <input asp-for="Title"
-                       class="form-control"
-                       name="Title"
-                       data-val="true"
-                       data-val-required="The question title is required."
-                       aria-describedby="title-error"
-                       aria-invalid="true" />
-                <span asp-validation-for="Title"
-                      class="field-validation-error text-danger ml-2 text-danger"
-                      data-valmsg-for="Title"
-                      data-valmsg-replace="true"></span>
+                <input type="hidden" asp-for="Id" name="Id" value="@Model.Id">
+            </div>
+            <div class="form-group">
+                <input type="hidden" asp-for="QuestionId" name="QuestionId" value="@Model.QuestionId">
             </div>
             <div class="form-group">
                 <label asp-for="Body"></label>
                 <textarea asp-for="Body"
                           class="form-control"
                           name="Body"
+                          value="@Model.Body"
                           data-val="true"
-                          data-val-required="The body of the question is required."
+                          data-val-required="The body of the answer is required."
                           aria-describedby="body-error"
                           aria-invalid="true">
                 </textarea>
@@ -41,11 +34,11 @@
                            name="Image" />
                 </div>
             </div>
-            <button name="SubmitNewQuestion" type="submit" class="btn btn-primary">Add Question</button>
+            <button name="SubmitNewAnswer" type="submit" class="btn btn-primary">Submit Answer</button>
         </form>
     </div>
 </div>
 
 @section Scripts {
-    <script type="module" src="~/js/addQuestion.js"></script>
+    <script type="module" src="~/js/addAnswer.js"></script>
 }

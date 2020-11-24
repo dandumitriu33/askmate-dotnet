@@ -21,5 +21,6 @@ namespace ApplicationCore.Entities
         public bool IsRemoved { get; set; } = false;
         public List<Comment> Comments { get; set; }
         public List<Answer> Answers { get; set; }
+        public string ImageNamePath { get; set; }
     }
 }

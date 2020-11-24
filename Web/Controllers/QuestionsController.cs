@@ -1,11 +1,13 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using Web.ViewModels;
 
@@ -15,12 +17,18 @@ namespace Web.Controllers
     {
         private readonly IAsyncRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IFileOperations _fileOperations;
 
         public QuestionsController(IAsyncRepository repository,
-                                   IMapper mapper)
+                                   IMapper mapper,
+                                   IWebHostEnvironment webHostEnvironment,
+                                   IFileOperations fileOperations)
         {
             _repository = repository;
             _mapper = mapper;
+            _webHostEnvironment = webHostEnvironment;
+            _fileOperations = fileOperations;
         }
         // GET: QuestionsController
         public ActionResult Index()
@@ -55,9 +63,20 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddQuestion(QuestionViewModel questionViewModel)
         {
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && _fileOperations.ValidateImageType(questionViewModel.Image.FileName) == true)
             {
+                string uniqueFileName = null;
+                if (questionViewModel.Image != null)
+                {
+                    // for more advanced projects add a composite file provider - for now wwwroot
+                    // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
+                    string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                    uniqueFileName = _fileOperations.AssembleQuestionUploadedFileName(questionViewModel.Title, questionViewModel.Image.FileName);
+                    string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+                    await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                }
                 var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
+                question.ImageNamePath = uniqueFileName;
                 var resultQuestion = await _repository.AddQuestionAsync(question);
                 return RedirectToAction("Details", new { questionId = resultQuestion.Id });
             }
@@ -97,7 +116,18 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                string uniqueFileName = null;
+                if (questionViewModel.Image != null)
+                {
+                    // for more advanced projects add a composite file provider - for now wwwroot
+                    // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
+                    string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                    uniqueFileName = _fileOperations.AssembleQuestionUploadedFileName(questionViewModel.Title, questionViewModel.Image.FileName);
+                    string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+                    await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                }
                 var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
+                question.ImageNamePath = uniqueFileName;
                 await _repository.EditQuestionAsync(question);
                 return RedirectToAction("Details", new { questionId = questionViewModel.Id });
             }
@@ -111,6 +141,26 @@ namespace Web.Controllers
         {
             await _repository.RemoveQuestionById(questionId);
             
+            return RedirectToAction("Index", "List");
+        }
+
+        // Get: QuestionsController/5/VoteUp
+        [HttpGet]
+        [Route("questions/{questionId}/voteup")]
+        public async Task<IActionResult> VoteUpQuestion(int questionId)
+        {
+            await _repository.VoteUpQuestionById(questionId);
+
+            return RedirectToAction("Index", "List");
+        }
+
+        // Get: QuestionsController/5/VoteDown
+        [HttpGet]
+        [Route("questions/{questionId}/votedown")]
+        public async Task<IActionResult> VoteDownQuestion(int questionId)
+        {
+            await _repository.VoteDownQuestionById(questionId);
+
             return RedirectToAction("Index", "List");
         }
     }

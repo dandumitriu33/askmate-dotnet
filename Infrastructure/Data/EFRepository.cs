@@ -121,6 +121,7 @@ namespace Infrastructure.Data
 
                 questionFromDb.Title = question.Title;
                 questionFromDb.Body = question.Body;
+                questionFromDb.ImageNamePath = question.ImageNamePath;
                 _dbContext.Questions.Attach(questionFromDb);
                 _dbContext.Entry(questionFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
@@ -155,6 +156,48 @@ namespace Infrastructure.Data
             }
         }
 
+        public async Task VoteUpQuestionById(int questionId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var questionFromDb = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
+
+                questionFromDb.Votes += 1;
+                _dbContext.Questions.Attach(questionFromDb);
+                _dbContext.Entry(questionFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task VoteDownQuestionById(int questionId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var questionFromDb = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
+
+                questionFromDb.Votes -= 1;
+                _dbContext.Questions.Attach(questionFromDb);
+                _dbContext.Entry(questionFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
         public async Task<Answer> AddAnswerAsync(Answer answer)
         {
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -174,6 +217,96 @@ namespace Infrastructure.Data
                 transaction.Rollback();
             }
             return answer;
+        }
+
+        public async Task<Answer> GetAnswerByIdWithoutDetailsAsync(int answerId)
+        {
+            return await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
+        }
+
+        public async Task EditAnswerAsync(Answer answer)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answer.Id && a.IsRemoved == false).FirstOrDefaultAsync();
+
+                answerFromDb.Body = answer.Body;
+                answerFromDb.ImageNamePath = answer.ImageNamePath;
+                _dbContext.Answers.Attach(answerFromDb);
+                _dbContext.Entry(answerFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task RemoveAnswerById(int answerId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
+
+                answerFromDb.IsRemoved = true;
+                _dbContext.Answers.Attach(answerFromDb);
+                _dbContext.Entry(answerFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task VoteUpAnswerById(int answerId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
+
+                answerFromDb.Votes += 1;
+                _dbContext.Answers.Attach(answerFromDb);
+                _dbContext.Entry(answerFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task VoteDownAnswerById(int answerId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
+
+                answerFromDb.Votes -= 1;
+                _dbContext.Answers.Attach(answerFromDb);
+                _dbContext.Entry(answerFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
         }
 
     }
