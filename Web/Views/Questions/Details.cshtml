@@ -54,39 +54,49 @@
     <tbody>
         @foreach (var answer in Model.Answers)
         {
-            <tr>
-                <th scope="row">
-                    <a asp-area=""
-                       asp-controller="Answers"
-                       asp-action="VoteUpAnswer"
-                       asp-route-answerId="@answer.Id"
-                       asp-route-questionId="@Model.Id">
-                        ^
-                    </a>
-                    @answer.Votes
-                    <a asp-area=""
-                       asp-controller="Answers"
-                       asp-action="VoteDownAnswer"
-                       asp-route-answerId="@answer.Id"
-                       asp-route-questionId="@Model.Id">
-                        v
-                    </a>
-                </th>
-                <td>@answer.Body</td>
-                <td>@answer.DateAdded</td>
+        <tr>
+            <th scope="row">
+                <a asp-area=""
+                   asp-controller="Answers"
+                   asp-action="VoteUpAnswer"
+                   asp-route-answerId="@answer.Id"
+                   asp-route-questionId="@Model.Id">
+                    ^
+                </a>
+                @answer.Votes
+                <a asp-area=""
+                   asp-controller="Answers"
+                   asp-action="VoteDownAnswer"
+                   asp-route-answerId="@answer.Id"
+                   asp-route-questionId="@Model.Id">
+                    v
+                </a>
+            </th>
+            <td>@answer.Body</td>
+            <td>@answer.DateAdded</td>
+            @if (answer.ImageNamePath == null)
+            {
                 <td>
                     -
                 </td>
-                <td><a class="btn btn-danger"
-                       asp-area=""
-                       asp-controller="Answers"
-                       asp-action="Remove"
-                       asp-route-questionId="@Model.Id"
-                       asp-route-answerId="@answer.Id">
-                        Remove
-                    </a>
+            }
+            else
+            {
+                <td>
+                    <img class="answerImageThumbnail" src="~/uploads/@answer.ImageNamePath" alt="Image related to the answer." />
                 </td>
-            </tr>
+            }
+            <td>
+                <a class="btn btn-danger"
+                   asp-area=""
+                   asp-controller="Answers"
+                   asp-action="Remove"
+                   asp-route-questionId="@Model.Id"
+                   asp-route-answerId="@answer.Id">
+                    Remove
+                </a>
+            </td>
+        </tr>
         }
     </tbody>
 </table>
