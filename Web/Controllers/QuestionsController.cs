@@ -71,15 +71,16 @@ namespace Web.Controllers
                     // for more advanced projects add a composite file provider - for now wwwroot
                     // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
                     string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                    uniqueFileName = "QTitle_" 
-                                    + questionViewModel.Title + "_" 
-                                    + DateTime.Now.Year.ToString() + "_" 
-                                    + DateTime.Now.Month.ToString() + "_" 
-                                    + DateTime.Now.Day.ToString() + "_" 
-                                    + DateTime.Now.Hour.ToString() + "_" 
-                                    + DateTime.Now.Minute.ToString() + "_" 
-                                    + DateTime.Now.Second.ToString() + "_" 
-                                    + Guid.NewGuid().ToString() + "_" + questionViewModel.Image.FileName;
+                    uniqueFileName = _fileOperations.AssembleQuestionUploadedFileName(questionViewModel.Title, questionViewModel.Image.FileName);
+                        //"QTitle_" 
+                        //            + questionViewModel.Title + "_" 
+                        //            + DateTime.Now.Year.ToString() + "_" 
+                        //            + DateTime.Now.Month.ToString() + "_" 
+                        //            + DateTime.Now.Day.ToString() + "_" 
+                        //            + DateTime.Now.Hour.ToString() + "_" 
+                        //            + DateTime.Now.Minute.ToString() + "_" 
+                        //            + DateTime.Now.Second.ToString() + "_" 
+                        //            + Guid.NewGuid().ToString() + "_" + questionViewModel.Image.FileName;
                     string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
                     await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
                 }
