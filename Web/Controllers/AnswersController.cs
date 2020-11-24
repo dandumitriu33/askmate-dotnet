@@ -54,15 +54,7 @@ namespace Web.Controllers
                     // for more advanced projects add a composite file provider - for now wwwroot
                     // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
                     string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                    uniqueFileName = "AQID_"
-                                    + answerViewModel.QuestionId + "_"
-                                    + DateTime.Now.Year.ToString() + "_"
-                                    + DateTime.Now.Month.ToString() + "_"
-                                    + DateTime.Now.Day.ToString() + "_"
-                                    + DateTime.Now.Hour.ToString() + "_"
-                                    + DateTime.Now.Minute.ToString() + "_"
-                                    + DateTime.Now.Second.ToString() + "_"
-                                    + Guid.NewGuid().ToString() + "_" + answerViewModel.Image.FileName;
+                    uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.QuestionId, answerViewModel.Image.FileName);
                     string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
                     await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
                 }

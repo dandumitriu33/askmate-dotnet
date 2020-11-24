@@ -8,5 +8,6 @@ namespace ApplicationCore.Interfaces
     {
         bool ValidateImageType(string fileName);
         string AssembleQuestionUploadedFileName(string questionTitle, string systemFileName);
+        string AssembleAnswerUploadedFileName(int questionId, string systemFileName);
     }
 }
