@@ -40,6 +40,10 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
+
+
+
+
                 var answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
                 await _repository.AddAnswerAsync(answer);
             }
