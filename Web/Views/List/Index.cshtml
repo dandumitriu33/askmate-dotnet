@@ -81,7 +81,15 @@
             @foreach (var question in Model)
             {
                 <tr>
-                    <th scope="row">@question.Votes</th>
+                    <th scope="row">
+                        <a asp-area=""
+                           asp-controller="Questions"
+                           asp-action="VoteUpQuestion"
+                           asp-route-questionId="@question.Id">
+                            ^
+                        </a>
+                        @question.Votes
+                    </th>
                     <td><a asp-area=""
                            asp-controller="Questions"
                            asp-action="Details"
