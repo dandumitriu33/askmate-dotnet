@@ -1,5 +1,6 @@
 using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Services;
 using AutoMapper;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Builder;
@@ -33,6 +34,7 @@ namespace Web
                     options.UseSqlServer(Configuration.GetConnectionString("Default"));
                 });
             services.AddScoped<IAsyncRepository, EFRepository>();
+            services.AddScoped<IFileTypeChecker, FileTypeChecker>();
             services.AddAutoMapper(typeof(Startup));
             services.AddControllersWithViews();
         }

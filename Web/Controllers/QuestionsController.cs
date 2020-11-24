@@ -1,5 +1,6 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using ApplicationCore.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Web.ViewModels;
 
@@ -18,14 +18,17 @@ namespace Web.Controllers
         private readonly IAsyncRepository _repository;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IFileTypeChecker _fileTypeChecker;
 
         public QuestionsController(IAsyncRepository repository,
                                    IMapper mapper,
-                                   IWebHostEnvironment webHostEnvironment)
+                                   IWebHostEnvironment webHostEnvironment,
+                                   IFileTypeChecker fileTypeChecker)
         {
             _repository = repository;
             _mapper = mapper;
             _webHostEnvironment = webHostEnvironment;
+            _fileTypeChecker = fileTypeChecker;
         }
         // GET: QuestionsController
         public ActionResult Index()
@@ -60,7 +63,7 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddQuestion(QuestionViewModel questionViewModel)
         {
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && _fileTypeChecker.ValidateImageType(questionViewModel.Image.FileName) == true)
             {
                 string uniqueFileName = null;
                 if (questionViewModel.Image != null)
