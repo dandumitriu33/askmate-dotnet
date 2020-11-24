@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,5 +20,6 @@ namespace Web.ViewModels
         public int Votes { get; set; }
         public List<CommentViewModel> Comments { get; set; }
         public List<AnswerViewModel> Answers { get; set; }
+        public IFormFile Image { get; set; }
     }
 }
