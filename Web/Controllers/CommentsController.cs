@@ -22,6 +22,7 @@ namespace Web.Controllers
             _mapper = mapper;
             _repository = repository;
         }
+
         // Get: comments/addQuestionComment/{questionId}
         [HttpGet]
         [Route("comments/addQuestionComment/{questionId}")]
@@ -30,6 +31,17 @@ namespace Web.Controllers
             var questionCommentViewModel = new QuestionCommentViewModel();
             questionCommentViewModel.QuestionId = questionId;
             return View(questionCommentViewModel);
+        }
+
+        // Get: comments/addAnswerComment/{answerId}
+        [HttpGet]
+        [Route("comments/addAnswerComment/{answerId}")]
+        public IActionResult AddAnswerComment(int answerId, int questionId)
+        {
+            var answerCommentViewModel = new AnswerCommentViewModel();
+            answerCommentViewModel.QuestionId = questionId;
+            answerCommentViewModel.AnswerId = answerId;
+            return View(answerCommentViewModel);
         }
 
         // POST: comments/addQuestionComment/{questionId}

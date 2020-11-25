@@ -43,9 +43,6 @@
 {
     <p>@questionComment.Body (@questionComment.DateAdded)</p>
 }
-
-
-
 <hr />
 
 
@@ -105,6 +102,14 @@
                 </td>
             }
             <td>
+                <a class="btn btn-primary"
+                   asp-area=""
+                   asp-controller="Comments"
+                   asp-action="AddAnswerComment"
+                   asp-route-questionId="@Model.Id"
+                   asp-route-answerId="@answer.Id">
+                    Comment
+                </a>
                 <a class="btn btn-warning"
                    asp-area=""
                    asp-controller="Answers"
