@@ -53,6 +53,11 @@ namespace Infrastructure.Data
             }
         }
 
+        public async Task<List<Question>> GetLatestQuestions(int numberOfQuestions)
+        {
+            return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderByDescending(q => q.DateAdded).Take(numberOfQuestions).ToListAsync();
+        }
+
         public async Task<Question> GetQuestionByIdAsync(int questionId)
         {
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
