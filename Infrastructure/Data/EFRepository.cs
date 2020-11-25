@@ -409,5 +409,27 @@ namespace Infrastructure.Data
             return await _dbContext.AnswerComments.Where(c => c.IsRemoved == false && c.Id == answerCommentId).FirstOrDefaultAsync();
         }
 
+        public async Task EditAnswerCommentAsync(AnswerComment answerComment)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answerCommentFromDb = await _dbContext.AnswerComments.Where(c => c.Id == answerComment.Id && c.IsRemoved == false).FirstOrDefaultAsync();
+
+                answerCommentFromDb.Body = answerComment.Body;
+                answerCommentFromDb.DateAdded = answerComment.DateAdded;
+                _dbContext.AnswerComments.Attach(answerCommentFromDb);
+                _dbContext.Entry(answerCommentFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
     }
 }

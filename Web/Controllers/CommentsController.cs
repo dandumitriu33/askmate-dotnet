@@ -84,6 +84,26 @@ namespace Web.Controllers
             return View(answerCommentViewModel);
         }
 
+        // POST: CommentsController/5/Edit
+        [HttpPost]
+        [Route("comments/answerComments/{answerCommentId}/edit")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAnswerComment(AnswerCommentViewModel answerCommentViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var answerComment = _mapper.Map<AnswerCommentViewModel, AnswerComment>(answerCommentViewModel);
+                // adding the "Edited" mark and refreshing the DateAdded
+                // this replaces the old message
+                // to keep old data, mark old comment as IsRemoved and add the new one w "Edited" mark
+                answerComment.Body = answerComment.Body + " (edited) ";
+                answerComment.DateAdded = DateTime.Now;
+                await _repository.EditAnswerCommentAsync(answerComment);
+                return RedirectToAction("Details", "Questions", new { questionId = answerCommentViewModel.QuestionId });
+            }
+            return View(answerCommentViewModel);
+        }
+
         // GET: CommentsController/Details/5
         public ActionResult Details(int id)
         {
