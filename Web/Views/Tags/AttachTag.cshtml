@@ -1,0 +1,43 @@
+﻿@model List<TagViewModel>
+
+@{ 
+    string questionId = ViewData["questionId"].ToString();
+}
+
+<h3>Select a Tag or create a new one for question @questionId.</h3>
+
+<hr />
+<p>
+    @foreach (var tagVM in Model)
+    {
+        <span>
+            @tagVM.Name (
+            <a asp-controller="Tags"
+               asp-action="AddQuestionTag"
+               asp-route-questionId="@questionId"
+               asp-route-tagId="@tagVM.Id">
+                +
+            </a>
+            )
+
+        </span>
+    }
+</p>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <form method="post">
+            <div class="form-group">
+                <div class="form-group">
+                    <input type="hidden" name="questionId" value="@questionId">
+                </div>
+                <label for="tagName"></label>
+                <input id="tagName"
+                       class="form-control"
+                       name="tagName" />
+            </div>
+            <button name="SubmitNewTag" type="submit" class="btn btn-primary">Create Tag and Attach</button>
+        </form>
+    </div>
+</div>
+

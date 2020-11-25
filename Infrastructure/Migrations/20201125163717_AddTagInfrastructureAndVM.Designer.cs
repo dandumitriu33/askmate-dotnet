@@ -4,14 +4,16 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AskMateContext))]
-    partial class AskMateContextModelSnapshot : ModelSnapshot
+    [Migration("20201125163717_AddTagInfrastructureAndVM")]
+    partial class AddTagInfrastructureAndVM
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -146,28 +148,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("QuestionComments");
                 });
 
-            modelBuilder.Entity("ApplicationCore.Entities.QuestionTag", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TagId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuestionId");
-
-                    b.HasIndex("TagId");
-
-                    b.ToTable("QuestionTags");
-                });
-
             modelBuilder.Entity("ApplicationCore.Entities.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -181,7 +161,12 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
 
                     b.ToTable("Tags");
                 });
@@ -213,17 +198,11 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ApplicationCore.Entities.QuestionTag", b =>
+            modelBuilder.Entity("ApplicationCore.Entities.Tag", b =>
                 {
-                    b.HasOne("ApplicationCore.Entities.Question", "Question")
-                        .WithMany("QuestionTags")
+                    b.HasOne("ApplicationCore.Entities.Question", null)
+                        .WithMany("Tags")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ApplicationCore.Entities.Tag", "Tag")
-                        .WithMany("QuestionTags")
-                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

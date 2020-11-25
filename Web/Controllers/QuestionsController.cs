@@ -47,7 +47,11 @@ namespace Web.Controllers
             {
                 questionCommentsViewModel = _mapper.Map<List<QuestionComment>, List<QuestionCommentViewModel>>(question.QuestionComments);
             }
-            
+            // pack Tags
+            List<int> tagIds = await _repository.GetTagIdsForQuestionId(questionId);
+            List<Tag> tagsFromDb = await _repository.GetTagsFromListFromDb(tagIds);
+            var questionTagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
+
             // pack answersVM with commentsVM
             var answersViewModel = new List<AnswerViewModel>(); // create answersVM List to attach to qVM
 
@@ -69,6 +73,7 @@ namespace Web.Controllers
             var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
             questionViewModel.Answers = answersViewModel;
             questionViewModel.QuestionComments = questionCommentsViewModel;
+            questionViewModel.Tags = questionTagsViewModel;
             return View(questionViewModel);
         }
 

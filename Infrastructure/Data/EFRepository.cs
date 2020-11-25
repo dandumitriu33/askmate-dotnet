@@ -460,5 +460,74 @@ namespace Infrastructure.Data
             }
         }
 
+        public async Task RemoveAnswerCommentById(int answerCommentId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answerCommentFromDb = await _dbContext.AnswerComments.Where(c => c.Id == answerCommentId && c.IsRemoved == false).FirstOrDefaultAsync();
+
+                answerCommentFromDb.IsRemoved = true;
+                _dbContext.AnswerComments.Attach(answerCommentFromDb);
+                _dbContext.Entry(answerCommentFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task RemoveQuestionCommentById(int questionCommentId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var questionCommentFromDb = await _dbContext.QuestionComments.Where(c => c.Id == questionCommentId && c.IsRemoved == false).FirstOrDefaultAsync();
+
+                questionCommentFromDb.IsRemoved = true;
+                _dbContext.QuestionComments.Attach(questionCommentFromDb);
+                _dbContext.Entry(questionCommentFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task<List<Tag>> GetAllTags()
+        {
+            return await _dbContext.Tags.Where(t => t.IsRemoved == false).OrderBy(t => t.Name).ToListAsync();
+        }
+
+        public async Task AddQuestionTagAsync(QuestionTag questionTag)
+        {
+            await _dbContext.QuestionTags.AddAsync(questionTag);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<Tag> AddTagAsync(Tag tag)
+        {
+            await _dbContext.Tags.AddAsync(tag);
+            await _dbContext.SaveChangesAsync();
+            return tag;
+        }
+
+        public async Task<List<int>> GetTagIdsForQuestionId(int questionId)
+        {
+            return await _dbContext.QuestionTags.Where(qt => qt.QuestionId == questionId).Select(qt => qt.TagId).ToListAsync();
+        }
+
+        public async Task<List<Tag>> GetTagsFromListFromDb(List<int> tagIds)
+        {
+            return await _dbContext.Tags.Where(t => tagIds.Contains(t.Id) && t.IsRemoved == false).OrderBy(t => t.Name).ToListAsync();
+        }
     }
 }

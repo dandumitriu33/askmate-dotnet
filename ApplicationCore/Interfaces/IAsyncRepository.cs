@@ -30,5 +30,12 @@ namespace ApplicationCore.Interfaces
         Task EditAnswerCommentAsync(AnswerComment answerComment);
         Task<QuestionComment> GetQuestionCommentById(int questionCommentId);
         Task EditQuestionCommentAsync(QuestionComment questionComment);
+        Task RemoveAnswerCommentById(int answerCommentId);
+        Task RemoveQuestionCommentById(int questionCommentId);
+        Task<List<Tag>> GetAllTags();
+        Task AddQuestionTagAsync(QuestionTag questionTag);
+        Task<Tag> AddTagAsync(Tag tag);
+        Task<List<int>> GetTagIdsForQuestionId(int questionId);
+        Task<List<Tag>> GetTagsFromListFromDb(List<int> tagIds);
     }
 }

@@ -5,8 +5,9 @@ using System.Text;
 
 namespace ApplicationCore.Entities
 {
-    public class Answer : BaseEntity
+    public class Answer
     {
+        public int Id { get; set; }
         [Column(TypeName = ("varchar(1000)"))]
         public string Body { get; set; }
         public DateTime DateAdded { get; set; }

@@ -20,6 +20,8 @@ namespace Web.AutomapperProfiles
                 .ReverseMap();
             CreateMap<AnswerComment, AnswerCommentViewModel>()
                 .ReverseMap();
+            CreateMap<Tag, TagViewModel>()
+                .ReverseMap();
         }
     }
 }

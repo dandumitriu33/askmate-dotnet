@@ -7,6 +7,12 @@
   <ItemGroup>
     <Compile Remove="Migrations\20201125084820_CommentAddPropsQuestionIdAndAnswerId.cs" />
     <Compile Remove="Migrations\20201125084820_CommentAddPropsQuestionIdAndAnswerId.Designer.cs" />
+    <Compile Remove="Migrations\20201125173514_RemoveTagQuestionIdColumn.cs" />
+    <Compile Remove="Migrations\20201125173514_RemoveTagQuestionIdColumn.Designer.cs" />
+    <Compile Remove="Migrations\20201125175603_AddManyToManyQuestionTagTable.cs" />
+    <Compile Remove="Migrations\20201125175603_AddManyToManyQuestionTagTable.Designer.cs" />
+    <Compile Remove="Migrations\20201125180638_TagIsRemovedInitializedAsFalseJustInCase.cs" />
+    <Compile Remove="Migrations\20201125180638_TagIsRemovedInitializedAsFalseJustInCase.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
