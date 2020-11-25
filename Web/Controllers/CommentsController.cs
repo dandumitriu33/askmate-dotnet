@@ -96,7 +96,8 @@ namespace Web.Controllers
                 // adding the "Edited" mark and refreshing the DateAdded
                 // this replaces the old message
                 // to keep old data, mark old comment as IsRemoved and add the new one w "Edited" mark
-                answerComment.Body = answerComment.Body + " (edited) ";
+                answerComment.Body = answerComment.Body;
+                answerComment.IsEdited = true;
                 answerComment.DateAdded = DateTime.Now;
                 await _repository.EditAnswerCommentAsync(answerComment);
                 return RedirectToAction("Details", "Questions", new { questionId = answerCommentViewModel.QuestionId });

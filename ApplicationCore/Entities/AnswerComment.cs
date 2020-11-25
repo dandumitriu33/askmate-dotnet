@@ -12,6 +12,7 @@ namespace ApplicationCore.Entities
         public string Body { get; set; }
         public DateTime DateAdded { get; set; }
         public bool IsRemoved { get; set; } = false;
+        public bool IsEdited { get; set; } = false;
         public int QuestionId { get; set; }
         public int AnswerId { get; set; }
     }

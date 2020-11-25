@@ -94,11 +94,17 @@
             <td>
                 @foreach (var answerComment in answer.AnswerComments)
                 {
-                    <p>@answerComment.Body (@answerComment.DateAdded)
+                    <p>
+                        @answerComment.Body 
+                        @if (answerComment.IsEdited == true)
+                            {
+                                <span> (edited) </span>
+                            } 
+                        (@answerComment.DateAdded)
                         <a asp-controller="Comments"
-                           asp-action="EditAnswerComment"
-                           asp-route-answerCommentId="@answerComment.Id">
-                           Edit</a>
+                            asp-action="EditAnswerComment"
+                            asp-route-answerCommentId="@answerComment.Id">
+                            Edit</a>
                     </p>
                 }
             </td>

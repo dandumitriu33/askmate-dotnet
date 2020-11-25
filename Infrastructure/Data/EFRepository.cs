@@ -417,6 +417,7 @@ namespace Infrastructure.Data
                 var answerCommentFromDb = await _dbContext.AnswerComments.Where(c => c.Id == answerComment.Id && c.IsRemoved == false).FirstOrDefaultAsync();
 
                 answerCommentFromDb.Body = answerComment.Body;
+                answerCommentFromDb.IsEdited = answerComment.IsEdited;
                 answerCommentFromDb.DateAdded = answerComment.DateAdded;
                 _dbContext.AnswerComments.Attach(answerCommentFromDb);
                 _dbContext.Entry(answerCommentFromDb).State = EntityState.Modified;
