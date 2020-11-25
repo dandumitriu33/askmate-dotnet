@@ -38,7 +38,10 @@
 </a>
 <hr />
 <p>
-    
+    @foreach (var tag in Model.Tags)
+    {
+        <span>@tag.Name </span>
+    }
     <a class="btn btn-primary btn-sm" 
        asp-controller="Tags"
        asp-action="AttachTag"

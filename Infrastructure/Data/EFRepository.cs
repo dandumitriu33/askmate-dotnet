@@ -520,5 +520,14 @@ namespace Infrastructure.Data
             return tag;
         }
 
+        public async Task<List<int>> GetTagIdsForQuestionId(int questionId)
+        {
+            return await _dbContext.QuestionTags.Where(qt => qt.QuestionId == questionId).Select(qt => qt.TagId).ToListAsync();
+        }
+
+        public async Task<List<Tag>> GetTagsFromListFromDb(List<int> tagIds)
+        {
+            return await _dbContext.Tags.Where(t => tagIds.Contains(t.Id) && t.IsRemoved == false).OrderBy(t => t.Name).ToListAsync();
+        }
     }
 }
