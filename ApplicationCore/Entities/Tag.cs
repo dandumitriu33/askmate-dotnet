@@ -4,8 +4,11 @@ using System.Text;
 
 namespace ApplicationCore.Entities
 {
-    public class BaseEntity
+    public class Tag
     {
         public int Id { get; set; }
+        public string Name { get; set; }
+        public int QuestionId { get; set; }
+        public bool IsRemoved { get; set; }
     }
 }

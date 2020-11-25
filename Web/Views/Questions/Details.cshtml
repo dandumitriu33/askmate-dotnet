@@ -36,6 +36,19 @@
    asp-route-questionId="@Model.Id">
     Remove
 </a>
+<hr />
+<p>
+    @foreach (var tag in Model.Tags)
+    {
+        <span>@tag.Name</span>
+    }
+    <a class="btn btn-primary btn-sm" 
+       asp-controller="Tags"
+       asp-action="AttachTag"
+       asp-route-questionId="@Model.Id"
+       >Attach Tag
+    </a>
+</p>
 
 
 <hr />

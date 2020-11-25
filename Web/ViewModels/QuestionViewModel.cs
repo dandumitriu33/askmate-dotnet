@@ -20,6 +20,7 @@ namespace Web.ViewModels
         public int Votes { get; set; }
         public List<QuestionCommentViewModel> QuestionComments { get; set; }
         public List<AnswerViewModel> Answers { get; set; }
+        public List<TagViewModel> Tags { get; set; }
         public IFormFile Image { get; set; }
         public string ImageNamePath { get; set; }
     }
