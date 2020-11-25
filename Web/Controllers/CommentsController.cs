@@ -59,6 +59,21 @@ namespace Web.Controllers
             return View(questionCommentViewModel);
         }
 
+        // POST: comments/addAnswerComment/{answerId}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("comments/addAnswerComment/{answerId}")]
+        public async Task<IActionResult> AddAnswerComment(AnswerCommentViewModel answerCommentViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var answerComment = _mapper.Map<AnswerCommentViewModel, AnswerComment>(answerCommentViewModel);
+                await _repository.AddAnswerCommentAsync(answerComment);
+                return RedirectToAction("Details", "Questions", new { questionId = answerCommentViewModel.QuestionId });
+            }
+            return View(answerCommentViewModel);
+        }
+
         // GET: CommentsController/Details/5
         public ActionResult Details(int id)
         {
