@@ -56,6 +56,9 @@
                 Body
             </th>
             <th scope="col">
+                Comments
+            </th>
+            <th scope="col">
                 Added
             </th>
             <th scope="col">
@@ -88,6 +91,12 @@
                 </a>
             </th>
             <td>@answer.Body</td>
+            <td>
+                @foreach (var answerComment in answer.AnswerComments)
+                {
+                    <p>@answerComment.Body (@answerComment.DateAdded)</p>
+                }
+            </td>
             <td>@answer.DateAdded</td>
             @if (answer.ImageNamePath == null)
             {

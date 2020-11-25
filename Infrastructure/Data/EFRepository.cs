@@ -64,14 +64,20 @@ namespace Infrastructure.Data
             var question = new Question();
             try
             {
-                var answers = await _dbContext.Answers
-                                        .Where(a => a.QuestionId == questionId && a.IsRemoved == false)
-                                        .OrderByDescending(a => a.DateAdded)
-                                        .ToListAsync();
                 var questionComments = await _dbContext.QuestionComments
                                                 .Where(c => c.QuestionId == questionId && c.IsRemoved == false)
                                                 .OrderByDescending(c => c.DateAdded)
                                                 .ToListAsync();
+
+                var answers = await _dbContext.Answers
+                                        .Where(a => a.QuestionId == questionId && a.IsRemoved == false)
+                                        .OrderByDescending(a => a.DateAdded)
+                                        .ToListAsync();
+
+                var allAnswerCommentsOfQuestion = await _dbContext.AnswerComments
+                                                            .Where(c => c.QuestionId == questionId && c.IsRemoved == false)
+                                                            .ToListAsync();
+
                 question = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
 
                 // increment view count for the extracted question
@@ -81,15 +87,27 @@ namespace Infrastructure.Data
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                // attach answers and questionComments
-                if (answers != null && answers.Count != 0)
-                {
-                    question.Answers = answers;
-                }
+                // attach answers, questionComments and answerComments
                 if (questionComments != null && questionComments.Count != 0)
                 {
                     question.QuestionComments = questionComments;
                 }
+
+                if (answers != null && answers.Count != 0)
+                {
+                    foreach (var answer in answers)
+                    {
+                        if (answer.AnswerComments != null && answer.AnswerComments.Count != 0)
+                        {
+                            answer.AnswerComments = allAnswerCommentsOfQuestion
+                                                        .Where(c => c.AnswerId == answer.Id && c.IsRemoved == false)
+                                                        .OrderByDescending(c => c.DateAdded)
+                                                        .ToList();
+                        }
+                    }
+                    question.Answers = answers;
+                }
+                
             }
             catch (Exception)
             {
