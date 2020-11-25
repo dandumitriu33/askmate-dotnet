@@ -437,5 +437,28 @@ namespace Infrastructure.Data
             }
         }
 
+        public async Task EditQuestionCommentAsync(QuestionComment questionComment)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var questionCommentFromDb = await _dbContext.QuestionComments.Where(c => c.Id == questionComment.Id && c.IsRemoved == false).FirstOrDefaultAsync();
+
+                questionCommentFromDb.Body = questionComment.Body;
+                questionCommentFromDb.IsEdited = questionComment.IsEdited;
+                questionCommentFromDb.DateAdded = questionComment.DateAdded;
+                _dbContext.QuestionComments.Attach(questionCommentFromDb);
+                _dbContext.Entry(questionCommentFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
     }
 }

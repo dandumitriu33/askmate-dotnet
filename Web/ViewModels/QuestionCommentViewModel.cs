@@ -13,5 +13,6 @@ namespace Web.ViewModels
         public string Body { get; set; }
         public int QuestionId { get; set; }
         public DateTime DateAdded { get; set; }
+        public bool IsEdited { get; set; }
     }
 }

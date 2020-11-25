@@ -42,7 +42,13 @@
 @foreach (var questionComment in Model.QuestionComments)
 {
     <p>
-        @questionComment.Body (@questionComment.DateAdded)
+        @questionComment.Body 
+        @if (questionComment.IsEdited == true)
+        {
+            <span> (edited) </span>
+        }
+        (@questionComment.DateAdded)
+        
         <a asp-controller="Comments"
            asp-action="EditQuestionComment"
            asp-route-questionCommentId="@questionComment.Id">
