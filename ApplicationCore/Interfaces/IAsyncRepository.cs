@@ -28,5 +28,6 @@ namespace ApplicationCore.Interfaces
         Task<AnswerComment> AddAnswerCommentAsync(AnswerComment answerComment);
         Task<AnswerComment> GetAnswerCommentById(int answerCommentId);
         Task EditAnswerCommentAsync(AnswerComment answerComment);
+        Task<QuestionComment> GetQuestionCommentById(int questionCommentId);
     }
 }

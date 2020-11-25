@@ -74,7 +74,7 @@ namespace Web.Controllers
             return View(answerCommentViewModel);
         }
 
-        // GET: CommentsController/5/Edit
+        // GET: CommentsController/answerComments/5/Edit
         [HttpGet]
         [Route("comments/answerComments/{answerCommentId}/edit")]
         public async Task<IActionResult> EditAnswerComment(int answerCommentId)
@@ -84,7 +84,17 @@ namespace Web.Controllers
             return View(answerCommentViewModel);
         }
 
-        // POST: CommentsController/5/Edit
+        // GET: CommentsController/QuestionComments/5/Edit
+        [HttpGet]
+        [Route("comments/questionComments/{questionCommentId}/edit")]
+        public async Task<IActionResult> EditQuestionComment(int questionCommentId)
+        {
+            var questionComment = await _repository.GetQuestionCommentById(questionCommentId);
+            var questionCommentViewModel = _mapper.Map<QuestionComment, QuestionCommentViewModel>(questionComment);
+            return View(questionCommentViewModel);
+        }
+
+        // POST: CommentsController/AnswerComments/5/Edit
         [HttpPost]
         [Route("comments/answerComments/{answerCommentId}/edit")]
         [ValidateAntiForgeryToken]

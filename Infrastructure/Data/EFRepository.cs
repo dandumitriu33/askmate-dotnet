@@ -409,6 +409,11 @@ namespace Infrastructure.Data
             return await _dbContext.AnswerComments.Where(c => c.IsRemoved == false && c.Id == answerCommentId).FirstOrDefaultAsync();
         }
 
+        public async Task<QuestionComment> GetQuestionCommentById(int questionCommentId)
+        {
+            return await _dbContext.QuestionComments.Where(c => c.IsRemoved == false && c.Id == questionCommentId).FirstOrDefaultAsync();
+        }
+
         public async Task EditAnswerCommentAsync(AnswerComment answerComment)
         {
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
