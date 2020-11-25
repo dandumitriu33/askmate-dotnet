@@ -36,6 +36,26 @@ namespace Web.Controllers
             return View(latestQuestionsViewModel);
         }
 
+        // Get: HomeController/5/VoteUp
+        [HttpGet]
+        [Route("home/{questionId}/voteup")]
+        public async Task<IActionResult> VoteUpQuestion(int questionId)
+        {
+            await _repository.VoteUpQuestionById(questionId);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        // Get: HomeController/5/VoteDown
+        [HttpGet]
+        [Route("home/{questionId}/votedown")]
+        public async Task<IActionResult> VoteDownQuestion(int questionId)
+        {
+            await _repository.VoteDownQuestionById(questionId);
+
+            return RedirectToAction("Index", "Home");
+        }
+
         public IActionResult Privacy()
         {
             return View();
