@@ -9,6 +9,7 @@ namespace ApplicationCore.Interfaces
     public interface IAsyncRepository
     {
         Task<List<Question>> ListAllAsync(string orderBy, string direction);
+        Task<List<Question>> GetLatestQuestions(int numberOfQuestions);
         Task<Question> GetQuestionByIdAsync(int questionId);
         Task<Question> AddQuestionAsync(Question question);
         Task<Question> GetQuestionByIdWithoutDetailsAsync(int questionId);
@@ -22,5 +23,12 @@ namespace ApplicationCore.Interfaces
         Task RemoveAnswerById(int answerId);
         Task VoteUpAnswerById(int answerId);
         Task VoteDownAnswerById(int answerId);
+        Task<List<Question>> GetSearchResults(string searchPhrase);
+        Task<QuestionComment> AddQuestionCommentAsync(QuestionComment comment);
+        Task<AnswerComment> AddAnswerCommentAsync(AnswerComment answerComment);
+        Task<AnswerComment> GetAnswerCommentById(int answerCommentId);
+        Task EditAnswerCommentAsync(AnswerComment answerComment);
+        Task<QuestionComment> GetQuestionCommentById(int questionCommentId);
+        Task EditQuestionCommentAsync(QuestionComment questionComment);
     }
 }

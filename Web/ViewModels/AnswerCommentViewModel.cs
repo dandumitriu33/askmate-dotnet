@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 
 namespace Web.ViewModels
 {
-    public class CommentViewModel
+    public class AnswerCommentViewModel
     {
         public int Id { get; set; }
         [Column(TypeName = ("varchar(1000)"))]
         public string Body { get; set; }
+        public int QuestionId { get; set; }
+        public int AnswerId { get; set; }
         public DateTime DateAdded { get; set; }
+        public bool IsEdited { get; set; }
     }
 }

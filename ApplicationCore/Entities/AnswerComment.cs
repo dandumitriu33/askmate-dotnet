@@ -5,15 +5,15 @@ using System.Text;
 
 namespace ApplicationCore.Entities
 {
-    public class Answer : BaseEntity
+    public class AnswerComment
     {
+        public int Id { get; set; }
         [Column(TypeName = ("varchar(1000)"))]
         public string Body { get; set; }
         public DateTime DateAdded { get; set; }
+        public bool IsRemoved { get; set; } = false;
+        public bool IsEdited { get; set; } = false;
         public int QuestionId { get; set; }
-        public bool IsRemoved { get; set; }
-        public int Votes { get; set; }
-        public List<AnswerComment> AnswerComments { get; set; }
-        public string ImageNamePath { get; set; }
+        public int AnswerId { get; set; }
     }
 }

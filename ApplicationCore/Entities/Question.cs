@@ -9,7 +9,6 @@ namespace ApplicationCore.Entities
     public class Question
     {
         public int Id { get; set; }
-        
         [Required]
         [Column(TypeName = ("varchar(100)"))]
         public string Title { get; set; }
@@ -19,7 +18,7 @@ namespace ApplicationCore.Entities
         public int Views { get; set; }
         public int Votes { get; set; }
         public bool IsRemoved { get; set; } = false;
-        public List<Comment> Comments { get; set; }
+        public List<QuestionComment> QuestionComments { get; set; }
         public List<Answer> Answers { get; set; }
         public string ImageNamePath { get; set; }
     }

@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace ApplicationCore.Entities
+namespace Web.ViewModels
 {
-    public class Comment : BaseEntity
+    public class QuestionCommentViewModel
     {
+        public int Id { get; set; }
         [Column(TypeName = ("varchar(1000)"))]
         public string Body { get; set; }
+        public int QuestionId { get; set; }
         public DateTime DateAdded { get; set; }
-        public bool IsRemoved { get; set; } = false;
+        public bool IsEdited { get; set; }
     }
 }

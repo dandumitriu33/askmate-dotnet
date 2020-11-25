@@ -53,25 +53,61 @@ namespace Infrastructure.Data
             }
         }
 
+        public async Task<List<Question>> GetLatestQuestions(int numberOfQuestions)
+        {
+            return await _dbContext.Questions.Where(q => q.IsRemoved == false).OrderByDescending(q => q.DateAdded).Take(numberOfQuestions).ToListAsync();
+        }
+
         public async Task<Question> GetQuestionByIdAsync(int questionId)
         {
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             var question = new Question();
             try
             {
-                var answers = await _dbContext.Answers.Where(a => a.QuestionId == questionId && a.IsRemoved == false).OrderByDescending(a => a.DateAdded).ToListAsync();
+                var questionComments = await _dbContext.QuestionComments
+                                                .Where(c => c.QuestionId == questionId && c.IsRemoved == false)
+                                                .OrderByDescending(c => c.DateAdded)
+                                                .ToListAsync();
+
+                var answers = await _dbContext.Answers
+                                        .Where(a => a.QuestionId == questionId && a.IsRemoved == false)
+                                        .OrderByDescending(a => a.DateAdded)
+                                        .ToListAsync();
+
+                var allAnswerCommentsOfQuestion = await _dbContext.AnswerComments
+                                                            .Where(c => c.QuestionId == questionId && c.IsRemoved == false)
+                                                            .ToListAsync();
+
                 question = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
+
                 // increment view count for the extracted question
                 question.Views += 1;
-
                 _dbContext.Questions.Attach(question);
                 _dbContext.Entry(question).Property(q => q.Views).IsModified = true;
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                // attach answers, questionComments and answerComments
+                if (questionComments != null && questionComments.Count != 0)
+                {
+                    question.QuestionComments = questionComments;
+                }
+
                 if (answers != null && answers.Count != 0)
                 {
+                    foreach (var answer in answers)
+                    {
+                        if (answer.AnswerComments != null && answer.AnswerComments.Count != 0)
+                        {
+                            answer.AnswerComments = allAnswerCommentsOfQuestion
+                                                        .Where(c => c.AnswerId == answer.Id && c.IsRemoved == false)
+                                                        .OrderByDescending(c => c.DateAdded)
+                                                        .ToList();
+                        }
+                    }
                     question.Answers = answers;
                 }
+                
             }
             catch (Exception)
             {
@@ -298,6 +334,121 @@ namespace Infrastructure.Data
                 answerFromDb.Votes -= 1;
                 _dbContext.Answers.Attach(answerFromDb);
                 _dbContext.Entry(answerFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task<List<Question>> GetSearchResults(string searchPhrase)
+        {
+            HashSet<int> allQuestionIds = new HashSet<int>();
+            // get questions with searchPhrase in title or body
+            var titleAndBodyQuestions = _dbContext.Questions.Where(q => q.IsRemoved == false && (q.Title.Contains(searchPhrase) || q.Body.Contains(searchPhrase))).ToList();
+            foreach (var question in titleAndBodyQuestions)
+            {
+                allQuestionIds.Add(question.Id);
+            }
+            // get answers with searchPhrase in body and grab question IDs
+            var answersWithSearchPhrase = _dbContext.Answers.Where(a => a.IsRemoved == false && a.Body.Contains(searchPhrase)).ToList();
+            foreach (var answer in answersWithSearchPhrase)
+            {
+                allQuestionIds.Add(answer.QuestionId);
+            }
+            // return all questions with the Id in the allQuestionIds set
+            return await _dbContext.Questions.Where(q => q.IsRemoved == false && allQuestionIds.Contains(q.Id)).OrderByDescending(q => q.Votes).ToListAsync();
+        }
+
+        public async Task<QuestionComment> AddQuestionCommentAsync(QuestionComment questionComment)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                questionComment.DateAdded = DateTime.Now;
+                await _dbContext.QuestionComments.AddAsync(questionComment);
+                await _dbContext.SaveChangesAsync();
+                // Commit transaction if all commands succeed, transaction will auto-rollback
+                // when disposed if either commands fails
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+            return questionComment;
+        }
+
+        public async Task<AnswerComment> AddAnswerCommentAsync(AnswerComment answerComment)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                answerComment.DateAdded = DateTime.Now;
+                await _dbContext.AnswerComments.AddAsync(answerComment);
+                await _dbContext.SaveChangesAsync();
+                // Commit transaction if all commands succeed, transaction will auto-rollback
+                // when disposed if either commands fails
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+            return answerComment;
+        }
+
+        public async Task<AnswerComment> GetAnswerCommentById(int answerCommentId)
+        {
+            return await _dbContext.AnswerComments.Where(c => c.IsRemoved == false && c.Id == answerCommentId).FirstOrDefaultAsync();
+        }
+
+        public async Task<QuestionComment> GetQuestionCommentById(int questionCommentId)
+        {
+            return await _dbContext.QuestionComments.Where(c => c.IsRemoved == false && c.Id == questionCommentId).FirstOrDefaultAsync();
+        }
+
+        public async Task EditAnswerCommentAsync(AnswerComment answerComment)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answerCommentFromDb = await _dbContext.AnswerComments.Where(c => c.Id == answerComment.Id && c.IsRemoved == false).FirstOrDefaultAsync();
+
+                answerCommentFromDb.Body = answerComment.Body;
+                answerCommentFromDb.IsEdited = answerComment.IsEdited;
+                answerCommentFromDb.DateAdded = answerComment.DateAdded;
+                _dbContext.AnswerComments.Attach(answerCommentFromDb);
+                _dbContext.Entry(answerCommentFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task EditQuestionCommentAsync(QuestionComment questionComment)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var questionCommentFromDb = await _dbContext.QuestionComments.Where(c => c.Id == questionComment.Id && c.IsRemoved == false).FirstOrDefaultAsync();
+
+                questionCommentFromDb.Body = questionComment.Body;
+                questionCommentFromDb.IsEdited = questionComment.IsEdited;
+                questionCommentFromDb.DateAdded = questionComment.DateAdded;
+                _dbContext.QuestionComments.Attach(questionCommentFromDb);
+                _dbContext.Entry(questionCommentFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
 
                 await transaction.CommitAsync();

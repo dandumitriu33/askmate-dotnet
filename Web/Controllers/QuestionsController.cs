@@ -41,13 +41,34 @@ namespace Web.Controllers
         public async Task<IActionResult> Details(int questionId)
         {
             var question = await _repository.GetQuestionByIdAsync(questionId);
-            var answersViewModel = new List<AnswerViewModel>();
-            if (question.Answers != null && question.Answers.Count != 0)
+            // pack question comments
+            var questionCommentsViewModel = new List<QuestionCommentViewModel>();
+            if (question.QuestionComments != null && question.QuestionComments.Count != 0)
             {
-                answersViewModel = _mapper.Map<List<Answer>, List<AnswerViewModel>>(question.Answers);
+                questionCommentsViewModel = _mapper.Map<List<QuestionComment>, List<QuestionCommentViewModel>>(question.QuestionComments);
+            }
+            
+            // pack answersVM with commentsVM
+            var answersViewModel = new List<AnswerViewModel>(); // create answersVM List to attach to qVM
+
+            if (question.Answers != null && question.Answers.Count != 0) // if the q has answers, proceed with process
+            {                        
+                foreach (var answer in question.Answers) // for each answer (not VM) in the list
+                {
+                    AnswerViewModel tempAnswerVM = _mapper.Map<Answer, AnswerViewModel>(answer);
+                    // pack comments
+                    if (answer.AnswerComments != null && answer.AnswerComments.Count != 0) // if the answer has comments, proceed with process
+                    {
+                        var answerCommentsVM = _mapper.Map<List<AnswerComment>, List<AnswerCommentViewModel>>(answer.AnswerComments);
+                        tempAnswerVM.AnswerComments = answerCommentsVM;
+                    }
+                    // add tempAnswerVM to the list answersVM
+                    answersViewModel.Add(tempAnswerVM);
+                }
             }
             var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
             questionViewModel.Answers = answersViewModel;
+            questionViewModel.QuestionComments = questionCommentsViewModel;
             return View(questionViewModel);
         }
 
