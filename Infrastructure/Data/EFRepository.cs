@@ -513,5 +513,12 @@ namespace Infrastructure.Data
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task<Tag> AddTagAsync(Tag tag)
+        {
+            await _dbContext.Tags.AddAsync(tag);
+            await _dbContext.SaveChangesAsync();
+            return tag;
+        }
+
     }
 }

@@ -24,6 +24,7 @@ namespace Web.Controllers
         }
 
         // GET: TagsController/tags
+        [HttpGet]
         public async Task<IActionResult> AttachTag(int questionId)
         {
             List<Tag> tagsFromDb = await _repository.GetAllTags();
@@ -32,8 +33,24 @@ namespace Web.Controllers
             return View(tagsViewModel);
         }
 
+        // POST: TagsController/tags
+        [HttpPost]
+        public async Task<IActionResult> AttachTag(int questionId, string tagName)
+        {
+            // create new tag assuming it doesn't exist, will check in refactor/validation round
+            Tag newTag = new Tag
+            {
+                Name = tagName
+            };
+            await _repository.AddTagAsync(newTag);
+
+            // attach the new tag to q
+            await AddQuestionTag(questionId, newTag.Id);
+            return RedirectToAction("Details", "Questions", new { questionId = questionId });
+        }
+
         // GET: TagsController/addQuestionTag
-        public async Task AddQuestionTag(int questionId, int tagId)
+        public async Task<IActionResult> AddQuestionTag(int questionId, int tagId)
         {
             QuestionTag newQuestionTag = new QuestionTag
             {
@@ -41,6 +58,7 @@ namespace Web.Controllers
                 TagId = tagId
             };
             await _repository.AddQuestionTagAsync(newQuestionTag);
+            return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
         // GET: TagsController
