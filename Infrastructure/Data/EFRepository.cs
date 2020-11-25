@@ -404,5 +404,10 @@ namespace Infrastructure.Data
             return answerComment;
         }
 
+        public async Task<AnswerComment> GetAnswerCommentById(int answerCommentId)
+        {
+            return await _dbContext.AnswerComments.Where(c => c.IsRemoved == false && c.Id == answerCommentId).FirstOrDefaultAsync();
+        }
+
     }
 }

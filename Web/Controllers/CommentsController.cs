@@ -74,6 +74,16 @@ namespace Web.Controllers
             return View(answerCommentViewModel);
         }
 
+        // GET: CommentsController/5/Edit
+        [HttpGet]
+        [Route("comments/answerComments/{answerCommentId}/edit")]
+        public async Task<IActionResult> EditAnswerComment(int answerCommentId)
+        {
+            var answerComment = await _repository.GetAnswerCommentById(answerCommentId);
+            var answerCommentViewModel = _mapper.Map<AnswerComment, AnswerCommentViewModel>(answerComment);
+            return View(answerCommentViewModel);
+        }
+
         // GET: CommentsController/Details/5
         public ActionResult Details(int id)
         {
@@ -90,27 +100,6 @@ namespace Web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: CommentsController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: CommentsController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
         {
             try
             {

@@ -26,5 +26,7 @@ namespace ApplicationCore.Interfaces
         Task<List<Question>> GetSearchResults(string searchPhrase);
         Task<QuestionComment> AddQuestionCommentAsync(QuestionComment comment);
         Task<AnswerComment> AddAnswerCommentAsync(AnswerComment answerComment);
+
+        Task<AnswerComment> GetAnswerCommentById(int answerCommentId);
     }
 }
