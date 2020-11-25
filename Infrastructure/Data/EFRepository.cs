@@ -64,18 +64,31 @@ namespace Infrastructure.Data
             var question = new Question();
             try
             {
-                var answers = await _dbContext.Answers.Where(a => a.QuestionId == questionId && a.IsRemoved == false).OrderByDescending(a => a.DateAdded).ToListAsync();
+                var answers = await _dbContext.Answers
+                                        .Where(a => a.QuestionId == questionId && a.IsRemoved == false)
+                                        .OrderByDescending(a => a.DateAdded)
+                                        .ToListAsync();
+                var questionComments = await _dbContext.QuestionComments
+                                                .Where(c => c.QuestionId == questionId && c.IsRemoved == false)
+                                                .OrderByDescending(c => c.DateAdded)
+                                                .ToListAsync();
                 question = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
+
                 // increment view count for the extracted question
                 question.Views += 1;
-
                 _dbContext.Questions.Attach(question);
                 _dbContext.Entry(question).Property(q => q.Views).IsModified = true;
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                // attach answers and questionComments
                 if (answers != null && answers.Count != 0)
                 {
                     question.Answers = answers;
+                }
+                if (questionComments != null && questionComments.Count != 0)
+                {
+                    question.QuestionComments = questionComments;
                 }
             }
             catch (Exception)

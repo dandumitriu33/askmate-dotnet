@@ -41,6 +41,14 @@ namespace Web.Controllers
         public async Task<IActionResult> Details(int questionId)
         {
             var question = await _repository.GetQuestionByIdAsync(questionId);
+            // pack question comments
+            var questionCommentsViewModel = new List<QuestionCommentViewModel>();
+            if (question.QuestionComments != null && question.QuestionComments.Count != 0)
+            {
+                questionCommentsViewModel = _mapper.Map<List<QuestionComment>, List<QuestionCommentViewModel>>(question.QuestionComments);
+            }
+            
+            // pack answers
             var answersViewModel = new List<AnswerViewModel>();
             if (question.Answers != null && question.Answers.Count != 0)
             {
@@ -48,6 +56,7 @@ namespace Web.Controllers
             }
             var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
             questionViewModel.Answers = answersViewModel;
+            questionViewModel.QuestionComments = questionCommentsViewModel;
             return View(questionViewModel);
         }
 
