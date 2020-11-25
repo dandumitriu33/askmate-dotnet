@@ -314,5 +314,24 @@ namespace Infrastructure.Data
             }
         }
 
+        public async Task<List<Question>> GetSearchResults(string searchPhrase)
+        {
+            HashSet<int> allQuestionIds = new HashSet<int>();
+            // get questions with searchPhrase in title or body
+            var titleAndBodyQuestions = _dbContext.Questions.Where(q => q.IsRemoved == false && (q.Title.Contains(searchPhrase) || q.Body.Contains(searchPhrase))).ToList();
+            foreach (var question in titleAndBodyQuestions)
+            {
+                allQuestionIds.Add(question.Id);
+            }
+            // get answers with searchPhrase in body and grab question IDs
+            var answersWithSearchPhrase = _dbContext.Answers.Where(a => a.IsRemoved == false && a.Body.Contains(searchPhrase)).ToList();
+            foreach (var answer in answersWithSearchPhrase)
+            {
+                allQuestionIds.Add(answer.QuestionId);
+            }
+            // return all questions with the Id in the allQuestionIds set
+            return await _dbContext.Questions.Where(q => q.IsRemoved == false && allQuestionIds.Contains(q.Id)).OrderByDescending(q => q.Votes).ToListAsync();
+        }
+
     }
 }

@@ -23,5 +23,6 @@ namespace ApplicationCore.Interfaces
         Task RemoveAnswerById(int answerId);
         Task VoteUpAnswerById(int answerId);
         Task VoteDownAnswerById(int answerId);
+        Task<List<Question>> GetSearchResults(string searchPhrase);
     }
 }

@@ -56,6 +56,16 @@ namespace Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        // Get: HomeController/{searchPhrase}
+        [HttpGet]
+        [Route("home/{searchPhrase}")]
+        public async Task<IActionResult> Search(string searchPhrase)
+        {
+            var searchResults = await _repository.GetSearchResults(searchPhrase);
+            var searchResultsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(searchResults);
+            return View(searchResultsViewModel);
+        }
+
         public IActionResult Privacy()
         {
             return View();
