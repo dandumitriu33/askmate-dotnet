@@ -502,5 +502,10 @@ namespace Infrastructure.Data
             }
         }
 
+        public async Task<List<string>> GetAllTagNames()
+        {
+            return await _dbContext.Tags.Where(t => t.IsRemoved == false).Select(t => t.Name).ToListAsync();
+        }
+
     }
 }

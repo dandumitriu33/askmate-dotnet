@@ -32,5 +32,6 @@ namespace ApplicationCore.Interfaces
         Task EditQuestionCommentAsync(QuestionComment questionComment);
         Task RemoveAnswerCommentById(int answerCommentId);
         Task RemoveQuestionCommentById(int questionCommentId);
+        Task<List<string>> GetAllTagNames();
     }
 }
