@@ -504,7 +504,13 @@ namespace Infrastructure.Data
 
         public async Task<List<string>> GetAllTagNames()
         {
-            return await _dbContext.Tags.Where(t => t.IsRemoved == false).Select(t => t.Name).ToListAsync();
+            return await _dbContext.Tags.Where(t => t.IsRemoved == false).Select(t => t.Name).Distinct().ToListAsync();
+        }
+
+        public async Task AddTagAsync(Tag tag)
+        {
+            await _dbContext.Tags.AddAsync(tag);
+            await _dbContext.SaveChangesAsync();
         }
 
     }

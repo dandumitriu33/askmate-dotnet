@@ -39,6 +39,16 @@ namespace Web.Controllers
             return View(allTagsViewModel);
         }
 
+        // GET: TagsController/addTagToQuestion
+        public async Task AddTagToQuestion(int questionId, string tagName)
+        {
+            Tag newTag = new Tag
+            {
+                Name = tagName
+            };
+            await _repository.AddTagAsync(newTag);
+        }
+
         // GET: TagsController
         public ActionResult Index()
         {

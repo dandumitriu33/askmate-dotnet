@@ -33,5 +33,6 @@ namespace ApplicationCore.Interfaces
         Task RemoveAnswerCommentById(int answerCommentId);
         Task RemoveQuestionCommentById(int questionCommentId);
         Task<List<string>> GetAllTagNames();
+        Task AddTagAsync(Tag tag);
     }
 }

@@ -20,7 +20,7 @@ namespace ApplicationCore.Entities
         public bool IsRemoved { get; set; } = false;
         public List<QuestionComment> QuestionComments { get; set; }
         public List<Answer> Answers { get; set; }
-        public List<Tag> Tags { get; set; }
+        public List<QuestionTag> QuestionTags { get; set; }
         public string ImageNamePath { get; set; }
     }
 }
