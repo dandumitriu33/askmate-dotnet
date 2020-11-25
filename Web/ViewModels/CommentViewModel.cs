@@ -11,6 +11,8 @@ namespace Web.ViewModels
         public int Id { get; set; }
         [Column(TypeName = ("varchar(1000)"))]
         public string Body { get; set; }
+        public int QuestionId { get; set; }
+        public int AnswerId { get; set; }
         public DateTime DateAdded { get; set; }
     }
 }
