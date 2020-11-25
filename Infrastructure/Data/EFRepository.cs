@@ -502,14 +502,14 @@ namespace Infrastructure.Data
             }
         }
 
-        public async Task<List<string>> GetAllTagNames()
+        public async Task<List<Tag>> GetAllTags()
         {
-            return await _dbContext.Tags.Where(t => t.IsRemoved == false).Select(t => t.Name).Distinct().ToListAsync();
+            return await _dbContext.Tags.Where(t => t.IsRemoved == false).OrderBy(t => t.Name).ToListAsync();
         }
 
-        public async Task AddTagAsync(Tag tag)
+        public async Task AddQuestionTagAsync(QuestionTag questionTag)
         {
-            await _dbContext.Tags.AddAsync(tag);
+            await _dbContext.QuestionTags.AddAsync(questionTag);
             await _dbContext.SaveChangesAsync();
         }
 

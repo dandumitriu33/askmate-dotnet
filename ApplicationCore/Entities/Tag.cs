@@ -9,6 +9,6 @@ namespace ApplicationCore.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public List<QuestionTag> QuestionTags { get; set; }
-        public bool IsRemoved { get; set; }
+        public bool IsRemoved { get; set; } = false;
     }
 }

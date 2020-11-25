@@ -17,5 +17,6 @@ namespace Infrastructure.Data
         public DbSet<AnswerComment> AnswerComments { get; set; }
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<QuestionTag> QuestionTags { get; set; }
     }
 }

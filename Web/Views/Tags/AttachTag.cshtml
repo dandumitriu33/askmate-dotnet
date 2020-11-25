@@ -1,20 +1,25 @@
 ﻿@model List<TagViewModel>
 
-<h3>Select a Tag or create a new one.</h3>
+@{ 
+    string questionId = ViewData["questionId"].ToString();
+}
+
+<h3>Select a Tag or create a new one for question @questionId.</h3>
 
 <hr />
 <p>
     @foreach (var tagVM in Model)
     {
         <span>
-            @tagVM.Name
-            ( <a 
-                 asp-controller="Tags"
-                 asp-action="AddTagToQuestion"
-                 asp-route-questionId="@tagVM.QuestionId"
-                 asp-route-tagName="@tagVM.Name">
-                 +
-              </a>)
+            @tagVM.Name (
+            <a asp-controller="Tags"
+               asp-action="AddQuestionTag"
+               asp-route-questionId="@questionId"
+               asp-route-tagId="@tagVM.Id">
+                +
+            </a>
+            )
+
         </span>
     }
 </p>

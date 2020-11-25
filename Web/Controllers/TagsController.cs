@@ -26,27 +26,21 @@ namespace Web.Controllers
         // GET: TagsController/tags
         public async Task<IActionResult> AttachTag(int questionId)
         {
-            List<string> tagsNamesFromDb = await _repository.GetAllTagNames();
-            List<TagViewModel> allTagsViewModel = new List<TagViewModel>();
-            foreach (var tag in tagsNamesFromDb)
-            {
-                allTagsViewModel.Add(new TagViewModel
-                {
-                    Name = tag,
-                    QuestionId = questionId
-                });
-            }
-            return View(allTagsViewModel);
+            List<Tag> tagsFromDb = await _repository.GetAllTags();
+            List<TagViewModel> tagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
+            ViewData["questionId"] = questionId.ToString();
+            return View(tagsViewModel);
         }
 
-        // GET: TagsController/addTagToQuestion
-        public async Task AddTagToQuestion(int questionId, string tagName)
+        // GET: TagsController/addQuestionTag
+        public async Task AddQuestionTag(int questionId, int tagId)
         {
-            Tag newTag = new Tag
+            QuestionTag newQuestionTag = new QuestionTag
             {
-                Name = tagName
+                QuestionId = questionId,
+                TagId = tagId
             };
-            await _repository.AddTagAsync(newTag);
+            await _repository.AddQuestionTagAsync(newQuestionTag);
         }
 
         // GET: TagsController
