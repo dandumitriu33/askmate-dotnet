@@ -59,7 +59,7 @@ namespace Web.Controllers
         // Get: HomeController/{searchPhrase}
         [HttpGet]
         [Route("home/{searchPhrase}")]
-        public async Task<IActionResult> Search(string searchPhrase)
+        public async Task<IActionResult> Search([FromQuery] string searchPhrase)
         {
             var searchResults = await _repository.GetSearchResults(searchPhrase);
             var searchResultsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(searchResults);
