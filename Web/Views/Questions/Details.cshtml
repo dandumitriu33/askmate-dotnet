@@ -15,6 +15,13 @@
     <img src="~/uploads/@Model.ImageNamePath" alt="Image related to the question."/>
 }
 <br />
+<a class="btn btn-primary"
+   asp-area=""
+   asp-controller="Comments"
+   asp-action="AddQuestionComment"
+   asp-route-questionId="@Model.Id">
+    Comment
+</a>
 <a class="btn btn-warning"
    asp-area=""
    asp-controller="Questions"
