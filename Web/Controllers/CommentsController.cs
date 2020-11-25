@@ -114,6 +114,16 @@ namespace Web.Controllers
             return View(answerCommentViewModel);
         }
 
+        // GET: CommentsController/AnswerComment/{answerCommentId}/Remove
+        [HttpGet]
+        [Route("comments/answerComments/{answerCommentId}/remove")]
+        public async Task<IActionResult> RemoveAnswerComment(int answerCommentId, int questionId)
+        {
+            await _repository.RemoveAnswerCommentById(answerCommentId);
+
+            return RedirectToAction("Details", "Questions", new { questionId = questionId });
+        }
+
         // POST: CommentsController/QuestionComments/5/Edit
         [HttpPost]
         [Route("comments/questionComments/{questionCommentId}/edit")]
@@ -132,6 +142,16 @@ namespace Web.Controllers
                 return RedirectToAction("Details", "Questions", new { questionId = questionCommentViewModel.QuestionId });
             }
             return View(questionCommentViewModel);
+        }
+
+        // GET: CommentsController/QuestionComment/{questionCommentId}/Remove
+        [HttpGet]
+        [Route("comments/questionComments/{questionCommentId}/remove")]
+        public async Task<IActionResult> RemoveQuestionComment(int questionCommentId, int questionId)
+        {
+            await _repository.RemoveQuestionCommentById(questionCommentId);
+
+            return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
         // GET: CommentsController/Details/5

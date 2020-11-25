@@ -1,7 +1,7 @@
 ﻿@model QuestionViewModel
 
-@{ 
-    
+@{
+
 }
 
 <p>Details</p>
@@ -12,7 +12,7 @@
 <p>@Model.DateAdded</p>
 @if (Model.ImageNamePath != null)
 {
-    <img src="~/uploads/@Model.ImageNamePath" alt="Image related to the question."/>
+    <img src="~/uploads/@Model.ImageNamePath" alt="Image related to the question." />
 }
 <br />
 <a class="btn btn-primary"
@@ -42,18 +42,52 @@
 @foreach (var questionComment in Model.QuestionComments)
 {
     <p>
-        @questionComment.Body 
+        @questionComment.Body
         @if (questionComment.IsEdited == true)
         {
             <span> (edited) </span>
         }
         (@questionComment.DateAdded)
-        
+
         <a asp-controller="Comments"
            asp-action="EditQuestionComment"
            asp-route-questionCommentId="@questionComment.Id">
             Edit
         </a>
+        <!-- Button trigger modal -->
+        @{ 
+            string questionCommentModalName = "questionCommentRemoveModal" + questionComment.Id;
+        }
+        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#@questionCommentModalName">
+            Remove
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="@questionCommentModalName" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Are you sure you want to Remove comment (@questionComment.Id)?</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        @questionComment.Body
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <a class="btn btn-danger"
+                           asp-controller="Comments"
+                           asp-action="RemoveQuestionComment"
+                           asp-route-questionCommentId="@questionComment.Id"
+                           asp-route-questionId="@questionComment.QuestionId"
+                           >Remove
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </p>
 }
 <hr />
@@ -85,81 +119,116 @@
     <tbody>
         @foreach (var answer in Model.Answers)
         {
-        <tr>
-            <th scope="row">
-                <a asp-area=""
-                   asp-controller="Answers"
-                   asp-action="VoteUpAnswer"
-                   asp-route-answerId="@answer.Id"
-                   asp-route-questionId="@Model.Id">
-                    ^
-                </a>
-                @answer.Votes
-                <a asp-area=""
-                   asp-controller="Answers"
-                   asp-action="VoteDownAnswer"
-                   asp-route-answerId="@answer.Id"
-                   asp-route-questionId="@Model.Id">
-                    v
-                </a>
-            </th>
-            <td>@answer.Body</td>
-            <td>
-                @foreach (var answerComment in answer.AnswerComments)
-                {
-                    <p>
-                        @answerComment.Body 
-                        @if (answerComment.IsEdited == true)
+            <tr>
+                <th scope="row">
+                    <a asp-area=""
+                       asp-controller="Answers"
+                       asp-action="VoteUpAnswer"
+                       asp-route-answerId="@answer.Id"
+                       asp-route-questionId="@Model.Id">
+                        ^
+                    </a>
+                    @answer.Votes
+                    <a asp-area=""
+                       asp-controller="Answers"
+                       asp-action="VoteDownAnswer"
+                       asp-route-answerId="@answer.Id"
+                       asp-route-questionId="@Model.Id">
+                        v
+                    </a>
+                </th>
+                <td>@answer.Body</td>
+                <td>
+                    @foreach (var answerComment in answer.AnswerComments)
+                    {
+                        <p>
+                            @answerComment.Body
+                            @if (answerComment.IsEdited == true)
                             {
                                 <span> (edited) </span>
-                            } 
-                        (@answerComment.DateAdded)
-                        <a asp-controller="Comments"
-                            asp-action="EditAnswerComment"
-                            asp-route-answerCommentId="@answerComment.Id">
-                            Edit</a>
-                    </p>
+                            }
+                            (@answerComment.DateAdded)
+                            <a asp-controller="Comments"
+                               asp-action="EditAnswerComment"
+                               asp-route-answerCommentId="@answerComment.Id">
+                                Edit
+                            </a>
+                            <!-- Button trigger modal -->
+                            @{ 
+                                string answerCommentModalName = "answerCommentRemoveModal" + answerComment.Id;
+                            }
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#@answerCommentModalName">
+                                Remove
+                            </button>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="@answerCommentModalName" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="exampleModalLabel">Are you sure you want to Remove comment (@answerComment.Id)?</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            @answerComment.Body
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <a class="btn btn-danger"
+                                                asp-controller="Comments"
+                                                asp-action="RemoveAnswerComment"
+                                                asp-route-answerCommentId="@answerComment.Id"
+                                                asp-route-questionId="@answerComment.QuestionId"
+                                                >Remove
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                    }
+                </td>
+                <td>@answer.DateAdded</td>
+                @if (answer.ImageNamePath == null)
+                {
+                    <td>
+                        -
+                    </td>
                 }
-            </td>
-            <td>@answer.DateAdded</td>
-            @if (answer.ImageNamePath == null)
-            {
+                else
+                {
+                    <td>
+                        <a href="~/uploads/@answer.ImageNamePath" target="_blank"><img class="answerImageThumbnail" src="~/uploads/@answer.ImageNamePath" alt="Image related to the answer." /></a>
+                    </td>
+                }
                 <td>
-                    -
+                    <a class="btn btn-primary"
+                       asp-area=""
+                       asp-controller="Comments"
+                       asp-action="AddAnswerComment"
+                       asp-route-questionId="@Model.Id"
+                       asp-route-answerId="@answer.Id">
+                        Comment
+                    </a>
+                    <a class="btn btn-warning"
+                       asp-area=""
+                       asp-controller="Answers"
+                       asp-action="EditAnswer"
+                       asp-route-answerId="@answer.Id">
+                        Edit
+                    </a>
+                    <a class="btn btn-danger"
+                       asp-area=""
+                       asp-controller="Answers"
+                       asp-action="Remove"
+                       asp-route-questionId="@Model.Id"
+                       asp-route-answerId="@answer.Id">
+                        Remove
+                    </a>
                 </td>
-            }
-            else
-            {
-                <td>
-                    <a href="~/uploads/@answer.ImageNamePath" target="_blank"><img class="answerImageThumbnail" src="~/uploads/@answer.ImageNamePath" alt="Image related to the answer." /></a>
-                </td>
-            }
-            <td>
-                <a class="btn btn-primary"
-                   asp-area=""
-                   asp-controller="Comments"
-                   asp-action="AddAnswerComment"
-                   asp-route-questionId="@Model.Id"
-                   asp-route-answerId="@answer.Id">
-                    Comment
-                </a>
-                <a class="btn btn-warning"
-                   asp-area=""
-                   asp-controller="Answers"
-                   asp-action="EditAnswer"
-                   asp-route-answerId="@answer.Id">
-                    Edit
-                </a>
-                <a class="btn btn-danger"
-                   asp-area=""
-                   asp-controller="Answers"
-                   asp-action="Remove"
-                   asp-route-questionId="@Model.Id"
-                   asp-route-answerId="@answer.Id">
-                    Remove
-                </a>
-            </td>
-        </tr>
+            </tr>
         }
     </tbody>
 </table>
@@ -173,3 +242,4 @@
     Answer
 </a>
 <hr />
+
