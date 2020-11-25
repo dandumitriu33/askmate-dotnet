@@ -16,7 +16,7 @@ namespace Web.AutomapperProfiles
                 .ReverseMap();
             CreateMap<Answer, AnswerViewModel>()
                 .ReverseMap();
-            CreateMap<Comment, CommentViewModel>()
+            CreateMap<QuestionComment, QuestionCommentViewModel>()
                 .ReverseMap();
         }
     }

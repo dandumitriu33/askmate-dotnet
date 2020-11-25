@@ -24,5 +24,6 @@ namespace ApplicationCore.Interfaces
         Task VoteUpAnswerById(int answerId);
         Task VoteDownAnswerById(int answerId);
         Task<List<Question>> GetSearchResults(string searchPhrase);
+        Task<QuestionComment> AddQuestionCommentAsync(QuestionComment comment);
     }
 }

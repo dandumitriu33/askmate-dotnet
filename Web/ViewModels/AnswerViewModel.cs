@@ -15,7 +15,7 @@ namespace Web.ViewModels
         public DateTime DateAdded { get; set; }
         public int QuestionId { get; set; }
         public int Votes { get; set; }
-        public List<CommentViewModel> Comments { get; set; }
+        public List<QuestionCommentViewModel> Comments { get; set; }
         public IFormFile Image { get; set; }
         public string ImageNamePath { get; set; }
     }

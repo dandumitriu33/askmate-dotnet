@@ -333,5 +333,25 @@ namespace Infrastructure.Data
             return await _dbContext.Questions.Where(q => q.IsRemoved == false && allQuestionIds.Contains(q.Id)).OrderByDescending(q => q.Votes).ToListAsync();
         }
 
+        public async Task<QuestionComment> AddQuestionCommentAsync(QuestionComment questionComment)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                questionComment.DateAdded = DateTime.Now;
+                await _dbContext.QuestionComments.AddAsync(questionComment);
+                await _dbContext.SaveChangesAsync();
+                // Commit transaction if all commands succeed, transaction will auto-rollback
+                // when disposed if either commands fails
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+            return questionComment;
+        }
+
     }
 }

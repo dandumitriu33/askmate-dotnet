@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ApplicationCore.Entities;
+using ApplicationCore.Interfaces;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -10,14 +13,38 @@ namespace Web.Controllers
 {
     public class CommentsController : Controller
     {
-        // Get
+        private readonly IMapper _mapper;
+        private readonly IAsyncRepository _repository;
+
+        public CommentsController(IMapper mapper,
+                                  IAsyncRepository repository)
+        {
+            _mapper = mapper;
+            _repository = repository;
+        }
+        // Get: comments/addQuestionComment/{questionId}
         [HttpGet]
         [Route("comments/addQuestionComment/{questionId}")]
         public IActionResult AddQuestionComment(int questionId)
         {
-            var commentViewModel = new CommentViewModel();
-            commentViewModel.QuestionId = questionId;
-            return View(commentViewModel);
+            var questionCommentViewModel = new QuestionCommentViewModel();
+            questionCommentViewModel.QuestionId = questionId;
+            return View(questionCommentViewModel);
+        }
+
+        // POST: comments/addQuestionComment/{questionId}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Route("comments/addQuestionComment/{questionId}")]
+        public async Task<IActionResult> AddQuestionComment(QuestionCommentViewModel questionCommentViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                var questionComment = _mapper.Map<QuestionCommentViewModel, QuestionComment>(questionCommentViewModel);
+                await _repository.AddQuestionCommentAsync(questionComment);
+                return RedirectToAction("Details", "Questions", new { questionId = questionCommentViewModel.QuestionId });
+            }
+            return View(questionCommentViewModel);
         }
 
         // GET: CommentsController/Details/5
