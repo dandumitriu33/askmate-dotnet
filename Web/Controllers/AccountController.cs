@@ -49,5 +49,12 @@ namespace Web.Controllers
             }
             return View(registerViewModel);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> LogOut()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
     }
 }
