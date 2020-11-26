@@ -27,7 +27,7 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> AttachTag(int questionId)
         {
-            List<Tag> tagsFromDb = await _repository.GetAllTags();
+            List<Tag> tagsFromDb = await _repository.GetAllTagsNoDuplicates(questionId);
             List<TagViewModel> tagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
             ViewData["questionId"] = questionId.ToString();
             return View(tagsViewModel);
