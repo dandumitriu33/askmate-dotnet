@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject SignInManager<IdentityUser> signInManager; 
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -37,12 +39,27 @@
                     <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="searchPhrase">
                     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                 </form>
-                <div class="nav-item">
-                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">WWWnWWW</a>
-                </div>
-                <div class="nav-item">
-                    <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
-                </div>
+                @if (signInManager.IsSignedIn(User))
+                {
+                    <div class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="" asp-action="">@User.Identity.Name</a>
+                    </div>
+                    <div class="nav-item">
+                        <form method="post" asp-controller="Account" asp-action="LogOut">
+                            <a href="" type="submit" class="nav-link text-dark">Log out</a>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="LogIn">Log in</a>
+                    </div>
+                    <div class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+                    </div>
+                }
+
             </div>
         </nav>
     </header>
