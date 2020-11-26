@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -6,7 +7,7 @@ using System.Text;
 
 namespace Infrastructure.Data
 {
-    public class AskMateContext : DbContext
+    public class AskMateContext : IdentityDbContext
     {
         public AskMateContext(DbContextOptions options) : base(options)
         {
