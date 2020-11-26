@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Infrastructure.Data
 {
-    public class AskMateContext : IdentityDbContext
+    public class AskMateContext : IdentityDbContext<ApplicationUser>
     {
         public AskMateContext(DbContextOptions options) : base(options)
         {

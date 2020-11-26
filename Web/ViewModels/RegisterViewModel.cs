@@ -20,9 +20,5 @@ namespace Web.ViewModels
         [Display(Name ="Confirm Password")]
         [Compare("Password", ErrorMessage = "The Password and Password Confirmation don't match.")]
         public string ConfirmPassword { get; set; }
-
-        [Required]
-        [Display(Name = "Username")]
-        public string UserName { get; set; }
     }
 }

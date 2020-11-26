@@ -35,7 +35,7 @@ namespace Web
                     options.UseSqlServer(Configuration.GetConnectionString("Default"));
                 });
 
-            services.AddIdentity<IdentityUser, IdentityRole>(options =>
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                     {
                         // development only configuration for simpler testing/demo
                         options.Password.RequiredLength = 3;
