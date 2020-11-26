@@ -1,0 +1,35 @@
+﻿@model List<ApplicationUserViewModel>
+
+@{ 
+    ViewData["Title"] = "All Users";
+}
+
+<h1>All Users</h1>
+
+<table class="table table-striped mt-2">
+    <thead>
+        <tr>
+            <th scope="col">
+                ID
+            </th>
+            <th scope="col">
+                Email
+            </th>
+            <th scope="col">
+                Joined on
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>
+                    @user.Id
+                </td>
+                <td>@user.Email</td>
+                <td>@user.DateAdded</td>
+            </tr>
+        }
+    </tbody>
+</table>
