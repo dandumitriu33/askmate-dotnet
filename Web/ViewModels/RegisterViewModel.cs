@@ -22,6 +22,7 @@ namespace Web.ViewModels
         public string ConfirmPassword { get; set; }
 
         [Required]
+        [Display(Name = "Username")]
         public string UserName { get; set; }
     }
 }
