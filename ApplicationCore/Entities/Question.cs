@@ -22,5 +22,6 @@ namespace ApplicationCore.Entities
         public List<Answer> Answers { get; set; }
         public List<QuestionTag> QuestionTags { get; set; }
         public string ImageNamePath { get; set; }
+        public string UserId { get; set; }
     }
 }

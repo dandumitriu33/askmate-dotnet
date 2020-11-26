@@ -23,5 +23,6 @@ namespace Web.ViewModels
         public List<TagViewModel> Tags { get; set; }
         public IFormFile Image { get; set; }
         public string ImageNamePath { get; set; }
+        public string UserId { get; set; }
     }
 }

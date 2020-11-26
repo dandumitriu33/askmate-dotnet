@@ -4,6 +4,7 @@ using ApplicationCore.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -19,16 +20,22 @@ namespace Web.Controllers
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IFileOperations _fileOperations;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public QuestionsController(IAsyncRepository repository,
                                    IMapper mapper,
                                    IWebHostEnvironment webHostEnvironment,
-                                   IFileOperations fileOperations)
+                                   IFileOperations fileOperations,
+                                   SignInManager<ApplicationUser> signInManager,
+                                   UserManager<ApplicationUser> userManager)
         {
             _repository = repository;
             _mapper = mapper;
             _webHostEnvironment = webHostEnvironment;
             _fileOperations = fileOperations;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
         // GET: QuestionsController
         public ActionResult Index()
@@ -103,6 +110,8 @@ namespace Web.Controllers
                 }
                 var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
                 question.ImageNamePath = uniqueFileName;
+                var currentlySignedInUser = await _userManager.GetUserAsync(User);
+                question.UserId = currentlySignedInUser.Id;
                 var resultQuestion = await _repository.AddQuestionAsync(question);
                 return RedirectToAction("Details", new { questionId = resultQuestion.Id });
             }

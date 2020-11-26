@@ -13,6 +13,12 @@
     <Compile Remove="Migrations\20201125175603_AddManyToManyQuestionTagTable.Designer.cs" />
     <Compile Remove="Migrations\20201125180638_TagIsRemovedInitializedAsFalseJustInCase.cs" />
     <Compile Remove="Migrations\20201125180638_TagIsRemovedInitializedAsFalseJustInCase.Designer.cs" />
+    <Compile Remove="Migrations\20201126173934_AddQuestionAddedByColumn.cs" />
+    <Compile Remove="Migrations\20201126173934_AddQuestionAddedByColumn.Designer.cs" />
+    <Compile Remove="Migrations\20201126174036_AddQuestionUserIdColumn.cs" />
+    <Compile Remove="Migrations\20201126174036_AddQuestionUserIdColumn.Designer.cs" />
+    <Compile Remove="Migrations\20201126174140_AddQuestionUserIdColumn.cs" />
+    <Compile Remove="Migrations\20201126174140_AddQuestionUserIdColumn.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
