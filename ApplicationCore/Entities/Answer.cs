@@ -16,5 +16,6 @@ namespace ApplicationCore.Entities
         public int Votes { get; set; }
         public List<AnswerComment> AnswerComments { get; set; }
         public string ImageNamePath { get; set; }
+        public string UserId { get; set; }
     }
 }

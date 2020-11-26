@@ -507,6 +507,12 @@ namespace Infrastructure.Data
             return await _dbContext.Tags.Where(t => t.IsRemoved == false).OrderBy(t => t.Name).ToListAsync();
         }
 
+        public async Task<List<Tag>> GetAllTagsNoDuplicates(int questionId)
+        {
+            List<int> currentQuestionTags = await _dbContext.QuestionTags.Where(qt => qt.QuestionId == questionId).Select(qt => qt.TagId).ToListAsync();
+            return await _dbContext.Tags.Where(t => t.IsRemoved == false && currentQuestionTags.Contains(t.Id) == false).OrderBy(t => t.Name).ToListAsync();
+        }
+
         public async Task AddQuestionTagAsync(QuestionTag questionTag)
         {
             await _dbContext.QuestionTags.AddAsync(questionTag);
@@ -528,6 +534,26 @@ namespace Infrastructure.Data
         public async Task<List<Tag>> GetTagsFromListFromDb(List<int> tagIds)
         {
             return await _dbContext.Tags.Where(t => tagIds.Contains(t.Id) && t.IsRemoved == false).OrderBy(t => t.Name).ToListAsync();
+        }
+
+        public async Task DetachTag(QuestionTag questionTag)
+        {
+            var questionTagToDelete = await _dbContext.QuestionTags.Where(t => t.TagId == questionTag.TagId && t.QuestionId == questionTag.QuestionId).FirstOrDefaultAsync();
+            _dbContext.QuestionTags.Remove(questionTagToDelete);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<Dictionary<int, int>> GetTagInfo()
+        {
+            return await _dbContext.QuestionTags
+                            .GroupBy(qt => qt.TagId)
+                            .Select(g => new { TagId = g.Key, count = g.Count() })
+                            .ToDictionaryAsync(k => k.TagId, i => i.count);
+        }
+
+        public async Task<List<ApplicationUser>> GetAllUsers()
+        {
+            return await _dbContext.Users.ToListAsync();
         }
     }
 }

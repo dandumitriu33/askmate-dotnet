@@ -2,6 +2,7 @@
 using ApplicationCore.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -18,16 +19,19 @@ namespace Web.Controllers
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IFileOperations _fileOperations;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AnswersController(IAsyncRepository repository,
                                  IMapper mapper,
                                  IWebHostEnvironment webHostEnvironment,
-                                 IFileOperations fileOperations)
+                                 IFileOperations fileOperations,
+                                 UserManager<ApplicationUser> userManager)
         {
             _repository = repository;
             _mapper = mapper;
             _webHostEnvironment = webHostEnvironment;
             _fileOperations = fileOperations;
+            _userManager = userManager;
         }
 
         // Get
@@ -46,10 +50,10 @@ namespace Web.Controllers
         [Route("answers/addanswer/{questionId}")]
         public async Task<IActionResult> AddAnswer(AnswerViewModel answerViewModel)
         {
-            if (ModelState.IsValid && _fileOperations.ValidateImageType(answerViewModel.Image.FileName) == true)
+            if (ModelState.IsValid)
             {
                 string uniqueFileName = null;
-                if (answerViewModel.Image != null)
+                if (answerViewModel.Image != null && _fileOperations.ValidateImageType(answerViewModel.Image.FileName) == true)
                 {
                     // for more advanced projects add a composite file provider - for now wwwroot
                     // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
@@ -58,6 +62,8 @@ namespace Web.Controllers
                     string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
                     await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
                 }
+                var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
+                answerViewModel.UserId = currentlyLoggedInUser.Id;
                 var answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
                 answer.ImageNamePath = uniqueFileName;
                 await _repository.AddAnswerAsync(answer);

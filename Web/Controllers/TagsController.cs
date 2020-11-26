@@ -27,7 +27,7 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> AttachTag(int questionId)
         {
-            List<Tag> tagsFromDb = await _repository.GetAllTags();
+            List<Tag> tagsFromDb = await _repository.GetAllTagsNoDuplicates(questionId);
             List<TagViewModel> tagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
             ViewData["questionId"] = questionId.ToString();
             return View(tagsViewModel);
@@ -49,6 +49,20 @@ namespace Web.Controllers
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
+        // GET: TagsController/detach
+        [HttpGet]
+        [Route("detach")]
+        public async Task<IActionResult> DetachTag(int tagId, int questionId)
+        {
+            QuestionTag newQuestionTag = new QuestionTag
+            {
+                QuestionId = questionId,
+                TagId = tagId
+            };
+            await _repository.DetachTag(newQuestionTag);
+            return RedirectToAction("Details", "Questions", new { questionId = questionId });
+        }
+
         // GET: TagsController/addQuestionTag
         public async Task<IActionResult> AddQuestionTag(int questionId, int tagId)
         {
@@ -61,79 +75,20 @@ namespace Web.Controllers
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
-        // GET: TagsController
-        public ActionResult Index()
+        // GET: TagsController/info
+        [Route("info")]
+        public async Task<IActionResult> TagInfo()
         {
-            return View();
-        }
-
-        // GET: TagsController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: TagsController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: TagsController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
+            Dictionary<int, int> tagInfo = await _repository.GetTagInfo();
+            List<Tag> allTags = await _repository.GetAllTags();
+            Dictionary<string, int> result = new Dictionary<string, int>();
+            foreach (var item in tagInfo)
             {
-                return RedirectToAction(nameof(Index));
+                var tempTag = allTags.Where(t => t.Id == item.Key).FirstOrDefault();
+                result.Add(tempTag.Name, item.Value);
             }
-            catch
-            {
-                return View();
-            }
+            return View(result);
         }
-
-        // GET: TagsController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: TagsController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: TagsController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: TagsController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+        
     }
 }

@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject SignInManager<ApplicationUser> signInManager; 
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -29,14 +31,38 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="List" asp-action="Index">List</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="AllUsers">Users</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Questions" asp-action="AddQuestion">Add Question</a>
                         </li>
                     </ul>
                 </div>
-                <form method="get" class="form-inline my-2 my-lg-0" asp-controller="Home" asp-action="Search" >
-                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="searchPhrase" >
+                <form method="get" class="form-inline my-2 my-lg-0" asp-controller="Home" asp-action="Search">
+                    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="searchPhrase">
                     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                 </form>
+                @if (signInManager.IsSignedIn(User))
+                {
+                    <div class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="" asp-action="">@User.Identity.Name</a>
+                    </div>
+                    <div class="nav-item">
+                        <form method="post" asp-controller="Account" asp-action="LogOut">
+                            <button type="submit" class="btn btn-link nav-link text-dark">Log out</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="LogIn">Log in</a>
+                    </div>
+                    <div class="nav-item">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+                    </div>
+                }
+
             </div>
         </nav>
     </header>

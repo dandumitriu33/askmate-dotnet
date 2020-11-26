@@ -40,7 +40,17 @@
 <p>
     @foreach (var tag in Model.Tags)
     {
-        <span>@tag.Name </span>
+        <span>
+            @tag.Name (
+            <a  
+               asp-controller="Tags"
+               asp-action="DetachTag"
+               asp-route-tagId="@tag.Id"
+               asp-route-questionId="@Model.Id"
+               > X 
+            </a>
+            )
+        </span>
     }
     <a class="btn btn-primary btn-sm" 
        asp-controller="Tags"
