@@ -96,10 +96,10 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddQuestion(QuestionViewModel questionViewModel)
         {
-            if (ModelState.IsValid && _fileOperations.ValidateImageType(questionViewModel.Image.FileName) == true)
+            if (ModelState.IsValid)
             {
                 string uniqueFileName = null;
-                if (questionViewModel.Image != null)
+                if (questionViewModel.Image != null && _fileOperations.ValidateImageType(questionViewModel.Image.FileName) == true)
                 {
                     // for more advanced projects add a composite file provider - for now wwwroot
                     // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
