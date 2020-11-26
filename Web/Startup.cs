@@ -6,6 +6,7 @@ using Infrastructure.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,10 @@ namespace Web
                 {
                     options.UseSqlServer(Configuration.GetConnectionString("Default"));
                 });
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                    .AddEntityFrameworkStores<AskMateContext>();
+
             services.AddScoped<IAsyncRepository, EFRepository>();
             services.AddScoped<IFileOperations, FileOperations>();
             services.AddAutoMapper(typeof(Startup));
