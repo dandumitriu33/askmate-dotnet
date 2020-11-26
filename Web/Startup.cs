@@ -35,7 +35,16 @@ namespace Web
                     options.UseSqlServer(Configuration.GetConnectionString("Default"));
                 });
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<IdentityUser, IdentityRole>(options =>
+                    {
+                        // development only configuration for simpler testing/demo
+                        options.Password.RequiredLength = 3;
+                        options.Password.RequireDigit = false;
+                        options.Password.RequiredUniqueChars = 0;
+                        options.Password.RequireUppercase = false;
+                        options.Password.RequireLowercase = false;
+                        options.Password.RequireNonAlphanumeric = false;
+                    })
                     .AddEntityFrameworkStores<AskMateContext>();
 
             services.AddScoped<IAsyncRepository, EFRepository>();
