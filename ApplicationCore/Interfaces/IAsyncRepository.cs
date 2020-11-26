@@ -37,5 +37,6 @@ namespace ApplicationCore.Interfaces
         Task<Tag> AddTagAsync(Tag tag);
         Task<List<int>> GetTagIdsForQuestionId(int questionId);
         Task<List<Tag>> GetTagsFromListFromDb(List<int> tagIds);
+        Task DetachTag(QuestionTag questionTag);
     }
 }

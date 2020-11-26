@@ -529,5 +529,12 @@ namespace Infrastructure.Data
         {
             return await _dbContext.Tags.Where(t => tagIds.Contains(t.Id) && t.IsRemoved == false).OrderBy(t => t.Name).ToListAsync();
         }
+
+        public async Task DetachTag(QuestionTag questionTag)
+        {
+            var questionTagToDelete = await _dbContext.QuestionTags.Where(t => t.TagId == questionTag.TagId && t.QuestionId == questionTag.QuestionId).FirstOrDefaultAsync();
+            _dbContext.QuestionTags.Remove(questionTagToDelete);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }
