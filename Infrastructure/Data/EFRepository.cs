@@ -550,5 +550,10 @@ namespace Infrastructure.Data
                             .Select(g => new { TagId = g.Key, count = g.Count() })
                             .ToDictionaryAsync(k => k.TagId, i => i.count);
         }
+
+        public async Task<List<ApplicationUser>> GetAllUsers()
+        {
+            return await _dbContext.Users.ToListAsync();
+        }
     }
 }
