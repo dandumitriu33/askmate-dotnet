@@ -542,5 +542,13 @@ namespace Infrastructure.Data
             _dbContext.QuestionTags.Remove(questionTagToDelete);
             await _dbContext.SaveChangesAsync();
         }
+
+        public async Task<Dictionary<int, int>> GetTagInfo()
+        {
+            return await _dbContext.QuestionTags
+                            .GroupBy(qt => qt.TagId)
+                            .Select(g => new { TagId = g.Key, count = g.Count() })
+                            .ToDictionaryAsync(k => k.TagId, i => i.count);
+        }
     }
 }

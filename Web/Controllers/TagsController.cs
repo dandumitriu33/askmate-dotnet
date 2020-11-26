@@ -75,6 +75,20 @@ namespace Web.Controllers
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
+        // GET: TagsController/info
+        [Route("info")]
+        public async Task<IActionResult> TagInfo()
+        {
+            Dictionary<int, int> tagInfo = await _repository.GetTagInfo();
+            List<Tag> allTags = await _repository.GetAllTags();
+            Dictionary<string, int> result = new Dictionary<string, int>();
+            foreach (var item in tagInfo)
+            {
+                var tempTag = allTags.Where(t => t.Id == item.Key).FirstOrDefault();
+                result.Add(tempTag.Name, item.Value);
+            }
+            return View(result);
+        }
         
     }
 }
