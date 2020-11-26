@@ -22,6 +22,8 @@ namespace Web.AutomapperProfiles
                 .ReverseMap();
             CreateMap<Tag, TagViewModel>()
                 .ReverseMap();
+            CreateMap<ApplicationUser, ApplicationUserViewModel>()
+                .ReverseMap();
         }
     }
 }
