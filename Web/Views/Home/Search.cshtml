@@ -26,32 +26,33 @@
         <tbody>
             @foreach (var question in Model)
             {
-                <tr>
-                    <th scope="row">
-                        <a asp-area=""
-                           asp-controller="Home"
-                           asp-action="VoteUpQuestion"
-                           asp-route-questionId="@question.Id">
-                            ^
-                        </a>
-                        @question.Votes
-                        <a asp-area=""
-                           asp-controller="Home"
-                           asp-action="VoteDownQuestion"
-                           asp-route-questionId="@question.Id">
-                            v
-                        </a>
-                    </th>
-                    <td>
-                        <a asp-area=""
-                           asp-controller="Questions"
-                           asp-action="Details"
-                           asp-route-questionId=@question.Id>@question.Title</a>
-                    </td>
-                    <td>@question.Body</td>
-                    <td>@question.Views</td>
-                    <td>@question.DateAdded</td>
-                </tr>
+            <tr>
+                <th scope="row">
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="VoteUpQuestion"
+                       asp-route-questionId="@question.Id">
+                        ^
+                    </a>
+                    @question.Votes
+                    <a asp-area=""
+                       asp-controller="Home"
+                       asp-action="VoteDownQuestion"
+                       asp-route-questionId="@question.Id">
+                        v
+                    </a>
+                </th>
+                <td>
+                    <a asp-area=""
+                       asp-controller="Questions"
+                       asp-action="Details"
+                       asp-route-questionId=@question.Id>@question.Title</a>
+                </td>
+                <!--<td>@question.Body</td>-->
+                <td>@Html.Raw(question.Body.Replace((string)ViewData["searchPhrase"], "<mark class='font-weight-bold'>" + (string)ViewData["searchPhrase"] + "</mark>"))</td>
+                <td>@question.Views</td>
+                <td>@question.DateAdded</td>
+            </tr>
             }
         </tbody>
     </table>
