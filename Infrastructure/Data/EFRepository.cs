@@ -71,7 +71,7 @@ namespace Infrastructure.Data
 
                 var answers = await _dbContext.Answers
                                         .Where(a => a.QuestionId == questionId && a.IsRemoved == false)
-                                        .OrderByDescending(a => a.DateAdded)
+                                        .OrderByDescending(a => a.Votes)
                                         .ToListAsync();
 
                 var allAnswerCommentsOfQuestion = await _dbContext.AnswerComments
