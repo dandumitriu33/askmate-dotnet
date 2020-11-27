@@ -1,119 +1,130 @@
 ﻿@model QuestionViewModel
 
 @{
-
+    ViewData["Title"] = $"Details for question {Model.Id}";
 }
 
-<p>Details</p>
-<p>@Model.Id</p>
-<p>@Model.Title</p>
-<p>@Model.Views</p>
-<p>@Model.Body</p>
-<p>@Model.DateAdded</p>
-@if (Model.ImageNamePath != null)
-{
-    <img src="~/uploads/@Model.ImageNamePath" alt="Image related to the question." />
-}
-<br />
-<a class="btn btn-primary"
-   asp-area=""
-   asp-controller="Comments"
-   asp-action="AddQuestionComment"
-   asp-route-questionId="@Model.Id">
-    Comment
-</a>
-<a class="btn btn-warning"
-   asp-area=""
-   asp-controller="Questions"
-   asp-action="Edit"
-   asp-route-questionId="@Model.Id">
-    Edit
-</a>
-<a class="btn btn-danger"
-   asp-area=""
-   asp-controller="Questions"
-   asp-action="Remove"
-   asp-route-questionId="@Model.Id">
-    Remove
-</a>
-<hr />
-<p>
-    @foreach (var tag in Model.Tags)
-    {
-        <span>
-            @tag.Name (
-            <a  
-               asp-controller="Tags"
-               asp-action="DetachTag"
-               asp-route-tagId="@tag.Id"
-               asp-route-questionId="@Model.Id"
-               > X 
+<div class="card" style="width: 100%;">
+
+    <div class="card-body">
+        <h5 class="card-title">
+            (^ @Model.Votes v)
+            @Model.Title
+            <a class="btn btn-outline-warning btn-sm"
+               asp-area=""
+               asp-controller="Questions"
+               asp-action="Edit"
+               asp-route-questionId="@Model.Id">
+                Edit
             </a>
-            )
-        </span>
-    }
-    <a class="btn btn-primary btn-sm" 
-       asp-controller="Tags"
-       asp-action="AttachTag"
-       asp-route-questionId="@Model.Id"
-       >Attach Tag
-    </a>
-</p>
-
-
-<hr />
-@foreach (var questionComment in Model.QuestionComments)
-{
-    <p>
-        @questionComment.Body
-        @if (questionComment.IsEdited == true)
+            <a class="btn btn-outline-danger btn-sm"
+               asp-area=""
+               asp-controller="Questions"
+               asp-action="Remove"
+               asp-route-questionId="@Model.Id">
+                Remove
+            </a>
+        </h5>
+        <p class="card-text">@Model.Body</p>
+        @if (Model.ImageNamePath != null)
         {
-            <span> (edited) </span>
+            <a href="~/uploads/@Model.ImageNamePath" target="_blank">
+                <img class="card-img-top" style="width: 30%;" src="~/uploads/@Model.ImageNamePath" alt="Image related to the question.">
+            </a>
         }
-        (@questionComment.DateAdded)
+    </div>
+    <div class="container text-right">
+        added on @Model.DateAdded - @Model.Views views
+    </div>
+    <hr />
+    <div class="container">
+        <p>
+            @foreach (var tag in Model.Tags)
+            {
+                <span class="badge badge-dark">
+                    @tag.Name
+                    <a class="badge badge-danger"
+                       asp-controller="Tags"
+                       asp-action="DetachTag"
+                       asp-route-tagId="@tag.Id"
+                       asp-route-questionId="@Model.Id">
+                        X
+                    </a>
 
-        <a asp-controller="Comments"
-           asp-action="EditQuestionComment"
-           asp-route-questionCommentId="@questionComment.Id">
-            Edit
-        </a>
-        <!-- Button trigger modal -->
-        @{ 
-            string questionCommentModalName = "questionCommentRemoveModal" + questionComment.Id;
-        }
-        <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#@questionCommentModalName">
-            Remove
-        </button>
+                </span>
+            }
+            <a class="badge badge-light"
+               asp-controller="Tags"
+               asp-action="AttachTag"
+               asp-route-questionId="@Model.Id">
+                Add Tag
+            </a>
+        </p>
+    </div>
 
-        <!-- Modal -->
-        <div class="modal fade" id="@questionCommentModalName" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Are you sure you want to Remove comment (@questionComment.Id)?</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        @questionComment.Body
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <a class="btn btn-danger"
-                           asp-controller="Comments"
-                           asp-action="RemoveQuestionComment"
-                           asp-route-questionCommentId="@questionComment.Id"
-                           asp-route-questionId="@questionComment.QuestionId"
-                           >Remove
-                        </a>
+    <div class="container text-right">
+        @foreach (var questionComment in Model.QuestionComments)
+        {
+            <p>
+                @questionComment.Body
+                @if (questionComment.IsEdited == true)
+                {
+                    <span> (edited) </span>
+                }
+                (@questionComment.DateAdded)
+
+                <a class="btn btn-outline-warning btn-sm"
+                   asp-controller="Comments"
+                   asp-action="EditQuestionComment"
+                   asp-route-questionCommentId="@questionComment.Id">
+                    Edit
+                </a>
+                <!-- Button trigger modal -->
+                @{
+                    string questionCommentModalName = "questionCommentRemoveModal" + questionComment.Id;
+                }
+                <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#@questionCommentModalName">
+                    Remove
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="@questionCommentModalName" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Are you sure you want to Remove comment (@questionComment.Id)?</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                @questionComment.Body
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <a class="btn btn-danger"
+                                   asp-controller="Comments"
+                                   asp-action="RemoveQuestionComment"
+                                   asp-route-questionCommentId="@questionComment.Id"
+                                   asp-route-questionId="@questionComment.QuestionId">
+                                    Remove
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </p>
-}
-<hr />
+            </p>
+        }
+        <a class="btn btn-outline-primary btn-sm mb-2"
+           asp-area=""
+           asp-controller="Comments"
+           asp-action="AddQuestionComment"
+           asp-route-questionId="@Model.Id">
+            Comment
+        </a>
+    </div>
+</div>
+
 
 
 <table class="table table-striped mt-2">
