@@ -182,20 +182,35 @@ namespace Web.Controllers
         // Get: QuestionsController/5/VoteUp
         [HttpGet]
         [Route("questions/{questionId}/voteup")]
-        public async Task<IActionResult> VoteUpQuestion(int questionId)
+        public async Task<IActionResult> VoteUpQuestion(int questionId, string redirection="list")
         {
             await _repository.VoteUpQuestionById(questionId);
-            return RedirectToAction("Index", "List");
+            if (String.Equals("redirectToDetails", redirection))
+            {
+                return RedirectToAction("Details", new { questionId = questionId });
+            }
+            else
+            {
+                return RedirectToAction("Index", "List");
+            }
+            
         }
 
         // Get: QuestionsController/5/VoteDown
         [HttpGet]
         [Route("questions/{questionId}/votedown")]
-        public async Task<IActionResult> VoteDownQuestion(int questionId)
+        public async Task<IActionResult> VoteDownQuestion(int questionId, string redirection="list")
         {
             await _repository.VoteDownQuestionById(questionId);
-
-            return RedirectToAction("Index", "List");
+            if (String.Equals("redirectToDetails", redirection))
+            {
+                return RedirectToAction("Details", new { questionId = questionId });
+            }
+            else
+            {
+                return RedirectToAction("Index", "List");
+            }
+            
         }
     }
 }

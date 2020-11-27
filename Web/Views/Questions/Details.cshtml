@@ -8,7 +8,19 @@
 
     <div class="card-body">
         <h5 class="card-title">
+            <a asp-controller="Questions"
+               asp-action="VoteUpQuestion"
+               asp-route-questionId="@Model.Id"
+               asp-route-redirection="redirectToDetails">
+                <span class="badge badge-success">+</span>
+            </a>
             [@Model.Votes]
+            <a asp-controller="Questions"
+               asp-action="VoteDownQuestion"
+               asp-route-questionId="@Model.Id"
+               asp-route-redirection="redirectToDetails">
+                <span class="badge badge-danger">-</span>
+            </a>
             @Model.Title
             <a class="btn btn-outline-warning btn-sm"
                asp-area=""
