@@ -575,5 +575,26 @@ namespace Infrastructure.Data
         {
             return await _dbContext.AnswerComments.Where(ac => ac.IsRemoved == false && ac.UserId == userId).OrderByDescending(ac => ac.DateAdded).ToListAsync();
         }
+
+        public async Task EditAnswerAccepted(int answerId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answer = await _dbContext.Answers.Where(a => a.IsRemoved == false && a.Id == answerId).FirstOrDefaultAsync();
+
+                answer.IsAccepted = true;
+                _dbContext.Answers.Attach(answer);
+                _dbContext.Entry(answer).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
     }
 }

@@ -45,5 +45,6 @@ namespace ApplicationCore.Interfaces
         Task<List<Answer>> GetUserAnswers(string userId);
         Task<List<QuestionComment>> GetUserQuestionComments(string userId);
         Task<List<AnswerComment>> GetUserAnswerComments(string userId);
+        Task EditAnswerAccepted(int answerId);
     }
 }
