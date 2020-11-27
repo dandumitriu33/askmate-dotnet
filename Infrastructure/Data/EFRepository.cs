@@ -220,9 +220,11 @@ namespace Infrastructure.Data
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
+                int reputationModificationValue = -1;
                 var questionFromDb = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
 
                 questionFromDb.Votes -= 1;
+                await ModifyUserReputation(reputationModificationValue, questionFromDb.UserId);
                 _dbContext.Questions.Attach(questionFromDb);
                 _dbContext.Entry(questionFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
@@ -333,9 +335,11 @@ namespace Infrastructure.Data
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
+                int reputationModificationValue = -1;
                 var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
 
                 answerFromDb.Votes -= 1;
+                await ModifyUserReputation(reputationModificationValue, answerFromDb.UserId);
                 _dbContext.Answers.Attach(answerFromDb);
                 _dbContext.Entry(answerFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
