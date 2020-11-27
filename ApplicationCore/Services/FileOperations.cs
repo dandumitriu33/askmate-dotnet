@@ -16,10 +16,10 @@ namespace ApplicationCore.Services
             return false;
         }
 
-        public string AssembleQuestionUploadedFileName(string questionTitle, string systemFileName)
+        public string AssembleQuestionUploadedFileName(int questionId, string systemFileName)
         {
-            return "QTitle_"
-                   + questionTitle + "_"
+            return "QID_"
+                   + questionId + "_"
                    + DateTime.Now.Year.ToString() + "_"
                    + DateTime.Now.Month.ToString() + "_"
                    + DateTime.Now.Day.ToString() + "_"
