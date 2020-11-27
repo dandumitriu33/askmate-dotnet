@@ -8,5 +8,6 @@ namespace ApplicationCore.Entities
     public class ApplicationUser : IdentityUser
     {
         public DateTime DateAdded { get; set; }
+        public int Reputation { get; set; }
     }
 }
