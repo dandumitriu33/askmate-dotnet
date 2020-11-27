@@ -146,7 +146,7 @@
                asp-action="VoteUpAnswer"
                asp-route-answerId="@answer.Id"
                asp-route-questionId="@Model.Id">
-                ^
+                <span class="badge badge-success">+</span>
             </a>
             [@answer.Votes]
             <a asp-area=""
@@ -154,7 +154,7 @@
                asp-action="VoteDownAnswer"
                asp-route-answerId="@answer.Id"
                asp-route-questionId="@Model.Id">
-                v
+                <span class="badge badge-danger">-</span>
             </a>
             <a class="btn btn-outline-success btn-sm"
                asp-controller="Answers"
