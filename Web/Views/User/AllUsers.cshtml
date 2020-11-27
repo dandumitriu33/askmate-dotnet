@@ -13,6 +13,9 @@
                 ID
             </th>
             <th scope="col">
+                Reputation
+            </th>
+            <th scope="col">
                 Email
             </th>
             <th scope="col">
@@ -24,9 +27,8 @@
         @foreach (var user in Model)
         {
             <tr>
-                <td>
-                    @user.Id
-                </td>
+                <td>@user.Id</td>
+                <td>@user.Reputation</td>
                 <td>@user.Email</td>
                 <td>@user.DateAdded</td>
             </tr>

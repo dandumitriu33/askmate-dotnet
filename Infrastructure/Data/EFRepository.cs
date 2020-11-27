@@ -71,7 +71,7 @@ namespace Infrastructure.Data
 
                 var answers = await _dbContext.Answers
                                         .Where(a => a.QuestionId == questionId && a.IsRemoved == false)
-                                        .OrderByDescending(a => a.DateAdded)
+                                        .OrderByDescending(a => a.Votes)
                                         .ToListAsync();
 
                 var allAnswerCommentsOfQuestion = await _dbContext.AnswerComments
@@ -197,9 +197,11 @@ namespace Infrastructure.Data
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
+                int reputationModificationValue = 1;
                 var questionFromDb = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
 
                 questionFromDb.Votes += 1;
+                await ModifyUserReputation(reputationModificationValue, questionFromDb.UserId);
                 _dbContext.Questions.Attach(questionFromDb);
                 _dbContext.Entry(questionFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
@@ -218,9 +220,11 @@ namespace Infrastructure.Data
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
+                int reputationModificationValue = -1;
                 var questionFromDb = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
 
                 questionFromDb.Votes -= 1;
+                await ModifyUserReputation(reputationModificationValue, questionFromDb.UserId);
                 _dbContext.Questions.Attach(questionFromDb);
                 _dbContext.Entry(questionFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
@@ -308,9 +312,11 @@ namespace Infrastructure.Data
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
+                int reputationModificationValue = 1;
                 var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
 
                 answerFromDb.Votes += 1;
+                await ModifyUserReputation(reputationModificationValue, answerFromDb.UserId);
                 _dbContext.Answers.Attach(answerFromDb);
                 _dbContext.Entry(answerFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
@@ -329,9 +335,11 @@ namespace Infrastructure.Data
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
+                int reputationModificationValue = -1;
                 var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
 
                 answerFromDb.Votes -= 1;
+                await ModifyUserReputation(reputationModificationValue, answerFromDb.UserId);
                 _dbContext.Answers.Attach(answerFromDb);
                 _dbContext.Entry(answerFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
@@ -554,6 +562,57 @@ namespace Infrastructure.Data
         public async Task<List<ApplicationUser>> GetAllUsers()
         {
             return await _dbContext.Users.ToListAsync();
+        }
+
+        public async Task<List<Question>> GetUserQuestions(string userId)
+        {
+            return await _dbContext.Questions.Where(q => q.IsRemoved == false && q.UserId == userId).OrderByDescending(q => q.DateAdded).ToListAsync();
+        }
+
+        public async Task<List<Answer>> GetUserAnswers(string userId)
+        {
+            return await _dbContext.Answers.Where(a => a.IsRemoved == false && a.UserId == userId).OrderByDescending(a => a.DateAdded).ToListAsync();
+        }
+
+        public async Task<List<QuestionComment>> GetUserQuestionComments(string userId)
+        {
+            return await _dbContext.QuestionComments.Where(qc => qc.IsRemoved == false && qc.UserId == userId).OrderByDescending(qc => qc.DateAdded).ToListAsync();
+        }
+
+        public async Task<List<AnswerComment>> GetUserAnswerComments(string userId)
+        {
+            return await _dbContext.AnswerComments.Where(ac => ac.IsRemoved == false && ac.UserId == userId).OrderByDescending(ac => ac.DateAdded).ToListAsync();
+        }
+
+        public async Task EditAnswerAccepted(int answerId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answer = await _dbContext.Answers.Where(a => a.IsRemoved == false && a.Id == answerId).FirstOrDefaultAsync();
+
+                answer.IsAccepted = true;
+                _dbContext.Answers.Attach(answer);
+                _dbContext.Entry(answer).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task ModifyUserReputation(int value, string userId)
+        {
+            var user = await _dbContext.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+
+            user.Reputation += value;
+            _dbContext.Users.Attach(user);
+            _dbContext.Entry(user).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

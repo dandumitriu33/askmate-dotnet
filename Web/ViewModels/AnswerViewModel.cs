@@ -19,5 +19,6 @@ namespace Web.ViewModels
         public IFormFile Image { get; set; }
         public string ImageNamePath { get; set; }
         public string UserId { get; set; }
+        public bool IsAccepted { get; set; } = false;
     }
 }

@@ -63,6 +63,7 @@ namespace Web.Controllers
         {
             var searchResults = await _repository.GetSearchResults(searchPhrase);
             var searchResultsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(searchResults);
+            ViewData["searchPhrase"] = searchPhrase;
             return View(searchResultsViewModel);
         }
 

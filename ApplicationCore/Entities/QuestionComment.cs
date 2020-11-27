@@ -14,5 +14,6 @@ namespace ApplicationCore.Entities
         public bool IsRemoved { get; set; } = false;
         public bool IsEdited { get; set; }
         public int QuestionId { get; set; }
+        public string UserId { get; set; }
     }
 }

@@ -1,0 +1,147 @@
+﻿@model UserActivitiesViewModel
+
+@{
+    ViewData["Title"] = "User activity";
+}
+
+<h1>User activity</h1>
+<br />
+<h2>Questions</h2>
+<table class="table table-striped mt-2">
+    <thead>
+        <tr>
+            <th scope="col">
+                Votes
+            </th>
+            <th scope="col">
+                Title
+            </th>
+            <th scope="col">
+                Date Added
+            </th>
+            <th scope="col">
+                Views
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var question in Model.Questions)
+        {
+            <tr>
+                <td>@question.Votes</td>
+                <td>
+                    <a asp-controller="Questions"
+                       asp-action="Details"
+                       asp-route-questionId="@question.Id">
+                        @question.Title
+                    </a>
+                </td>
+                <td>@question.DateAdded</td>
+                <td>@question.Views</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<hr />
+<h2>Answers</h2>
+<table class="table table-striped mt-2">
+    <thead>
+        <tr>
+            <th scope="col">
+                Question
+            </th>
+            <th scope="col">
+                Votes
+            </th>
+            <th scope="col">
+                Message
+            </th>
+            <th scope="col">
+                Date Added
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var answer in Model.Answers)
+        {
+            <tr>
+                <td>
+                    <a asp-controller="Questions"
+                       asp-action="Details"
+                       asp-route-questionId="@answer.QuestionId">
+                        Go To Question...
+                    </a>
+                </td>
+                <td>@answer.Votes</td>
+                <td>@answer.Body</td>
+                <td>@answer.DateAdded</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<hr />
+<h2>Question Comments</h2>
+<table class="table table-striped mt-2">
+    <thead>
+        <tr>
+            <th scope="col">
+                Question
+            </th>
+            <th scope="col">
+                Message
+            </th>
+            <th scope="col">
+                Date Added
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var questionComment in Model.QuestionComments)
+        {
+            <tr>
+                <td>
+                    <a asp-controller="Questions"
+                       asp-action="Details"
+                       asp-route-questionId="@questionComment.QuestionId">
+                        Go To Question...
+                    </a>
+                </td>
+                <td>@questionComment.Body</td>
+                <td>@questionComment.DateAdded</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<hr />
+<h2>Answer Comments</h2>
+<table class="table table-striped mt-2">
+    <thead>
+        <tr>
+            <th scope="col">
+                Question
+            </th>
+            <th scope="col">
+                Message
+            </th>
+            <th scope="col">
+                Date Added
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var answerComment in Model.AnswerComments)
+        {
+            <tr>
+                <td>
+                    <a asp-controller="Questions"
+                       asp-action="Details"
+                       asp-route-questionId="@answerComment.QuestionId">
+                        Go To Question...
+                    </a>
+                </td>
+                <td>@answerComment.Body</td>
+                <td>@answerComment.DateAdded</td>
+            </tr>
+        }
+    </tbody>
+</table>

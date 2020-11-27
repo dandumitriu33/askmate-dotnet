@@ -10,5 +10,6 @@ namespace Web.ViewModels
         public string Id { get; set; }
         public string Email { get; set; }
         public DateTime DateAdded { get; set; }
+        public int Reputation { get; set; }
     }
 }

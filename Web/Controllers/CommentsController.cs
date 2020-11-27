@@ -2,6 +2,7 @@
 using ApplicationCore.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -15,12 +16,15 @@ namespace Web.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IAsyncRepository _repository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public CommentsController(IMapper mapper,
-                                  IAsyncRepository repository)
+                                  IAsyncRepository repository,
+                                  UserManager<ApplicationUser> userManager)
         {
             _mapper = mapper;
             _repository = repository;
+            _userManager = userManager;
         }
 
         // Get: comments/addQuestionComment/{questionId}
@@ -52,6 +56,8 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
+                questionCommentViewModel.UserId = currentlyLoggedInUser.Id;
                 var questionComment = _mapper.Map<QuestionCommentViewModel, QuestionComment>(questionCommentViewModel);
                 await _repository.AddQuestionCommentAsync(questionComment);
                 return RedirectToAction("Details", "Questions", new { questionId = questionCommentViewModel.QuestionId });
@@ -67,6 +73,8 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
+                answerCommentViewModel.UserId = currentlyLoggedInUser.Id;
                 var answerComment = _mapper.Map<AnswerCommentViewModel, AnswerComment>(answerCommentViewModel);
                 await _repository.AddAnswerCommentAsync(answerComment);
                 return RedirectToAction("Details", "Questions", new { questionId = answerCommentViewModel.QuestionId });

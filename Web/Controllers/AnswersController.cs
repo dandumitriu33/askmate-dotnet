@@ -137,5 +137,14 @@ namespace Web.Controllers
 
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
+
+        // GET: AnswersController/5/Accept
+        [HttpGet]
+        [Route("answers/{answerId}/accept")]
+        public async Task<IActionResult> AcceptAnswer(int answerId, int questionId)
+        {
+            await _repository.EditAnswerAccepted(answerId);
+            return RedirectToAction("Details", "Questions", new { questionId = questionId });
+        }
     }
 }
