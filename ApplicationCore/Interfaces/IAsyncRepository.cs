@@ -41,5 +41,9 @@ namespace ApplicationCore.Interfaces
         Task DetachTag(QuestionTag questionTag);
         Task<Dictionary<int, int>> GetTagInfo();
         Task<List<ApplicationUser>> GetAllUsers();
+        Task<List<Question>> GetUserQuestions(string userId);
+        Task<List<Answer>> GetUserAnswers(string userId);
+        Task<List<QuestionComment>> GetUserQuestionComments(string userId);
+        Task<List<AnswerComment>> GetUserAnswerComments(string userId);
     }
 }

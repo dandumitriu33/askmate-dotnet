@@ -555,5 +555,25 @@ namespace Infrastructure.Data
         {
             return await _dbContext.Users.ToListAsync();
         }
+
+        public async Task<List<Question>> GetUserQuestions(string userId)
+        {
+            return await _dbContext.Questions.Where(q => q.IsRemoved == false && q.UserId == userId).OrderByDescending(q => q.DateAdded).ToListAsync();
+        }
+
+        public async Task<List<Answer>> GetUserAnswers(string userId)
+        {
+            return await _dbContext.Answers.Where(a => a.IsRemoved == false && a.UserId == userId).OrderByDescending(a => a.DateAdded).ToListAsync();
+        }
+
+        public async Task<List<QuestionComment>> GetUserQuestionComments(string userId)
+        {
+            return await _dbContext.QuestionComments.Where(qc => qc.IsRemoved == false && qc.UserId == userId).OrderByDescending(qc => qc.DateAdded).ToListAsync();
+        }
+
+        public async Task<List<AnswerComment>> GetUserAnswerComments(string userId)
+        {
+            return await _dbContext.AnswerComments.Where(ac => ac.IsRemoved == false && ac.UserId == userId).OrderByDescending(ac => ac.DateAdded).ToListAsync();
+        }
     }
 }
