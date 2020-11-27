@@ -197,9 +197,11 @@ namespace Infrastructure.Data
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
             try
             {
+                int reputationModificationValue = 1;
                 var questionFromDb = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
 
                 questionFromDb.Votes += 1;
+                await ModifyUserReputation(reputationModificationValue, questionFromDb.UserId);
                 _dbContext.Questions.Attach(questionFromDb);
                 _dbContext.Entry(questionFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
@@ -595,6 +597,16 @@ namespace Infrastructure.Data
                 // TODO: Handle failure - UX message
                 transaction.Rollback();
             }
+        }
+
+        public async Task ModifyUserReputation(int value, string userId)
+        {
+            var user = await _dbContext.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+
+            user.Reputation += value;
+            _dbContext.Users.Attach(user);
+            _dbContext.Entry(user).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

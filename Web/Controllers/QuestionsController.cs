@@ -185,7 +185,6 @@ namespace Web.Controllers
         public async Task<IActionResult> VoteUpQuestion(int questionId)
         {
             await _repository.VoteUpQuestionById(questionId);
-
             return RedirectToAction("Index", "List");
         }
 
