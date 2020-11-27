@@ -1,0 +1,44 @@
+﻿@model UserActivitiesViewModel
+
+@{
+    ViewData["Title"] = "User activity";
+}
+
+<h1>User activity</h1>
+
+<h2>Questions</h2>
+<table class="table table-striped mt-2">
+    <thead>
+        <tr>
+            <th scope="col">
+                Votes
+            </th>
+            <th scope="col">
+                Title
+            </th>
+            <th scope="col">
+                Date Added
+            </th>
+            <th scope="col">
+                Views
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var question in Model.Questions)
+        {
+            <tr>
+                <td>@question.Votes</td>
+                <td>
+                    <a asp-controller="Questions"
+                       asp-action="Details"
+                       asp-route-questionId="@question.Id">
+                        @question.Title
+                    </a>
+                </td>
+                <td>@question.DateAdded</td>
+                <td>@question.Views</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -40,9 +40,7 @@ namespace Web.Controllers
         {
             var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
             string userId = currentlyLoggedInUser.Id;
-
-            List<Object> allActivities = new List<object>();
-            
+                        
             var userQuestionsFromDb = await _repository.GetUserQuestions(userId);
             List<QuestionViewModel> userQuestionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(userQuestionsFromDb);
 
@@ -55,13 +53,13 @@ namespace Web.Controllers
             var userAnswerCommentsFromDb = await _repository.GetUserAnswerComments(userId);
             List<AnswerCommentViewModel> userAnswerCommentsViewModel = _mapper.Map<List<AnswerComment>, List<AnswerCommentViewModel>>(userAnswerCommentsFromDb);
 
-            // arrange in List to send to View - ORDER MATTERS
-            allActivities.Add(userQuestionsViewModel);
-            allActivities.Add(userAnswersViewModel);
-            allActivities.Add(userQuestionCommentsViewModel);
-            allActivities.Add(userAnswerCommentsViewModel);
+            UserActivitiesViewModel allUserActivities = new UserActivitiesViewModel();
+            allUserActivities.Questions = userQuestionsViewModel;
+            allUserActivities.Answers = userAnswersViewModel;
+            allUserActivities.QuestionComments = userQuestionCommentsViewModel;
+            allUserActivities.AnswerComments = userAnswerCommentsViewModel;
 
-            return View(allActivities);
+            return View(allUserActivities);
         }
     }
 }
