@@ -12,10 +12,11 @@ namespace ApplicationCore.Entities
         public string Body { get; set; }
         public DateTime DateAdded { get; set; }
         public int QuestionId { get; set; }
-        public bool IsRemoved { get; set; }
+        public bool IsRemoved { get; set; } = false;
         public int Votes { get; set; }
         public List<AnswerComment> AnswerComments { get; set; }
         public string ImageNamePath { get; set; }
         public string UserId { get; set; }
+        public bool IsAccepted { get; set; } = false;
     }
 }
