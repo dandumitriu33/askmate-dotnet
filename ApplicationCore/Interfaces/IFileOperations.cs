@@ -7,7 +7,7 @@ namespace ApplicationCore.Interfaces
     public interface IFileOperations
     {
         bool ValidateImageType(string fileName);
-        string AssembleQuestionUploadedFileName(int questionId, string systemFileName);
-        string AssembleAnswerUploadedFileName(int questionId, string systemFileName);
+        string AssembleQuestionUploadedFileName(string userId, string systemFileName);
+        string AssembleAnswerUploadedFileName(string userId, string systemFileName);
     }
 }

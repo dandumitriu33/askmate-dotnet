@@ -52,18 +52,18 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
+                answerViewModel.UserId = currentlyLoggedInUser.Id;
                 string uniqueFileName = null;
                 if (answerViewModel.Image != null && _fileOperations.ValidateImageType(answerViewModel.Image.FileName) == true)
                 {
                     // for more advanced projects add a composite file provider - for now wwwroot
                     // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
                     string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                    uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.QuestionId, answerViewModel.Image.FileName);
+                    uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
                     string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
                     await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
                 }
-                var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
-                answerViewModel.UserId = currentlyLoggedInUser.Id;
                 var answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
                 answer.ImageNamePath = uniqueFileName;
                 await _repository.AddAnswerAsync(answer);
@@ -90,13 +90,15 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
+                var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
+                answerViewModel.UserId = currentlyLoggedInUser.Id;
                 string uniqueFileName = null;
                 if (answerViewModel.Image != null)
                 {
                     // for more advanced projects add a composite file provider - for now wwwroot
                     // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
                     string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                    uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.QuestionId, answerViewModel.Image.FileName);
+                    uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
                     string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
                     await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
                 }

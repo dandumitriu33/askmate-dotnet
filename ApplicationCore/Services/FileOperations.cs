@@ -16,10 +16,10 @@ namespace ApplicationCore.Services
             return false;
         }
 
-        public string AssembleQuestionUploadedFileName(int questionId, string systemFileName)
+        public string AssembleQuestionUploadedFileName(string userId, string systemFileName)
         {
-            return "QID_"
-                   + questionId + "_"
+            return "Q_"
+                   + userId + "_"
                    + DateTime.Now.Year.ToString() + "_"
                    + DateTime.Now.Month.ToString() + "_"
                    + DateTime.Now.Day.ToString() + "_"
@@ -29,10 +29,10 @@ namespace ApplicationCore.Services
                    + Guid.NewGuid().ToString() + "_" + systemFileName;
         }
 
-        public string AssembleAnswerUploadedFileName(int questionId, string systemFileName)
+        public string AssembleAnswerUploadedFileName(string userId, string systemFileName)
         {
-            return "AQID_"
-                   + questionId + "_"
+            return "A_"
+                   + userId + "_"
                    + DateTime.Now.Year.ToString() + "_"
                    + DateTime.Now.Month.ToString() + "_"
                    + DateTime.Now.Day.ToString() + "_"
