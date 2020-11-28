@@ -14,14 +14,17 @@ namespace Web.Controllers
     public class AdministrationController : Controller
     {
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAsyncRepository _repository;
         private readonly IMapper _mapper;
 
         public AdministrationController(RoleManager<IdentityRole> roleManager,
+                                        UserManager<ApplicationUser> userManager,
                                         IAsyncRepository repository,
                                         IMapper mapper)
         {
             _roleManager = roleManager;
+            _userManager = userManager;
             _repository = repository;
             _mapper = mapper;
         }
@@ -85,15 +88,39 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUserToRole(UserRoleViewModel userRoleViewModel)
         {
+            var user = await _userManager.FindByIdAsync(userRoleViewModel.UserId);
+            var role = await _roleManager.FindByIdAsync(userRoleViewModel.RoleId);
 
+            IdentityResult result = null;
+            if ((await _userManager.IsInRoleAsync(user, role.Name)) == false)
+            {
+                result = await _userManager.AddToRoleAsync(user, role.Name);
+            }
+            if (result.Succeeded)
+            {
+                return RedirectToAction("ListRoles", "Administration");
+            }
+            return View("EditUsersInRole", new { roleId = userRoleViewModel.RoleId });
 
-            return RedirectToAction("ListRoles", "Administration");
+            
         }
 
         [HttpPost]
         public async Task<IActionResult> RemoveUserFromRole(UserRoleViewModel userRoleViewModel)
         {
-            return RedirectToAction("ListRoles", "Administration");
+            var user = await _userManager.FindByIdAsync(userRoleViewModel.UserId);
+            var role = await _roleManager.FindByIdAsync(userRoleViewModel.RoleId);
+
+            IdentityResult result = null;
+            if ((await _userManager.IsInRoleAsync(user, role.Name)) == true)
+            {
+                result = await _userManager.RemoveFromRoleAsync(user, role.Name);
+            }
+            if (result.Succeeded)
+            {
+                return RedirectToAction("ListRoles", "Administration");
+            }
+            return View("EditUsersInRole", new { roleId = userRoleViewModel.RoleId });
         }
     }
 }
