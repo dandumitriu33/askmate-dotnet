@@ -294,7 +294,10 @@ namespace Infrastructure.Data
             try
             {
                 var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answer.Id && a.IsRemoved == false).FirstOrDefaultAsync();
-
+                if (answer.ImageNamePath == null && answerFromDb.ImageNamePath != null)
+                {
+                    answer.ImageNamePath = answerFromDb.ImageNamePath;
+                }
                 answerFromDb.Body = answer.Body;
                 answerFromDb.ImageNamePath = answer.ImageNamePath;
                 _dbContext.Answers.Attach(answerFromDb);
