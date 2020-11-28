@@ -1,0 +1,30 @@
+﻿@model List<ApplicationUserViewModel>
+
+@{ 
+    string roleId = (string) ViewData["roleId"];
+    string roleName = (string) ViewData["roleName"];
+    ViewData["Title"] = $"{roleName} Role User Management";
+}
+
+<h1>Manage Users in the @roleName Role</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label for="userId">Example select</label>
+        <select class="form-control" id="userId" name="userId">
+            @foreach (var user in Model)
+            {
+                <option value="@user.Id">@user.Email (@user.DateAdded)</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="roleId">Role ID</label>
+        <input type="text" class="form-control" id="roleId" name="roleId" value="@roleName - @roleId" disabled>
+    </div>
+    <button type="submit" class="btn btn-primary" asp-action="AddUserToRole" asp-controller="Administration">Add User To @roleName Role</button>
+    <button type="submit" class="btn btn-danger" asp-action="RemoveUserFromRole" asp-controller="Administration">Remove User From @roleName Role</button>
+    <a class="btn btn-dark" asp-action="ListRoles" asp-controller="Administration">
+        Cancel
+    </a>
+</form>
