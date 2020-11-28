@@ -43,6 +43,13 @@
             <a href="~/uploads/@Model.ImageNamePath" target="_blank">
                 <img class="card-img-top" style="width: 30%;" src="~/uploads/@Model.ImageNamePath" alt="Image related to the question.">
             </a>
+            <a class="btn btn-outline-danger btn-sm"
+               asp-area=""
+               asp-controller="Questions"
+               asp-action="RemoveImage"
+               asp-route-questionId="@Model.Id">
+                Remove Image
+            </a>
         }
     </div>
     <div class="container text-right">
