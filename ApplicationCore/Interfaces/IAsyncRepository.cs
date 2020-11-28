@@ -15,12 +15,14 @@ namespace ApplicationCore.Interfaces
         Task<Question> GetQuestionByIdWithoutDetailsAsync(int questionId);
         Task EditQuestionAsync(Question question);
         Task RemoveQuestionById(int questionId);
+        Task RemoveQuestionImageByQuestionId(int questionId);
         Task VoteUpQuestionById(int questionId);
         Task VoteDownQuestionById(int questionId);
         Task<Answer> AddAnswerAsync(Answer answer);
         Task<Answer> GetAnswerByIdWithoutDetailsAsync(int answerId);
         Task EditAnswerAsync(Answer answer);
         Task RemoveAnswerById(int answerId);
+        Task RemoveAnswerImageByAnswerId(int answerId);
         Task VoteUpAnswerById(int answerId);
         Task VoteDownAnswerById(int answerId);
         Task<List<Question>> GetSearchResults(string searchPhrase);

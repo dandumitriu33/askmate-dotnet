@@ -154,7 +154,10 @@ namespace Infrastructure.Data
             try
             {
                 var questionFromDb = await _dbContext.Questions.Where(q => q.Id == question.Id && q.IsRemoved == false).FirstOrDefaultAsync();
-
+                if (question.ImageNamePath == null && questionFromDb.ImageNamePath != null)
+                {
+                    question.ImageNamePath = questionFromDb.ImageNamePath;
+                }
                 questionFromDb.Title = question.Title;
                 questionFromDb.Body = question.Body;
                 questionFromDb.ImageNamePath = question.ImageNamePath;
@@ -179,6 +182,27 @@ namespace Infrastructure.Data
                 var questionFromDb = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
 
                 questionFromDb.IsRemoved = true;
+                _dbContext.Questions.Attach(questionFromDb);
+                _dbContext.Entry(questionFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task RemoveQuestionImageByQuestionId(int questionId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var questionFromDb = await _dbContext.Questions.Where(q => q.Id == questionId && q.IsRemoved == false).FirstOrDefaultAsync();
+
+                questionFromDb.ImageNamePath = null;
                 _dbContext.Questions.Attach(questionFromDb);
                 _dbContext.Entry(questionFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();
@@ -270,7 +294,10 @@ namespace Infrastructure.Data
             try
             {
                 var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answer.Id && a.IsRemoved == false).FirstOrDefaultAsync();
-
+                if (answer.ImageNamePath == null && answerFromDb.ImageNamePath != null)
+                {
+                    answer.ImageNamePath = answerFromDb.ImageNamePath;
+                }
                 answerFromDb.Body = answer.Body;
                 answerFromDb.ImageNamePath = answer.ImageNamePath;
                 _dbContext.Answers.Attach(answerFromDb);
@@ -294,6 +321,27 @@ namespace Infrastructure.Data
                 var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
 
                 answerFromDb.IsRemoved = true;
+                _dbContext.Answers.Attach(answerFromDb);
+                _dbContext.Entry(answerFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
+        public async Task RemoveAnswerImageByAnswerId(int answerId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
+
+                answerFromDb.ImageNamePath = null;
                 _dbContext.Answers.Attach(answerFromDb);
                 _dbContext.Entry(answerFromDb).State = EntityState.Modified;
                 await _dbContext.SaveChangesAsync();

@@ -1,0 +1,61 @@
+﻿@model ListRolesDisplayObject
+
+@{
+    ViewData["Title"] = "All roles";
+}
+
+<h1>All Roles</h1>
+
+@if (Model.Roles != null)
+{
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Role Name</th>
+            <th scope="col">ID</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var role in Model.Roles)
+        {
+        <tr>
+            <td>@role.Name</td>
+            <td>@role.Id</td>
+            <td>
+                <a class="btn btn-outline-primary" 
+                   asp-action="EditUsersInRole" 
+                   asp-controller="Administration"
+                   asp-route-roleId="@role.Id">
+                    Manage Users
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                @foreach (var user in Model.UserLists[role.Name])
+                {
+                    <span>( @user ) </span>
+                }
+            </td>
+            
+        </tr>
+        }
+    </tbody>
+</table>
+
+}
+else
+{
+<div class="card">
+    <div class="card-header">
+        No roles created yet.
+    </div>
+    <div class="card-body">
+        <a asp-action="CreateRole" asp-controller="Administration" class="btn btn-outline-primary">
+            Create Role
+        </a>
+    </div>
+
+</div>
+}

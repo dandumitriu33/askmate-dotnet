@@ -1,6 +1,8 @@
 ﻿@model List<QuestionViewModel> 
 @{
     ViewData["Title"] = "All questions";
+    int substringLength = 0;
+    string dots = "";
 }
 
 <div class="text-center">
@@ -16,12 +18,12 @@
                        asp-controller="List"
                        asp-action="Index"
                        asp-route-orderBy="Votes"
-                       asp-route-direction="Descending">v</a>
+                       asp-route-direction="Descending">&#x21E9;</a>
                     <a asp-area=""
                        asp-controller="List"
                        asp-action="Index"
                        asp-route-orderBy="Votes"
-                       asp-route-direction="Ascending">^</a>
+                       asp-route-direction="Ascending">&#x21E7;</a>
                 </th>
                 <th scope="col">
                     Title
@@ -29,12 +31,12 @@
                        asp-controller="List"
                        asp-action="Index"
                        asp-route-orderBy="Title"
-                       asp-route-direction="Descending">v</a>
+                       asp-route-direction="Descending">&#x21E9;</a>
                     <a asp-area=""
                        asp-controller="List"
                        asp-action="Index"
                        asp-route-orderBy="Title"
-                       asp-route-direction="Ascending">^</a>
+                       asp-route-direction="Ascending">&#x21E7;</a>
                 </th>
                 <th scope="col">
                     Body
@@ -42,12 +44,12 @@
                        asp-controller="List"
                        asp-action="Index"
                        asp-route-orderBy="Body"
-                       asp-route-direction="Descending">v</a>
+                       asp-route-direction="Descending">&#x21E9;</a>
                     <a asp-area=""
                        asp-controller="List"
                        asp-action="Index"
                        asp-route-orderBy="Body"
-                       asp-route-direction="Ascending">^</a>
+                       asp-route-direction="Ascending">&#x21E7;</a>
                 </th>
                 <th scope="col">
                     Views
@@ -55,12 +57,12 @@
                        asp-controller="List"
                        asp-action="Index"
                        asp-route-orderBy="Views"
-                       asp-route-direction="Descending">v</a>
+                       asp-route-direction="Descending">&#x21E9;</a>
                     <a asp-area=""
                        asp-controller="List"
                        asp-action="Index"
                        asp-route-orderBy="Views"
-                       asp-route-direction="Ascending">^</a>
+                       asp-route-direction="Ascending">&#x21E7;</a>
                 </th>
                 <th scope="col">
                     Added
@@ -68,12 +70,12 @@
                        asp-controller="List"
                        asp-action="Index"
                        asp-route-orderBy="DateAdded"
-                       asp-route-direction="Descending">v</a>
+                       asp-route-direction="Descending">&#x21E9;</a>
                     <a asp-area=""
                        asp-controller="List"
                        asp-action="Index"
                        asp-route-orderBy="DateAdded"
-                       asp-route-direction="Ascending">^</a>
+                       asp-route-direction="Ascending">&#x21E7;</a>
                 </th>
             </tr>
         </thead>
@@ -82,18 +84,18 @@
             {
                 <tr>
                     <th scope="row">
-                        <a asp-area=""
+                        <a class="badge badge-success"
                            asp-controller="Questions"
                            asp-action="VoteUpQuestion"
                            asp-route-questionId="@question.Id">
-                            ^
+                            +
                         </a>
                         @question.Votes
-                        <a asp-area=""
+                        <a class="badge badge-danger"
                            asp-controller="Questions"
                            asp-action="VoteDownQuestion"
                            asp-route-questionId="@question.Id">
-                            v
+                            -
                         </a>
                     </th>
                     <td><a asp-area=""
@@ -101,7 +103,21 @@
                            asp-action="Details"
                            asp-route-questionId=@question.Id>@question.Title</a>
                     </td>
-                    <td>@question.Body</td>
+                    <td>
+                        @{
+                            if (question.Body.Length > 30)
+                            {
+                                substringLength = 30;
+                                dots = "...";
+                            }
+                            else
+                            {
+                                substringLength = question.Body.Length;
+                                dots = "";
+                            }
+                        }
+                        @question.Body.Substring(0, substringLength) @dots
+                    </td>
                     <td>@question.Views</td>
                     <td>@question.DateAdded</td>
                 </tr>
