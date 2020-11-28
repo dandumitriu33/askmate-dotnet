@@ -60,10 +60,27 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult ListRoles()
+        public async Task<IActionResult> ListRoles()
         {
             var roles = _roleManager.Roles;
-            return View(roles);
+            List<IdentityRole> inMemoryRoles = new List<IdentityRole>();
+            foreach (var role in roles)
+            {
+                inMemoryRoles.Add(role);
+            }
+            Dictionary<string, List<string>> roleUsers = new Dictionary<string, List<string>>();
+            foreach (var role in inMemoryRoles)
+            {
+                var usersInRole = await _userManager.GetUsersInRoleAsync(role.Name);
+                var emailsInRole = usersInRole.Select(u => u.Email).ToList();
+                roleUsers.Add(role.Name, emailsInRole);
+            }
+            ListRolesDisplayObject rolesAndMembers = new ListRolesDisplayObject
+            {
+                Roles = roles,
+                UserLists = roleUsers
+            };
+            return View(rolesAndMembers);
         }
 
         [HttpGet]

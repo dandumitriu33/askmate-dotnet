@@ -1,4 +1,4 @@
-﻿@model IEnumerable<IdentityRole>
+﻿@model ListRolesDisplayObject
 
 @{
     ViewData["Title"] = "All roles";
@@ -6,7 +6,7 @@
 
 <h1>All Roles</h1>
 
-@if (Model.Any())
+@if (Model.Roles != null)
 {
 <table class="table table-striped">
     <thead>
@@ -17,7 +17,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var role in Model)
+        @foreach (var role in Model.Roles)
         {
         <tr>
             <td>@role.Name</td>
@@ -30,6 +30,15 @@
                     Manage Users
                 </a>
             </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                @foreach (var user in Model.UserLists[role.Name])
+                {
+                    <span>( @user ) </span>
+                }
+            </td>
+            
         </tr>
         }
     </tbody>
