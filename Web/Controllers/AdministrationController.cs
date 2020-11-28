@@ -47,5 +47,12 @@ namespace Web.Controllers
             }
             return View(createRoleViewModel);
         }
+
+        [HttpGet]
+        public IActionResult ListRoles()
+        {
+            var roles = _roleManager.Roles;
+            return View(roles);
+        }
     }
 }
