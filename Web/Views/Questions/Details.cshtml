@@ -153,7 +153,10 @@
         Answer
     </a>
 </div>
+
+
 <!-- ANSWERS -->
+
 
 @foreach (var answer in Model.Answers)
 {
@@ -221,6 +224,14 @@
         {
             <a href="~/uploads/@Model.ImageNamePath" target="_blank">
                 <img class="card-img-top" style="width: 30%;" src="~/uploads/@answer.ImageNamePath" alt="Image related to the answer.">
+            </a>
+            <a class="btn btn-outline-danger btn-sm"
+               asp-area=""
+               asp-controller="Answers"
+               asp-action="RemoveImage"
+               asp-route-answerId="@answer.Id"
+               asp-route-questionId="@Model.Id">
+                Remove Image
             </a>
         }
     </div>

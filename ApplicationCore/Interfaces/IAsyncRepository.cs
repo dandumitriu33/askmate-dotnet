@@ -22,6 +22,7 @@ namespace ApplicationCore.Interfaces
         Task<Answer> GetAnswerByIdWithoutDetailsAsync(int answerId);
         Task EditAnswerAsync(Answer answer);
         Task RemoveAnswerById(int answerId);
+        Task RemoveAnswerImageByAnswerId(int answerId);
         Task VoteUpAnswerById(int answerId);
         Task VoteDownAnswerById(int answerId);
         Task<List<Question>> GetSearchResults(string searchPhrase);

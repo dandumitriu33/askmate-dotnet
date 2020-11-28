@@ -328,6 +328,27 @@ namespace Infrastructure.Data
             }
         }
 
+        public async Task RemoveAnswerImageByAnswerId(int answerId)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var answerFromDb = await _dbContext.Answers.Where(a => a.Id == answerId && a.IsRemoved == false).FirstOrDefaultAsync();
+
+                answerFromDb.ImageNamePath = null;
+                _dbContext.Answers.Attach(answerFromDb);
+                _dbContext.Entry(answerFromDb).State = EntityState.Modified;
+                await _dbContext.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                // TODO: Handle failure - UX message
+                transaction.Rollback();
+            }
+        }
+
         public async Task VoteUpAnswerById(int answerId)
         {
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
