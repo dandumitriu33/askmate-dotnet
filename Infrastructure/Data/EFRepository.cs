@@ -154,7 +154,10 @@ namespace Infrastructure.Data
             try
             {
                 var questionFromDb = await _dbContext.Questions.Where(q => q.Id == question.Id && q.IsRemoved == false).FirstOrDefaultAsync();
-
+                if (question.ImageNamePath == null && questionFromDb.ImageNamePath != null)
+                {
+                    question.ImageNamePath = questionFromDb.ImageNamePath;
+                }
                 questionFromDb.Title = question.Title;
                 questionFromDb.Body = question.Body;
                 questionFromDb.ImageNamePath = question.ImageNamePath;
