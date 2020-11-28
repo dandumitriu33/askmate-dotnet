@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Home Page";
+    int substringLength = 0;
+    string dots = "";
 }
 
 <div class="text-center">
@@ -32,18 +34,18 @@
             {
                 <tr>
                     <th scope="row">
-                        <a asp-area=""
+                        <a class="badge badge-success"
                            asp-controller="Home"
                            asp-action="VoteUpQuestion"
                            asp-route-questionId="@question.Id">
-                            ^
+                            +
                         </a>
                         @question.Votes
-                        <a asp-area=""
+                        <a class="badge badge-danger"
                            asp-controller="Home"
                            asp-action="VoteDownQuestion"
                            asp-route-questionId="@question.Id">
-                            v
+                            -
                         </a>
                     </th>
                     <td>
@@ -52,7 +54,21 @@
                            asp-action="Details"
                            asp-route-questionId=@question.Id>@question.Title</a>
                     </td>
-                    <td>@question.Body</td>
+                    <td>
+                        @{
+                            if (question.Body.Length > 30)
+                            {
+                                substringLength = 30;
+                                dots = "...";
+                            }
+                            else
+                            {
+                                substringLength = question.Body.Length;
+                                dots = "";
+                            }
+                        }
+                        @question.Body.Substring(0, substringLength) @dots
+                    </td>
                     <td>@question.Views</td>
                     <td>@question.DateAdded</td>
                 </tr>
