@@ -175,8 +175,16 @@ namespace Web.Controllers
         public async Task<IActionResult> Remove(int questionId)
         {
             await _repository.RemoveQuestionById(questionId);
-            
             return RedirectToAction("Index", "List");
+        }
+
+        // Get: QuestionsController/5/RemoveImage
+        [HttpGet]
+        [Route("questions/removeimage/{questionId}")]
+        public async Task<IActionResult> RemoveImage(int questionId)
+        {
+            await _repository.RemoveQuestionImageByQuestionId(questionId);
+            return RedirectToAction("Details", new { questionId = questionId });
         }
 
         // Get: QuestionsController/5/VoteUp
@@ -193,7 +201,6 @@ namespace Web.Controllers
             {
                 return RedirectToAction("Index", "List");
             }
-            
         }
 
         // Get: QuestionsController/5/VoteDown
