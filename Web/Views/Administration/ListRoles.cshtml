@@ -13,6 +13,7 @@
         <tr>
             <th scope="col">Role Name</th>
             <th scope="col">ID</th>
+            <th scope="col">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -21,6 +22,14 @@
         <tr>
             <td>@role.Name</td>
             <td>@role.Id</td>
+            <td>
+                <a class="btn btn-outline-primary" 
+                   asp-action="EditUsersInRole" 
+                   asp-controller="Administration"
+                   asp-route-roleId="@role.Id">
+                    Manage Users
+                </a>
+            </td>
         </tr>
         }
     </tbody>
