@@ -141,5 +141,11 @@ namespace Web.Controllers
             }
             return View("EditUsersInRole", new { roleId = userRoleViewModel.RoleId });
         }
+
+        [HttpGet]
+        public IActionResult ManageUserClaims()
+        {
+            return View();
+        }
     }
 }

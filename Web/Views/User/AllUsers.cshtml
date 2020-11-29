@@ -21,6 +21,10 @@
             <th scope="col">
                 Joined on
             </th>
+            <th>
+                Actions
+            </th>
+
         </tr>
     </thead>
     <tbody>
@@ -31,6 +35,11 @@
                 <td>@user.Reputation</td>
                 <td>@user.Email</td>
                 <td>@user.DateAdded</td>
+                <td>
+                    <a class="btn btn-primary btn-sm" asp-action="ManageUserClaims" asp-controller="Administration" asp-route-userId="@user.Id">
+                        Manage Claims
+                    </a>
+                </td>
             </tr>
         }
     </tbody>
