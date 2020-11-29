@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "User activity";
+    int substringLength = 0;
+    string dots = "";
 }
 
 <h1>User activity</h1>
@@ -73,7 +75,21 @@
                     </a>
                 </td>
                 <td>@answer.Votes</td>
-                <td>@answer.Body</td>
+                <td>
+                    @{
+                        if (answer.Body.Length > 30)
+                        {
+                            substringLength = 30;
+                            dots = "...";
+                        }
+                        else
+                        {
+                            substringLength = answer.Body.Length;
+                            dots = "";
+                        }
+                    }
+                    @answer.Body.Substring(0, substringLength) @dots
+                </td>
                 <td>@answer.DateAdded</td>
             </tr>
         }
