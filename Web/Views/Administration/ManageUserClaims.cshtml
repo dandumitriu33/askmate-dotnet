@@ -7,10 +7,13 @@
 <h1>Manage @Model.UserEmail claims</h1>
 
 <h2>Current claims</h2>
-@foreach (var claim in Model.ExistingUserClaims)
-{
-    <p>( @claim.Value )</p>
-}
+<p>
+    @foreach (var claim in Model.ExistingUserClaims)
+    {
+        <span>( @claim.Value )</span>
+    }
+</p>
+
 
 <form method="post">
     <div class="form-group">

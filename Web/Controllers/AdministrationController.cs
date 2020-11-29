@@ -175,8 +175,12 @@ namespace Web.Controllers
             var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
             
             Claim newClaim = new Claim(claimType, claimValue);
-            await _userManager.AddClaimAsync(user, newClaim);
-
+            var result = await _userManager.AddClaimAsync(user, newClaim);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("ManageUserClaims", new { userId = user.Id });
+            }
+            // error message UX 
             return RedirectToAction("ManageUserClaims", new { userId = user.Id });
         }
 
@@ -189,8 +193,12 @@ namespace Web.Controllers
             var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
 
             Claim newClaim = new Claim(claimType, claimValue);
-            await _userManager.RemoveClaimAsync(user, newClaim);
-
+            var result = await _userManager.RemoveClaimAsync(user, newClaim);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("ManageUserClaims", new { userId = user.Id });
+            }
+            // error message UX 
             return RedirectToAction("ManageUserClaims", new { userId = user.Id });
         }
     }
