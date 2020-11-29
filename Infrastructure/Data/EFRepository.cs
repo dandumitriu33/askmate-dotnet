@@ -1,9 +1,11 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -661,6 +663,16 @@ namespace Infrastructure.Data
             _dbContext.Users.Attach(user);
             _dbContext.Entry(user).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<List<ApplicationClaim>> GetAllUserClaims()
+        {
+            return await _dbContext.ApplicationClaims.ToListAsync();
+        }
+
+        public async Task<ApplicationClaim> GetApplicationClaimById(int applicationClaimId)
+        {
+            return await _dbContext.ApplicationClaims.Where(c => c.Id == applicationClaimId).FirstOrDefaultAsync();
         }
     }
 }

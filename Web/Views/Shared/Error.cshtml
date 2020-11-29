@@ -1,10 +1,16 @@
 ﻿@model ErrorViewModel
 @{
     ViewData["Title"] = "Error";
+    string errorMessage = (string) ViewData["ErrorMessage"];
 }
 
 <h1 class="text-danger">Error.</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
+
+@if (String.IsNullOrEmpty(errorMessage) == false)
+{
+    <p>@errorMessage</p>
+}
 
 @if (Model.ShowRequestId)
 {

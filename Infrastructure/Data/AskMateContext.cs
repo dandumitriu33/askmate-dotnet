@@ -19,5 +19,6 @@ namespace Infrastructure.Data
         public DbSet<Answer> Answers { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<QuestionTag> QuestionTags { get; set; }
+        public DbSet<ApplicationClaim> ApplicationClaims { get; set; }
     }
 }
