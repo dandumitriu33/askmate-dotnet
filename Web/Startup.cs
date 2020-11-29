@@ -3,6 +3,7 @@ using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
 using AutoMapper;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -39,8 +40,8 @@ namespace Web
             {
                 options.AddPolicy("AdminRolePolicy",
                     policy => policy.RequireRole("Admin"));
-                options.AddPolicy("AdminClaimPolicy",
-                    policy => policy.RequireClaim("IsAdmin", "true"));
+                options.AddPolicy("AdminAccess",
+                    policy => policy.RequireAssertion(context => AuthorizeAccess(context)));
             });
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -59,6 +60,12 @@ namespace Web
             services.AddScoped<IFileOperations, FileOperations>();
             services.AddAutoMapper(typeof(Startup));
             services.AddControllersWithViews();
+        }
+
+        private bool AuthorizeAccess(AuthorizationHandlerContext context)
+        {
+            return context.User.HasClaim("IsAdmin", "true") ||
+                   context.User.IsInRole("Super Admin");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -29,8 +29,8 @@
         <label for="userId">User ID</label>
         <input class="form-control" id="userId" name="userId" value="@Model.UserId" />
     </div>
-    <button type="submit" class="btn btn-primary" asp-action="AddClaimToUser" asp-controller="Administration">Add Claim To @Model.UserEmail Role</button>
-    <button type="submit" class="btn btn-danger" asp-action="RemoveClaimFromUser" asp-controller="Administration">Remove Claim From @Model.UserEmail Role</button>
+    <button type="submit" class="btn btn-primary" asp-action="AddClaimToUser" asp-controller="Administration">Add Claim To @Model.UserEmail </button>
+    <button type="submit" class="btn btn-danger" asp-action="RemoveClaimFromUser" asp-controller="Administration">Remove Claim From @Model.UserEmail </button>
     <a class="btn btn-dark" asp-action="AllUsers" asp-controller="User">
         Cancel
     </a>
