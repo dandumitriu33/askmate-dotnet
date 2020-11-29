@@ -35,6 +35,12 @@ namespace Web
                     options.UseSqlServer(Configuration.GetConnectionString("Default"));
                 });
 
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminRolePolicy",
+                    policy => policy.RequireRole("Admin"));
+            });
+
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
                     {
                         // development only configuration for simpler testing/demo
