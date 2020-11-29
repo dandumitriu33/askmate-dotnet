@@ -12,7 +12,7 @@ using Web.ViewModels;
 
 namespace Web.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class AdministrationController : Controller
     {
         private readonly RoleManager<IdentityRole> _roleManager;
