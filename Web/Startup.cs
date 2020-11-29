@@ -40,7 +40,7 @@ namespace Web
                 options.AddPolicy("AdminRolePolicy",
                     policy => policy.RequireRole("Admin"));
                 options.AddPolicy("AdminClaimPolicy",
-                    policy => policy.RequireClaim("AdminTest"));
+                    policy => policy.RequireClaim("IsAdmin", "true"));
             });
 
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>

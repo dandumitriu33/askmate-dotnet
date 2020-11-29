@@ -10,7 +10,7 @@
 <p>
     @foreach (var claim in Model.ExistingUserClaims)
     {
-        <span>( @claim.Value )</span>
+        <span>( @claim.Type )</span>
     }
 </p>
 
@@ -21,7 +21,7 @@
         <select class="form-control" id="claimId" name="claimId">
             @foreach (var claim in Model.AllClaims)
             {
-                <option value="@claim.Id">@claim.ClaimValue ( @claim.ClaimType )</option>
+                <option value="@claim.Id">@claim.ClaimType ( @claim.ClaimValue )</option>
             }
         </select>
     </div>
