@@ -37,8 +37,8 @@ namespace Web
 
             services.AddAuthorization(options =>
             {
-                //options.AddPolicy("AdminRolePolicy",
-                //    policy => policy.RequireRole("Admin"));
+                options.AddPolicy("AdminRolePolicy",
+                    policy => policy.RequireRole("Admin"));
                 options.AddPolicy("AdminClaimPolicy",
                     policy => policy.RequireClaim("AdminTest"));
             });

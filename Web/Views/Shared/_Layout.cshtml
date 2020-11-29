@@ -1,5 +1,9 @@
 ﻿@inject SignInManager<ApplicationUser> signInManager; 
 
+@using Microsoft.AspNetCore.Authorization
+    
+@inject IAuthorizationService authorizationService; 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,8 +71,7 @@
                                 </a>
                             </div>
                         </li>
-
-                        @if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                        @if ((await authorizationService.AuthorizeAsync(User, "AdminClaimPolicy")).Succeeded == true)
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
