@@ -24,6 +24,8 @@ namespace Web.AutomapperProfiles
                 .ReverseMap();
             CreateMap<ApplicationUser, ApplicationUserViewModel>()
                 .ReverseMap();
+            CreateMap<ApplicationClaim, ApplicationClaimViewModel>()
+                .ReverseMap();
         }
     }
 }

@@ -1,0 +1,34 @@
+﻿@model ManageUserClaimsViewModel
+
+@{ 
+    ViewData["Title"] = "Manage user claims";
+}
+
+<h1>Manage @Model.UserEmail claims</h1>
+
+<h2>Current claims</h2>
+@foreach (var claim in Model.ExistingUserClaims)
+{
+    <p>( @claim.Value )</p>
+}
+
+<form method="post">
+    <div class="form-group">
+        <label for="userId">Select Claim</label>
+        <select class="form-control" id="claimId" name="claimId">
+            @foreach (var claim in Model.AllClaims)
+            {
+                <option value="@claim.Id">@claim.ClaimValue ( @claim.ClaimType )</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="userId">User ID</label>
+        <input class="form-control" id="userId" name="userId" value="@Model.UserId" />
+    </div>
+    <button type="submit" class="btn btn-primary" asp-action="AddClaimToUser" asp-controller="Administration">Add Claim To @Model.UserEmail Role</button>
+    <button type="submit" class="btn btn-danger" asp-action="RemoveClaimFromUser" asp-controller="Administration">Remove Claim From @Model.UserEmail Role</button>
+    <a class="btn btn-dark" asp-action="AllUsers" asp-controller="User">
+        Cancel
+    </a>
+</form>

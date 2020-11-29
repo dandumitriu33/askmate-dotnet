@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Web.ViewModels;
 
@@ -143,9 +144,54 @@ namespace Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult ManageUserClaims()
+        public async Task<IActionResult> ManageUserClaims(string userId)
         {
-            return View();
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                ViewData["ErrorMessage"] = "The user cannot be found.";
+                return View("Error");
+            }
+            var existingUserClaims = await _userManager.GetClaimsAsync(user);
+            var allClaims = await _repository.GetAllUserClaims();
+            var allClaimsViewModel = _mapper.Map<List<ApplicationClaim>, List<ApplicationClaimViewModel>>(allClaims);
+
+            ManageUserClaimsViewModel allInfo = new ManageUserClaimsViewModel()
+            {
+                UserId = userId,
+                UserEmail = user.Email,
+                ExistingUserClaims = existingUserClaims,
+                AllClaims = allClaimsViewModel
+            };
+            return View(allInfo);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddClaimToUser(ClaimModificationViewModel claimModificationViewModel)
+        {
+            var claimFromDb = await _repository.GetApplicationClaimById(claimModificationViewModel.ClaimId);
+            string claimType = claimFromDb.ClaimType;
+            string claimValue = claimFromDb.ClaimValue;
+            var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
+            
+            Claim newClaim = new Claim(claimType, claimValue);
+            await _userManager.AddClaimAsync(user, newClaim);
+
+            return RedirectToAction("ManageUserClaims", new { userId = user.Id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveClaimFromUser(ClaimModificationViewModel claimModificationViewModel)
+        {
+            var claimFromDb = await _repository.GetApplicationClaimById(claimModificationViewModel.ClaimId);
+            string claimType = claimFromDb.ClaimType;
+            string claimValue = claimFromDb.ClaimValue;
+            var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
+
+            Claim newClaim = new Claim(claimType, claimValue);
+            await _userManager.RemoveClaimAsync(user, newClaim);
+
+            return RedirectToAction("ManageUserClaims", new { userId = user.Id });
         }
     }
 }

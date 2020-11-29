@@ -1,4 +1,5 @@
 ﻿using ApplicationCore.Entities;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -49,5 +50,7 @@ namespace ApplicationCore.Interfaces
         Task<List<AnswerComment>> GetUserAnswerComments(string userId);
         Task EditAnswerAccepted(int answerId);
         Task ModifyUserReputation(int value, string userId);
+        Task<List<ApplicationClaim>> GetAllUserClaims();
+        Task<ApplicationClaim> GetApplicationClaimById(int applicationClaimId);
     }
 }
