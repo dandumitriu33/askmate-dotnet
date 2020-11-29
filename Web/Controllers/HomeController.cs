@@ -1,6 +1,7 @@
 ﻿using ApplicationCore.Entities;
 using ApplicationCore.Interfaces;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -36,6 +37,7 @@ namespace Web.Controllers
             return View(latestQuestionsViewModel);
         }
 
+        [Authorize]
         // Get: HomeController/5/VoteUp
         [HttpGet]
         [Route("home/{questionId}/voteup")]
@@ -46,6 +48,7 @@ namespace Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        [Authorize]
         // Get: HomeController/5/VoteDown
         [HttpGet]
         [Route("home/{questionId}/votedown")]

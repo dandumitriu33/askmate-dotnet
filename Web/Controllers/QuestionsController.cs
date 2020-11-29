@@ -2,6 +2,7 @@
 using ApplicationCore.Interfaces;
 using ApplicationCore.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +15,7 @@ using Web.ViewModels;
 
 namespace Web.Controllers
 {
+    [Authorize]
     public class QuestionsController : Controller
     {
         private readonly IAsyncRepository _repository;
@@ -43,6 +45,7 @@ namespace Web.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         // GET: QuestionsController/Details/5
         [Route("questions/{questionId}")]
         public async Task<IActionResult> Details(int questionId)
