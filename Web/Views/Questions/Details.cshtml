@@ -42,7 +42,7 @@
             }
 
         </h5>
-        <p class="card-text">@Model.Body</p>
+        <p class="card-text" style="white-space: pre-line">@Model.Body</p>
         @if (Model.ImageNamePath != null)
         {
             <a href="~/uploads/@Model.ImageNamePath" target="_blank">
@@ -230,12 +230,14 @@
                         ACCEPTED ANSWER
                     </span>
                     <br />
-                    @answer.Body
+                    <span style="white-space: pre-line">
+                        @answer.Body
+                    </span>
                 </p>
             }
             else
             {
-                <p class="card-text">@answer.Body</p>
+                <p class="card-text" style="white-space: pre-line">@answer.Body</p>
             }
         </div>
 
