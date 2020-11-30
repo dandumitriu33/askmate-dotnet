@@ -1,5 +1,11 @@
 ﻿@model AnswerCommentViewModel
 
+@{
+    ViewData["Title"] = "Add Comment";
+}
+
+<h1>Add a comment</h1>
+
 <div class="row">
     <div class="col-md-12">
         <form method="post">
@@ -16,7 +22,6 @@
                           class="form-control"
                           name="Body"
                           data-val="true"
-                          data-val-required="The body of the comment is required."
                           aria-describedby="body-error"
                           aria-invalid="true">
                 </textarea>
@@ -29,3 +34,7 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
