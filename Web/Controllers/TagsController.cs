@@ -37,13 +37,14 @@ namespace Web.Controllers
 
         // POST: TagsController/tags
         [HttpPost]
-        public async Task<IActionResult> AttachTag(int questionId, string tagName)
+        public async Task<IActionResult> AttachTag(TagViewModel tagViewModel, int questionId)
         {
-            // create new tag assuming it doesn't exist, will check in refactor/validation round
-            Tag newTag = new Tag
+            if (ModelState.IsValid == false)
             {
-                Name = tagName
-            };
+                return RedirectToAction("AttachTag", "Tags", new { questionId = questionId});
+            }
+            // create new tag assuming it doesn't exist, will check in refactor/validation round
+            Tag newTag = _mapper.Map<TagViewModel, Tag>(tagViewModel);
             await _repository.AddTagAsync(newTag);
 
             // attach the new tag to q

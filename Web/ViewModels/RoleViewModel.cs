@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace Web.ViewModels
 {
-    public class CreateRoleViewModel
+    public class RoleViewModel
     {
         [Required]
+        [MaxLength(100)]
         public string RoleName { get; set; }
     }
 }

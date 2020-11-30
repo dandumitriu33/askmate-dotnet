@@ -1,4 +1,5 @@
-﻿@model QuestionViewModel
+﻿@inject SignInManager<ApplicationUser> signInManager;
+@model QuestionViewModel
 
 @{
     ViewData["Title"] = $"Details for question {Model.Id}";
@@ -22,34 +23,42 @@
                 <span class="badge badge-danger">-</span>
             </a>
             @Model.Title
-            <a class="btn btn-outline-warning btn-sm"
-               asp-area=""
-               asp-controller="Questions"
-               asp-action="Edit"
-               asp-route-questionId="@Model.Id">
-                Edit
-            </a>
-            <a class="btn btn-outline-danger btn-sm"
-               asp-area=""
-               asp-controller="Questions"
-               asp-action="Remove"
-               asp-route-questionId="@Model.Id">
-                Remove
-            </a>
+            @if (signInManager.IsSignedIn(User) == true && String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), Model.UserId))
+            {
+                <a class="btn btn-outline-warning btn-sm"
+                   asp-area=""
+                   asp-controller="Questions"
+                   asp-action="Edit"
+                   asp-route-questionId="@Model.Id">
+                    Edit
+                </a>
+                <a class="btn btn-outline-danger btn-sm"
+                   asp-area=""
+                   asp-controller="Questions"
+                   asp-action="Remove"
+                   asp-route-questionId="@Model.Id">
+                    Remove
+                </a>
+            }
+
         </h5>
-        <p class="card-text">@Model.Body</p>
+        <p class="card-text" style="white-space: pre-line">@Model.Body</p>
         @if (Model.ImageNamePath != null)
         {
             <a href="~/uploads/@Model.ImageNamePath" target="_blank">
                 <img class="card-img-top" style="width: 30%;" src="~/uploads/@Model.ImageNamePath" alt="Image related to the question.">
             </a>
-            <a class="btn btn-outline-danger btn-sm"
-               asp-area=""
-               asp-controller="Questions"
-               asp-action="RemoveImage"
-               asp-route-questionId="@Model.Id">
-                Remove Image
-            </a>
+            @if (signInManager.IsSignedIn(User) == true && String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), Model.UserId))
+            {
+                <a class="btn btn-outline-danger btn-sm"
+                   asp-area=""
+                   asp-controller="Questions"
+                   asp-action="RemoveImage"
+                   asp-route-questionId="@Model.Id">
+                    Remove Image
+                </a>
+            }
+
         }
     </div>
     <div class="container text-right">
@@ -84,14 +93,16 @@
     <div class="container text-right">
         @foreach (var questionComment in Model.QuestionComments)
         {
-            <p>
-                @questionComment.Body
-                @if (questionComment.IsEdited == true)
-                {
-                    <span> (edited) </span>
-                }
-                (@questionComment.DateAdded)
+        <p>
+            @questionComment.Body
+            @if (questionComment.IsEdited == true)
+            {
+                <span> (edited) </span>
+            }
+            (@questionComment.DateAdded)
 
+            @if (signInManager.IsSignedIn(User) == true && String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), questionComment.UserId))
+            {
                 <a class="btn btn-outline-warning btn-sm"
                    asp-controller="Comments"
                    asp-action="EditQuestionComment"
@@ -99,9 +110,9 @@
                     Edit
                 </a>
                 <!-- Button trigger modal -->
-                @{
+                
                     string questionCommentModalName = "questionCommentRemoveModal" + questionComment.Id;
-                }
+                
                 <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#@questionCommentModalName">
                     Remove
                 </button>
@@ -132,7 +143,9 @@
                         </div>
                     </div>
                 </div>
-            </p>
+            }
+
+        </p>
         }
         <a class="btn btn-outline-primary btn-sm mb-2"
            asp-area=""
@@ -160,85 +173,98 @@
 
 @foreach (var answer in Model.Answers)
 {
-<div class="card" style="width: 100%;">
-    <div class="card-body">
-        <h5 class="card-title">
-            <a asp-area=""
-               asp-controller="Answers"
-               asp-action="VoteUpAnswer"
-               asp-route-answerId="@answer.Id"
-               asp-route-questionId="@Model.Id">
-                <span class="badge badge-success">+</span>
-            </a>
-            [@answer.Votes]
-            <a asp-area=""
-               asp-controller="Answers"
-               asp-action="VoteDownAnswer"
-               asp-route-answerId="@answer.Id"
-               asp-route-questionId="@Model.Id">
-                <span class="badge badge-danger">-</span>
-            </a>
-            <a class="btn btn-outline-success btn-sm"
-               asp-controller="Answers"
-               asp-action="AcceptAnswer"
-               asp-route-answerId="@answer.Id"
-               asp-route-questionId="@Model.Id">
-                Accept Answer
-            </a>
+    <div class="card" style="width: 100%;">
+        <div class="card-body">
+            <h5 class="card-title">
+                <a asp-area=""
+                   asp-controller="Answers"
+                   asp-action="VoteUpAnswer"
+                   asp-route-answerId="@answer.Id"
+                   asp-route-questionId="@Model.Id">
+                    <span class="badge badge-success">+</span>
+                </a>
+                [@answer.Votes]
+                <a asp-area=""
+                   asp-controller="Answers"
+                   asp-action="VoteDownAnswer"
+                   asp-route-answerId="@answer.Id"
+                   asp-route-questionId="@Model.Id">
+                    <span class="badge badge-danger">-</span>
+                </a>
+                @if (signInManager.IsSignedIn(User) == true && String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), Model.UserId))
+                {
+                    <a class="btn btn-outline-success btn-sm"
+                       asp-controller="Answers"
+                       asp-action="AcceptAnswer"
+                       asp-route-answerId="@answer.Id"
+                       asp-route-questionId="@Model.Id">
+                        Accept Answer
+                    </a>
+                }
 
-            <a class="btn btn-outline-warning btn-sm"
-               asp-area=""
-               asp-controller="Answers"
-               asp-action="EditAnswer"
-               asp-route-answerId="@answer.Id">
-                Edit
-            </a>
-            <a class="btn btn-outline-danger btn-sm"
-               asp-area=""
-               asp-controller="Answers"
-               asp-action="Remove"
-               asp-route-questionId="@Model.Id"
-               asp-route-answerId="@answer.Id">
-                Remove
-            </a>
+                @if (signInManager.IsSignedIn(User) == true && String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId))
+                {
+                    <a class="btn btn-outline-warning btn-sm"
+                       asp-area=""
+                       asp-controller="Answers"
+                       asp-action="EditAnswer"
+                       asp-route-answerId="@answer.Id">
+                        Edit
+                    </a>
+                    <a class="btn btn-outline-danger btn-sm"
+                       asp-area=""
+                       asp-controller="Answers"
+                       asp-action="Remove"
+                       asp-route-questionId="@Model.Id"
+                       asp-route-answerId="@answer.Id">
+                        Remove
+                    </a>
+                }
 
-        </h5>
-        @if (answer.IsAccepted == true)
-        {
-            <p class="card-text">
-                <span class="badge badge-success">
-                    ACCEPTED ANSWER
-                </span>
-                <br />
-                @answer.Body
-            </p>
-        }
-        else
-        {
-            <p class="card-text">@answer.Body</p>
-        }
-    </div>
 
-    <div class="card-body">
-        @if (answer.ImageNamePath != null)
-        {
-            <a href="~/uploads/@Model.ImageNamePath" target="_blank">
-                <img class="card-img-top" style="width: 30%;" src="~/uploads/@answer.ImageNamePath" alt="Image related to the answer.">
-            </a>
-            <a class="btn btn-outline-danger btn-sm"
-               asp-area=""
-               asp-controller="Answers"
-               asp-action="RemoveImage"
-               asp-route-answerId="@answer.Id"
-               asp-route-questionId="@Model.Id">
-                Remove Image
-            </a>
-        }
-    </div>
+            </h5>
+            @if (answer.IsAccepted == true)
+            {
+                <p class="card-text">
+                    <span class="badge badge-success">
+                        ACCEPTED ANSWER
+                    </span>
+                    <br />
+                    <span style="white-space: pre-line">
+                        @answer.Body
+                    </span>
+                </p>
+            }
+            else
+            {
+                <p class="card-text" style="white-space: pre-line">@answer.Body</p>
+            }
+        </div>
 
-    <div class="container text-right">
-        @foreach (var answerComment in answer.AnswerComments)
-        {
+        <div class="card-body">
+            @if (answer.ImageNamePath != null)
+            {
+                <a href="~/uploads/@Model.ImageNamePath" target="_blank">
+                    <img class="card-img-top" style="width: 30%;" src="~/uploads/@answer.ImageNamePath" alt="Image related to the answer.">
+                </a>
+                @if (signInManager.IsSignedIn(User) == true && String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId))
+                {
+                    <a class="btn btn-outline-danger btn-sm"
+                       asp-area=""
+                       asp-controller="Answers"
+                       asp-action="RemoveImage"
+                       asp-route-answerId="@answer.Id"
+                       asp-route-questionId="@Model.Id">
+                        Remove Image
+                    </a>
+                }
+
+            }
+        </div>
+
+        <div class="container text-right">
+            @foreach (var answerComment in answer.AnswerComments)
+            {
             <p>
                 @answerComment.Body
                 @if (answerComment.IsEdited == true)
@@ -247,59 +273,63 @@
                 }
                 (@answerComment.DateAdded)
 
-                <a class="btn btn-outline-warning btn-sm"
-                   asp-controller="Comments"
-                   asp-action="EditAnswerComment"
-                   asp-route-questionCommentId="@answerComment.Id">
-                    Edit
-                </a>
-                <!-- Button trigger modal -->
-                @{
-                    string answerCommentModalName = "answerCommentRemoveModal" + answerComment.Id;
-                }
-                <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#@answerCommentModalName">
-                    Remove
-                </button>
+                @if (signInManager.IsSignedIn(User) == true && String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answerComment.UserId))
+                {
+                    <a class="btn btn-outline-warning btn-sm"
+                       asp-controller="Comments"
+                       asp-action="EditAnswerComment"
+                       asp-route-answerCommentId="@answerComment.Id">
+                        Edit
+                    </a>
+                    <!-- Button trigger modal -->
+                    
+                        string answerCommentModalName = "answerCommentRemoveModal" + answerComment.Id;
+                    
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-toggle="modal" data-target="#@answerCommentModalName">
+                        Remove
+                    </button>
 
-                <!-- Modal -->
-                <div class="modal fade" id="@answerCommentModalName" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Are you sure you want to Remove comment (@answerComment.Id)?</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                @answerComment.Body
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <a class="btn btn-danger"
-                                   asp-controller="Comments"
-                                   asp-action="RemoveAnswerComment"
-                                   asp-route-answerCommentId="@answerComment.Id"
-                                   asp-route-questionId="@answerComment.QuestionId">
-                                    Remove
-                                </a>
+                    <!-- Modal -->
+                    <div class="modal fade" id="@answerCommentModalName" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Are you sure you want to Remove comment (@answerComment.Id)?</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    @answerComment.Body
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <a class="btn btn-danger"
+                                       asp-controller="Comments"
+                                       asp-action="RemoveAnswerComment"
+                                       asp-route-answerCommentId="@answerComment.Id"
+                                       asp-route-questionId="@answerComment.QuestionId">
+                                        Remove
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </p>
-        }
-        <a class="btn btn-outline-primary btn-sm mb-2"
-           asp-area=""
-           asp-controller="Comments"
-           asp-action="AddAnswerComment"
-           asp-route-questionId="@Model.Id"
-           asp-route-answerId="@answer.Id">
-            Comment
-        </a>
-    </div>
+                }
 
-</div>
+            </p>
+            }
+            <a class="btn btn-outline-primary btn-sm mb-2"
+               asp-area=""
+               asp-controller="Comments"
+               asp-action="AddAnswerComment"
+               asp-route-questionId="@Model.Id"
+               asp-route-answerId="@answer.Id">
+                Comment
+            </a>
+        </div>
+
+    </div>
 }
 
 

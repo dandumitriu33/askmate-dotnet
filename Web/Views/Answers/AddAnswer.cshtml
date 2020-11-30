@@ -1,5 +1,11 @@
 ﻿@model AnswerViewModel
 
+@{
+    ViewData["Title"] = "Add answer";
+}
+
+<h1>Add an answer</h1>
+
 <div class="row">
     <div class="col-md-12">
         <form enctype="multipart/form-data" method="post">
@@ -11,9 +17,7 @@
                 <label asp-for="Body"></label>
                 <textarea asp-for="Body"
                           class="form-control"
-                          name="Body"
                           data-val="true"
-                          data-val-required="The body of the answer is required."
                           aria-describedby="body-error"
                           aria-invalid="true">
                 </textarea>
@@ -37,4 +41,5 @@
 
 @section Scripts {
     <script type="module" src="~/js/addAnswer.js"></script>
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

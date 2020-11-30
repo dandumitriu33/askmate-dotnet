@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Web.ViewModels;
 
@@ -80,6 +81,10 @@ namespace Web.Controllers
         public async Task<IActionResult> EditAnswer(int answerId)
         {
             var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             var answerViewModel = _mapper.Map<Answer, AnswerViewModel>(answer);
             return View(answerViewModel);
         }
@@ -90,6 +95,11 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditAnswer(AnswerViewModel answerViewModel)
         {
+            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerViewModel.Id);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             if (ModelState.IsValid)
             {
                 var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
@@ -104,7 +114,7 @@ namespace Web.Controllers
                     string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
                     await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
                 }
-                var answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
+                answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
                 answer.ImageNamePath = uniqueFileName;
                 await _repository.EditAnswerAsync(answer);
                 return RedirectToAction("Details", "Questions", new { questionId = answerViewModel.QuestionId });
@@ -117,6 +127,11 @@ namespace Web.Controllers
         [Route("answers/remove/{answerId}")]
         public async Task<IActionResult> Remove(int answerId, int questionId)
         {
+            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             await _repository.RemoveAnswerById(answerId);
 
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
@@ -127,6 +142,11 @@ namespace Web.Controllers
         [Route("answers/removeimage/{answerId}")]
         public async Task<IActionResult> RemoveImage(int answerId, int questionId)
         {
+            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             await _repository.RemoveAnswerImageByAnswerId(answerId);
 
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
@@ -157,6 +177,11 @@ namespace Web.Controllers
         [Route("answers/{answerId}/accept")]
         public async Task<IActionResult> AcceptAnswer(int answerId, int questionId)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             await _repository.EditAnswerAccepted(answerId);
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }

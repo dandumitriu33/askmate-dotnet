@@ -6,6 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\uploads\Q_8ca83953-2f9e-4ef2-944d-783ff431493d_2020_11_30_15_22_17_872501de-fd80-4024-9966-b91b85913a1f_aaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbb3333333333333.jpg\**" />
+    <Content Remove="wwwroot\uploads\Q_8ca83953-2f9e-4ef2-944d-783ff431493d_2020_11_30_15_22_17_872501de-fd80-4024-9966-b91b85913a1f_aaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbb3333333333333.jpg\**" />
+    <EmbeddedResource Remove="wwwroot\uploads\Q_8ca83953-2f9e-4ef2-944d-783ff431493d_2020_11_30_15_22_17_872501de-fd80-4024-9966-b91b85913a1f_aaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbb3333333333333.jpg\**" />
+    <None Remove="wwwroot\uploads\Q_8ca83953-2f9e-4ef2-944d-783ff431493d_2020_11_30_15_22_17_872501de-fd80-4024-9966-b91b85913a1f_aaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbbaaaaaaaaaabbbbbbbbbb3333333333333.jpg\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.10">
       <PrivateAssets>all</PrivateAssets>

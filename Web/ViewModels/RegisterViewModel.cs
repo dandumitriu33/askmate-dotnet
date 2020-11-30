@@ -10,6 +10,7 @@ namespace Web.ViewModels
     {
         [Required]
         [EmailAddress]
+        [Display(Name = "Email (username)")]
         public string Email { get; set; }
 
         [Required]

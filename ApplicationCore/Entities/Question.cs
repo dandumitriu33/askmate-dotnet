@@ -21,7 +21,9 @@ namespace ApplicationCore.Entities
         public List<QuestionComment> QuestionComments { get; set; }
         public List<Answer> Answers { get; set; }
         public List<QuestionTag> QuestionTags { get; set; }
+        [MaxLength(400)]
         public string ImageNamePath { get; set; }
+        [MaxLength(64)]
         public string UserId { get; set; }
     }
 }

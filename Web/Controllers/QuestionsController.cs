@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Web.ViewModels;
 
@@ -39,52 +40,64 @@ namespace Web.Controllers
             _signInManager = signInManager;
             _userManager = userManager;
         }
-        // GET: QuestionsController
-        public ActionResult Index()
-        {
-            return View();
-        }
 
         [AllowAnonymous]
         // GET: QuestionsController/Details/5
         [Route("questions/{questionId}")]
         public async Task<IActionResult> Details(int questionId)
         {
-            var question = await _repository.GetQuestionByIdAsync(questionId);
-            // pack question comments
-            var questionCommentsViewModel = new List<QuestionCommentViewModel>();
-            if (question.QuestionComments != null && question.QuestionComments.Count != 0)
+            var tempQuestion = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (tempQuestion == null)
             {
-                questionCommentsViewModel = _mapper.Map<List<QuestionComment>, List<QuestionCommentViewModel>>(question.QuestionComments);
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
             }
-            // pack Tags
-            List<int> tagIds = await _repository.GetTagIdsForQuestionId(questionId);
-            List<Tag> tagsFromDb = await _repository.GetTagsFromListFromDb(tagIds);
-            var questionTagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
+            try
+            {
+                var question = await _repository.GetQuestionByIdAsync(questionId);
 
-            // pack answersVM with commentsVM
-            var answersViewModel = new List<AnswerViewModel>(); // create answersVM List to attach to qVM
-
-            if (question.Answers != null && question.Answers.Count != 0) // if the q has answers, proceed with process
-            {                        
-                foreach (var answer in question.Answers) // for each answer (not VM) in the list
+                // pack question comments
+                var questionCommentsViewModel = new List<QuestionCommentViewModel>();
+                if (question.QuestionComments != null && question.QuestionComments.Count != 0)
                 {
-                    AnswerViewModel tempAnswerVM = _mapper.Map<Answer, AnswerViewModel>(answer);
-                    // pack comments
-                    if (answer.AnswerComments != null && answer.AnswerComments.Count != 0) // if the answer has comments, proceed with process
-                    {
-                        var answerCommentsVM = _mapper.Map<List<AnswerComment>, List<AnswerCommentViewModel>>(answer.AnswerComments);
-                        tempAnswerVM.AnswerComments = answerCommentsVM;
-                    }
-                    // add tempAnswerVM to the list answersVM
-                    answersViewModel.Add(tempAnswerVM);
+                    questionCommentsViewModel = _mapper.Map<List<QuestionComment>, List<QuestionCommentViewModel>>(question.QuestionComments);
                 }
+                // pack Tags
+                List<int> tagIds = await _repository.GetTagIdsForQuestionId(questionId);
+                List<Tag> tagsFromDb = await _repository.GetTagsFromListFromDb(tagIds);
+                var questionTagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
+
+                // pack answersVM with commentsVM
+                var answersViewModel = new List<AnswerViewModel>(); // create answersVM List to attach to qVM
+
+                if (question.Answers != null && question.Answers.Count != 0) // if the q has answers, proceed with process
+                {
+                    foreach (var answer in question.Answers) // for each answer (not VM) in the list
+                    {
+                        AnswerViewModel tempAnswerVM = _mapper.Map<Answer, AnswerViewModel>(answer);
+                        // pack comments
+                        if (answer.AnswerComments != null && answer.AnswerComments.Count != 0) // if the answer has comments, proceed with process
+                        {
+                            var answerCommentsVM = _mapper.Map<List<AnswerComment>, List<AnswerCommentViewModel>>(answer.AnswerComments);
+                            tempAnswerVM.AnswerComments = answerCommentsVM;
+                        }
+                        // add tempAnswerVM to the list answersVM
+                        answersViewModel.Add(tempAnswerVM);
+                    }
+                }
+                var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
+                questionViewModel.Answers = answersViewModel;
+                questionViewModel.QuestionComments = questionCommentsViewModel;
+                questionViewModel.Tags = questionTagsViewModel;
+
+                return View(questionViewModel);
             }
-            var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
-            questionViewModel.Answers = answersViewModel;
-            questionViewModel.QuestionComments = questionCommentsViewModel;
-            questionViewModel.Tags = questionTagsViewModel;
-            return View(questionViewModel);
+            catch(Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         // GET: QuestionsController/Create
@@ -121,27 +134,16 @@ namespace Web.Controllers
             return View();
         }
 
-        // POST: QuestionsController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
         // GET: QuestionsController/5/Edit
         [HttpGet]
         [Route("questions/{questionId}/edit")]
         public async Task<IActionResult> Edit(int questionId)
         {
             var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
             return View(questionViewModel);
         }
@@ -152,6 +154,11 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(QuestionViewModel questionViewModel)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionViewModel.Id);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             if (ModelState.IsValid)
             {
                 var currentlySignedInUser = await _userManager.GetUserAsync(User);
@@ -166,7 +173,7 @@ namespace Web.Controllers
                     string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
                     await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
                 }
-                var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
+                question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
                 question.ImageNamePath = uniqueFileName;
                 await _repository.EditQuestionAsync(question);
                 return RedirectToAction("Details", new { questionId = questionViewModel.Id });
@@ -179,6 +186,11 @@ namespace Web.Controllers
         [Route("questions/remove/{questionId}")]
         public async Task<IActionResult> Remove(int questionId)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             await _repository.RemoveQuestionById(questionId);
             return RedirectToAction("Index", "List");
         }
@@ -188,6 +200,11 @@ namespace Web.Controllers
         [Route("questions/removeimage/{questionId}")]
         public async Task<IActionResult> RemoveImage(int questionId)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             await _repository.RemoveQuestionImageByQuestionId(questionId);
             return RedirectToAction("Details", new { questionId = questionId });
         }
