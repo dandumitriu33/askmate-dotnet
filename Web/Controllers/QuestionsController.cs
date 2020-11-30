@@ -40,52 +40,64 @@ namespace Web.Controllers
             _signInManager = signInManager;
             _userManager = userManager;
         }
-        // GET: QuestionsController
-        public ActionResult Index()
-        {
-            return View();
-        }
 
         [AllowAnonymous]
         // GET: QuestionsController/Details/5
         [Route("questions/{questionId}")]
         public async Task<IActionResult> Details(int questionId)
         {
-            var question = await _repository.GetQuestionByIdAsync(questionId);
-            // pack question comments
-            var questionCommentsViewModel = new List<QuestionCommentViewModel>();
-            if (question.QuestionComments != null && question.QuestionComments.Count != 0)
+            var tempQuestion = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (tempQuestion == null)
             {
-                questionCommentsViewModel = _mapper.Map<List<QuestionComment>, List<QuestionCommentViewModel>>(question.QuestionComments);
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
             }
-            // pack Tags
-            List<int> tagIds = await _repository.GetTagIdsForQuestionId(questionId);
-            List<Tag> tagsFromDb = await _repository.GetTagsFromListFromDb(tagIds);
-            var questionTagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
+            try
+            {
+                var question = await _repository.GetQuestionByIdAsync(questionId);
 
-            // pack answersVM with commentsVM
-            var answersViewModel = new List<AnswerViewModel>(); // create answersVM List to attach to qVM
-
-            if (question.Answers != null && question.Answers.Count != 0) // if the q has answers, proceed with process
-            {                        
-                foreach (var answer in question.Answers) // for each answer (not VM) in the list
+                // pack question comments
+                var questionCommentsViewModel = new List<QuestionCommentViewModel>();
+                if (question.QuestionComments != null && question.QuestionComments.Count != 0)
                 {
-                    AnswerViewModel tempAnswerVM = _mapper.Map<Answer, AnswerViewModel>(answer);
-                    // pack comments
-                    if (answer.AnswerComments != null && answer.AnswerComments.Count != 0) // if the answer has comments, proceed with process
-                    {
-                        var answerCommentsVM = _mapper.Map<List<AnswerComment>, List<AnswerCommentViewModel>>(answer.AnswerComments);
-                        tempAnswerVM.AnswerComments = answerCommentsVM;
-                    }
-                    // add tempAnswerVM to the list answersVM
-                    answersViewModel.Add(tempAnswerVM);
+                    questionCommentsViewModel = _mapper.Map<List<QuestionComment>, List<QuestionCommentViewModel>>(question.QuestionComments);
                 }
+                // pack Tags
+                List<int> tagIds = await _repository.GetTagIdsForQuestionId(questionId);
+                List<Tag> tagsFromDb = await _repository.GetTagsFromListFromDb(tagIds);
+                var questionTagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
+
+                // pack answersVM with commentsVM
+                var answersViewModel = new List<AnswerViewModel>(); // create answersVM List to attach to qVM
+
+                if (question.Answers != null && question.Answers.Count != 0) // if the q has answers, proceed with process
+                {
+                    foreach (var answer in question.Answers) // for each answer (not VM) in the list
+                    {
+                        AnswerViewModel tempAnswerVM = _mapper.Map<Answer, AnswerViewModel>(answer);
+                        // pack comments
+                        if (answer.AnswerComments != null && answer.AnswerComments.Count != 0) // if the answer has comments, proceed with process
+                        {
+                            var answerCommentsVM = _mapper.Map<List<AnswerComment>, List<AnswerCommentViewModel>>(answer.AnswerComments);
+                            tempAnswerVM.AnswerComments = answerCommentsVM;
+                        }
+                        // add tempAnswerVM to the list answersVM
+                        answersViewModel.Add(tempAnswerVM);
+                    }
+                }
+                var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
+                questionViewModel.Answers = answersViewModel;
+                questionViewModel.QuestionComments = questionCommentsViewModel;
+                questionViewModel.Tags = questionTagsViewModel;
+
+                return View(questionViewModel);
             }
-            var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
-            questionViewModel.Answers = answersViewModel;
-            questionViewModel.QuestionComments = questionCommentsViewModel;
-            questionViewModel.Tags = questionTagsViewModel;
-            return View(questionViewModel);
+            catch(Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         // GET: QuestionsController/Create
