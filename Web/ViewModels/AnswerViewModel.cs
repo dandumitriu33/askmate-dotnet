@@ -11,7 +11,8 @@ namespace Web.ViewModels
     public class AnswerViewModel
     {
         public int Id { get; set; }
-        [Column(TypeName = ("varchar(1000)"))]
+        [Required]
+        [MaxLength(1000, ErrorMessage ="Answer length must be less than 1000 characters.")]
         public string Body { get; set; }
         public DateTime DateAdded { get; set; }
         public int QuestionId { get; set; }
