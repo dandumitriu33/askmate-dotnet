@@ -122,21 +122,6 @@ namespace Web.Controllers
             return View();
         }
 
-        // POST: QuestionsController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
         // GET: QuestionsController/5/Edit
         [HttpGet]
         [Route("questions/{questionId}/edit")]
