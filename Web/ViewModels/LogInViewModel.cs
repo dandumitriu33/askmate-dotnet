@@ -9,6 +9,7 @@ namespace Web.ViewModels
     public class LogInViewModel
     {
         [Required]
+        [Display(Name = "Email (username)")]
         [EmailAddress]
         public string Email { get; set; }
 
