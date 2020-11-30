@@ -1,6 +1,7 @@
 ﻿@model List<TagViewModel>
 
-@{ 
+@{
+    ViewData["Title"] = "Add a tag";
     string questionId = ViewData["questionId"].ToString();
 }
 
@@ -24,30 +25,19 @@
     }
 </p>
 <hr />
-<div class="row">
-    <div class="col-md-12">
-        <form method="post">
-            <div class="form-group">
-                <div class="form-group">
-                    <input type="hidden" name="questionId" value="@questionId">
-                </div>
-                <label for="tagName"></label>
-                <input id="tagName"
-                       class="form-control"
-                       name="tagName" />
-            </div>
-            <button name="SubmitNewTag" type="submit" class="btn btn-primary">Create Tag and Attach</button>
-        </form>
-    </div>
-</div>
+
+@await Component.InvokeAsync("CreateAndAddTag")
+
 <hr />
 <p>
-    For more information on all the existing tags click 
-    <a
-       asp-action="TagInfo"
+    For more information on all the existing tags click
+    <a asp-action="TagInfo"
        asp-controller="Tags">
         here
     </a>
     ...
 </p>
 
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
