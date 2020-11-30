@@ -40,7 +40,7 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateRole(CreateRoleViewModel createRoleViewModel)
+        public async Task<IActionResult> CreateRole(RoleViewModel createRoleViewModel)
         {
             if (ModelState.IsValid)
             {
