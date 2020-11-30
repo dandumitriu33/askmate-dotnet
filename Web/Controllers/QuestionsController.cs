@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Web.ViewModels;
 
@@ -142,6 +143,10 @@ namespace Web.Controllers
         public async Task<IActionResult> Edit(int questionId)
         {
             var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
             return View(questionViewModel);
         }
@@ -152,6 +157,11 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(QuestionViewModel questionViewModel)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionViewModel.Id);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             if (ModelState.IsValid)
             {
                 var currentlySignedInUser = await _userManager.GetUserAsync(User);
@@ -166,7 +176,7 @@ namespace Web.Controllers
                     string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
                     await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
                 }
-                var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
+                question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
                 question.ImageNamePath = uniqueFileName;
                 await _repository.EditQuestionAsync(question);
                 return RedirectToAction("Details", new { questionId = questionViewModel.Id });
@@ -179,6 +189,11 @@ namespace Web.Controllers
         [Route("questions/remove/{questionId}")]
         public async Task<IActionResult> Remove(int questionId)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             await _repository.RemoveQuestionById(questionId);
             return RedirectToAction("Index", "List");
         }
@@ -188,6 +203,11 @@ namespace Web.Controllers
         [Route("questions/removeimage/{questionId}")]
         public async Task<IActionResult> RemoveImage(int questionId)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             await _repository.RemoveQuestionImageByQuestionId(questionId);
             return RedirectToAction("Details", new { questionId = questionId });
         }

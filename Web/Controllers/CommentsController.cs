@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Web.ViewModels;
 
@@ -90,6 +91,10 @@ namespace Web.Controllers
         public async Task<IActionResult> EditAnswerComment(int answerCommentId)
         {
             var answerComment = await _repository.GetAnswerCommentById(answerCommentId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answerComment.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             var answerCommentViewModel = _mapper.Map<AnswerComment, AnswerCommentViewModel>(answerComment);
             return View(answerCommentViewModel);
         }
@@ -100,6 +105,10 @@ namespace Web.Controllers
         public async Task<IActionResult> EditQuestionComment(int questionCommentId)
         {
             var questionComment = await _repository.GetQuestionCommentById(questionCommentId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), questionComment.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             var questionCommentViewModel = _mapper.Map<QuestionComment, QuestionCommentViewModel>(questionComment);
             return View(questionCommentViewModel);
         }
@@ -110,9 +119,14 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditAnswerComment(AnswerCommentViewModel answerCommentViewModel)
         {
+            var answerComment = await _repository.GetAnswerCommentById(answerCommentViewModel.Id);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answerComment.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             if (ModelState.IsValid)
             {
-                var answerComment = _mapper.Map<AnswerCommentViewModel, AnswerComment>(answerCommentViewModel);
+                answerComment = _mapper.Map<AnswerCommentViewModel, AnswerComment>(answerCommentViewModel);
                 // adding the "Edited" mark and refreshing the DateAdded
                 // this replaces the old Body
                 // to keep old data, mark old comment as IsRemoved and add the new one w "Edited" mark
@@ -129,6 +143,11 @@ namespace Web.Controllers
         [Route("comments/answerComments/{answerCommentId}/remove")]
         public async Task<IActionResult> RemoveAnswerComment(int answerCommentId, int questionId)
         {
+            var answerComment = await _repository.GetAnswerCommentById(answerCommentId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answerComment.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             await _repository.RemoveAnswerCommentById(answerCommentId);
 
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
@@ -140,9 +159,14 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditQuestionComment(QuestionCommentViewModel questionCommentViewModel)
         {
+            var questionComment = await _repository.GetQuestionCommentById(questionCommentViewModel.Id);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), questionComment.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             if (ModelState.IsValid)
             {
-                var questionComment = _mapper.Map<QuestionCommentViewModel, QuestionComment>(questionCommentViewModel);
+                questionComment = _mapper.Map<QuestionCommentViewModel, QuestionComment>(questionCommentViewModel);
                 // adding the "Edited" mark and refreshing the DateAdded
                 // this replaces the old Body
                 // to keep old data, mark old comment as IsRemoved and add the new one w "Edited" mark
@@ -159,6 +183,11 @@ namespace Web.Controllers
         [Route("comments/questionComments/{questionCommentId}/remove")]
         public async Task<IActionResult> RemoveQuestionComment(int questionCommentId, int questionId)
         {
+            var questionComment = await _repository.GetQuestionCommentById(questionCommentId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), questionComment.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             await _repository.RemoveQuestionCommentById(questionCommentId);
 
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
