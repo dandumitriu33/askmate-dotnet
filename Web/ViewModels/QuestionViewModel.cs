@@ -22,7 +22,9 @@ namespace Web.ViewModels
         public List<AnswerViewModel> Answers { get; set; }
         public List<TagViewModel> Tags { get; set; }
         public IFormFile Image { get; set; }
+        [MaxLength(400)]
         public string ImageNamePath { get; set; }
+        [MaxLength(64)]
         public string UserId { get; set; }
     }
 }

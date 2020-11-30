@@ -19,6 +19,8 @@
     <Compile Remove="Migrations\20201126174036_AddQuestionUserIdColumn.Designer.cs" />
     <Compile Remove="Migrations\20201126174140_AddQuestionUserIdColumn.cs" />
     <Compile Remove="Migrations\20201126174140_AddQuestionUserIdColumn.Designer.cs" />
+    <Compile Remove="Migrations\20201130131642_SetImagePAthAndUserIdQuestionAttriLengths.cs" />
+    <Compile Remove="Migrations\20201130131642_SetImagePAthAndUserIdQuestionAttriLengths.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
