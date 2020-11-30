@@ -177,6 +177,11 @@ namespace Web.Controllers
         [Route("answers/{answerId}/accept")]
         public async Task<IActionResult> AcceptAnswer(int answerId, int questionId)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             await _repository.EditAnswerAccepted(answerId);
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
