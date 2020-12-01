@@ -56,10 +56,23 @@ namespace Web.Controllers
         [Route("home/{searchPhrase}")]
         public async Task<IActionResult> Search([FromQuery] string searchPhrase)
         {
-            var searchResults = await _repository.GetSearchResults(searchPhrase);
-            var searchResultsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(searchResults);
-            ViewData["searchPhrase"] = searchPhrase;
-            return View(searchResultsViewModel);
+            try
+            {
+                var searchResults = await _repository.GetSearchResults(searchPhrase);
+                var searchResultsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(searchResults);
+                ViewData["searchPhrase"] = searchPhrase;
+                return View(searchResultsViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         public IActionResult Privacy()
