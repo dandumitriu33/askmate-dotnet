@@ -316,6 +316,10 @@ namespace Web.Controllers
                 {
                     return RedirectToAction("Details", new { questionId = questionId });
                 }
+                else if (String.Equals("redirectToHome", redirection))
+                {
+                    return RedirectToAction("Index", "Home");
+                }
                 else
                 {
                     return RedirectToAction("Index", "List");
@@ -352,6 +356,10 @@ namespace Web.Controllers
                 if (String.Equals("redirectToDetails", redirection))
                 {
                     return RedirectToAction("Details", new { questionId = questionId });
+                }
+                else if (String.Equals("redirectToHome", redirection))
+                {
+                    return RedirectToAction("Index", "Home");
                 }
                 else
                 {

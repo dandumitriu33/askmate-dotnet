@@ -35,16 +35,18 @@
                 <tr>
                     <th scope="row">
                         <a class="badge badge-success"
-                           asp-controller="Home"
+                           asp-controller="Questions"
                            asp-action="VoteUpQuestion"
-                           asp-route-questionId="@question.Id">
+                           asp-route-questionId="@question.Id"
+                           asp-route-redirection="redirectToHome">
                             +
                         </a>
                         @question.Votes
                         <a class="badge badge-danger"
-                           asp-controller="Home"
+                           asp-controller="Questions"
                            asp-action="VoteDownQuestion"
-                           asp-route-questionId="@question.Id">
+                           asp-route-questionId="@question.Id"
+                           asp-route-redirection="redirectToHome">
                             -
                         </a>
                     </th>
