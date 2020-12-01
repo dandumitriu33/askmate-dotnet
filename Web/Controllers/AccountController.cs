@@ -78,14 +78,26 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(logInViewModel.Email, logInViewModel.Password, logInViewModel.RememberMe, false);
-                
-                if (result.Succeeded)
+                try
                 {
-                    return RedirectToAction("Index", "Home");
+                    var result = await _signInManager.PasswordSignInAsync(logInViewModel.Email, logInViewModel.Password, logInViewModel.RememberMe, false);
+
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                    ModelState.AddModelError(string.Empty, "Invalid log in attempt.");
                 }
-                ModelState.AddModelError(string.Empty, "Invalid log in attempt.");
-                
+                catch (DbUpdateException dbex)
+                {
+                    ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                    return View("Error");
+                }
+                catch (Exception ex)
+                {
+                    ViewData["ErrorMessage"] = ex.Message;
+                    return View("Error");
+                }
             }
             return View(logInViewModel);
         }
@@ -93,8 +105,21 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> LogOut()
         {
-            await _signInManager.SignOutAsync();
-            return RedirectToAction("Index", "Home");
+            try
+            {
+                await _signInManager.SignOutAsync();
+                return RedirectToAction("Index", "Home");
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         [HttpGet]
