@@ -24,7 +24,7 @@ namespace Web.Controllers
         {
             var exceptionDetails = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
 
-            ViewData["ErrorMessage"] = exceptionDetails.Error.Message;
+            ViewData["ErrorMessage"] = exceptionDetails.Error.Message.Split(". ")[0] + ".";
 
             return View("Error");
         }
