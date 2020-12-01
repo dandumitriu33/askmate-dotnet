@@ -75,6 +75,13 @@ namespace Web.Controllers
             }
         }
 
+        public async Task<IActionResult> AllQuestions(string orderBy = "DateAdded", string direction = "Descending")
+        {
+            var questions = await _repository.ListAllAsync(orderBy, direction);
+            var questionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(questions);
+            return View(questionsViewModel);
+        }
+
         public IActionResult Privacy()
         {
             return View();

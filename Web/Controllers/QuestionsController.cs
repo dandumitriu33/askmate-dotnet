@@ -300,7 +300,7 @@ namespace Web.Controllers
         // Get: QuestionsController/5/VoteUp
         [HttpGet]
         [Route("questions/{questionId}/voteup")]
-        public async Task<IActionResult> VoteUpQuestion(int questionId, string redirection="list")
+        public async Task<IActionResult> VoteUpQuestion(int questionId, string redirection= "redirectToAllQuestions")
         {
             var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
             if (question == null)
@@ -322,7 +322,7 @@ namespace Web.Controllers
                 }
                 else
                 {
-                    return RedirectToAction("Index", "List");
+                    return RedirectToAction("AllQuestions", "Home");
                 }
             }
             catch (DbUpdateException dbex)
@@ -341,7 +341,7 @@ namespace Web.Controllers
         // Get: QuestionsController/5/VoteDown
         [HttpGet]
         [Route("questions/{questionId}/votedown")]
-        public async Task<IActionResult> VoteDownQuestion(int questionId, string redirection="list")
+        public async Task<IActionResult> VoteDownQuestion(int questionId, string redirection="redirectToAllQuestions")
         {
             var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
             if (question == null)
@@ -363,7 +363,7 @@ namespace Web.Controllers
                 }
                 else
                 {
-                    return RedirectToAction("Index", "List");
+                    return RedirectToAction("AllQuestions", "Home");
                 }
             }
             catch (DbUpdateException dbex)
