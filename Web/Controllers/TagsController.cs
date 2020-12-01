@@ -67,23 +67,27 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = "404 Resource not found.";
                 return View("Error");
             }
-            var tag = await _repository.GetTagByIdAsync(tagViewModel.Id);
-            if (tag == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
+            //var tag = await _repository.GetTagByIdAsync(tagViewModel.Id);
+            //if (tag == null)
+            //{
+            //    Response.StatusCode = 404;
+            //    ViewData["ErrorMessage"] = "404 Resource not found.";
+            //    return View("Error");
+            //}
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // create new tag assuming it doesn't exist, will check in refactor/validation round
-                    Tag newTag = _mapper.Map<TagViewModel, Tag>(tagViewModel);
-                    await _repository.AddTagAsync(newTag);
+                    var tag = await _repository.GetTagByIdAsync(tagViewModel.Id);
+                    if (tag == null)
+                    {
+                        // create new tag 
+                        Tag newTag = _mapper.Map<TagViewModel, Tag>(tagViewModel);
+                        tag = await _repository.AddTagAsync(newTag);
+                    }
 
                     // attach the new tag to q
-                    await AddQuestionTag(questionId, newTag.Id);
+                    await AddQuestionTag(tag.Id, questionId);
                 }
                 catch (DbUpdateException dbex)
                 {
