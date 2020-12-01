@@ -4,6 +4,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,108 +41,196 @@ namespace Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateRole(RoleViewModel createRoleViewModel)
+        public async Task<IActionResult> CreateRole(RoleViewModel roleViewModel)
         {
             if (ModelState.IsValid)
             {
-                IdentityRole identityRole = new IdentityRole
+                try
                 {
-                    Name = createRoleViewModel.RoleName
-                };
+                    IdentityRole identityRole = new IdentityRole
+                    {
+                        Name = roleViewModel.RoleName
+                    };
 
-                IdentityResult result = await _roleManager.CreateAsync(identityRole);
+                    IdentityResult result = await _roleManager.CreateAsync(identityRole);
 
-                if (result.Succeeded)
-                {
-                    return RedirectToAction("ListRoles", "Administration");
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("ListRoles", "Administration");
+                    }
+                    foreach (IdentityError error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
                 }
-                foreach (IdentityError error in result.Errors)
+                catch (DbUpdateException dbex)
                 {
-                    ModelState.AddModelError("", error.Description);
+                    ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                    return View("Error");
+                }
+                catch (Exception ex)
+                {
+                    ViewData["ErrorMessage"] = ex.Message;
+                    return View("Error");
                 }
             }
-            return View(createRoleViewModel);
+            return View(roleViewModel);
         }
 
         [HttpGet]
         public async Task<IActionResult> ListRoles()
         {
-            var roles = _roleManager.Roles;
-            List<IdentityRole> inMemoryRoles = new List<IdentityRole>();
-            foreach (var role in roles)
+            try
             {
-                inMemoryRoles.Add(role);
+                var roles = _roleManager.Roles;
+                List<IdentityRole> inMemoryRoles = new List<IdentityRole>();
+                foreach (var role in roles)
+                {
+                    inMemoryRoles.Add(role);
+                }
+                Dictionary<string, List<string>> roleUsers = new Dictionary<string, List<string>>();
+                foreach (var role in inMemoryRoles)
+                {
+                    var usersInRole = await _userManager.GetUsersInRoleAsync(role.Name);
+                    var emailsInRole = usersInRole.Select(u => u.Email).ToList();
+                    roleUsers.Add(role.Name, emailsInRole);
+                }
+                ListRolesDisplayObject rolesAndMembers = new ListRolesDisplayObject
+                {
+                    Roles = roles,
+                    UserLists = roleUsers
+                };
+                return View(rolesAndMembers);
             }
-            Dictionary<string, List<string>> roleUsers = new Dictionary<string, List<string>>();
-            foreach (var role in inMemoryRoles)
+            catch (DbUpdateException dbex)
             {
-                var usersInRole = await _userManager.GetUsersInRoleAsync(role.Name);
-                var emailsInRole = usersInRole.Select(u => u.Email).ToList();
-                roleUsers.Add(role.Name, emailsInRole);
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
             }
-            ListRolesDisplayObject rolesAndMembers = new ListRolesDisplayObject
+            catch (Exception ex)
             {
-                Roles = roles,
-                UserLists = roleUsers
-            };
-            return View(rolesAndMembers);
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> EditUsersInRole(string roleId)
         {
             var role = await _roleManager.FindByIdAsync(roleId);
-            ViewData["roleId"] = roleId;
-            ViewData["roleName"] = role.Name;
-
             if (role == null)
             {
-                // implement error page with message, for now redirect to ListRoles
-                return RedirectToAction("ListRoles", "Administration");
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
             }
+            try
+            {
+                ViewData["roleId"] = roleId;
+                ViewData["roleName"] = role.Name;
 
-            List<ApplicationUser> allUsersFromDb = await _repository.GetAllUsers();
-            var allUsersViewModel = _mapper.Map<List<ApplicationUser>, List<ApplicationUserViewModel>>(allUsersFromDb);
+                List<ApplicationUser> allUsersFromDb = await _repository.GetAllUsers();
+                var allUsersViewModel = _mapper.Map<List<ApplicationUser>, List<ApplicationUserViewModel>>(allUsersFromDb);
 
-            return View(allUsersViewModel);
+                return View(allUsersViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> AddUserToRole(UserRoleViewModel userRoleViewModel)
         {
             var user = await _userManager.FindByIdAsync(userRoleViewModel.UserId);
+            if (user == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
             var role = await _roleManager.FindByIdAsync(userRoleViewModel.RoleId);
-
-            IdentityResult result = null;
-            if ((await _userManager.IsInRoleAsync(user, role.Name)) == false)
+            if (role == null)
             {
-                result = await _userManager.AddToRoleAsync(user, role.Name);
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
             }
-            if (result.Succeeded)
+            if (ModelState.IsValid)
             {
-                return RedirectToAction("ListRoles", "Administration");
+                try
+                {
+                    if ((await _userManager.IsInRoleAsync(user, role.Name)) == false)
+                    {
+                        IdentityResult result = await _userManager.AddToRoleAsync(user, role.Name);
+                        if (result.Succeeded)
+                        {
+                            return RedirectToAction("ListRoles", "Administration");
+                        }
+                    }
+                    return View("EditUsersInRole", new { roleId = userRoleViewModel.RoleId });
+                }
+                catch (DbUpdateException dbex)
+                {
+                    ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                    return View("Error");
+                }
+                catch (Exception ex)
+                {
+                    ViewData["ErrorMessage"] = ex.Message;
+                    return View("Error");
+                }
             }
-            return View("EditUsersInRole", new { roleId = userRoleViewModel.RoleId });
-
-            
+            return RedirectToAction("ListRoles", "Administration");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> RemoveUserFromRole(UserRoleViewModel userRoleViewModel)
+        [HttpGet]
+        [Route("administration/{roleId}/remove/{userEmail}")]
+        public async Task<IActionResult> RemoveUserFromRole(string userEmail, string roleId)
         {
-            var user = await _userManager.FindByIdAsync(userRoleViewModel.UserId);
-            var role = await _roleManager.FindByIdAsync(userRoleViewModel.RoleId);
-
-            IdentityResult result = null;
-            if ((await _userManager.IsInRoleAsync(user, role.Name)) == true)
+            var user = await _userManager.FindByEmailAsync(userEmail);
+            if (user == null)
             {
-                result = await _userManager.RemoveFromRoleAsync(user, role.Name);
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
             }
-            if (result.Succeeded)
+            var role = await _roleManager.FindByIdAsync(roleId);
+            if (role == null)
             {
-                return RedirectToAction("ListRoles", "Administration");
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
             }
-            return View("EditUsersInRole", new { roleId = userRoleViewModel.RoleId });
+            try
+            {
+                if ((await _userManager.IsInRoleAsync(user, role.Name)) == true)
+                {
+                    IdentityResult result = await _userManager.RemoveFromRoleAsync(user, role.Name);
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("ListRoles", "Administration");
+                    }
+                }
+                return View("EditUsersInRole", new { roleId = roleId });
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         [HttpGet]
