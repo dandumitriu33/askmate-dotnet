@@ -157,7 +157,7 @@ namespace Web.Controllers
         // GET: QuestionsController/5/Edit
         [HttpGet]
         [Route("questions/{questionId}/edit")]
-        public async Task<IActionResult> Edit(int questionId)
+        public async Task<IActionResult> Edit(int questionId, string validationErrorMessage = "")
         {
             var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
             if (question == null)
@@ -171,6 +171,7 @@ namespace Web.Controllers
                 return RedirectToAction("AccessDenied", "Account");
             }
             var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
+            ViewData["ValidationErrorMessage"] = validationErrorMessage;
             return View(questionViewModel);
         }
 
@@ -180,19 +181,19 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(QuestionViewModel questionViewModel)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionViewModel.Id);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             if (ModelState.IsValid)
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionViewModel.Id);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
                 try
                 {
                     var currentlySignedInUser = await _userManager.GetUserAsync(User);
@@ -223,7 +224,8 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(questionViewModel.Id);
+            string validationErrorMessage = "The question format was not valid.";
+            return RedirectToAction("Edit", "Questions", new { questionId = questionViewModel.Id, validationErrorMessage = validationErrorMessage });
         }
 
         // Get: QuestionsController/5/Remove

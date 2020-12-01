@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,21 +34,34 @@ namespace Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser
+                try
                 {
-                    UserName = registerViewModel.Email,
-                    Email = registerViewModel.Email,
-                    DateAdded = DateTime.Now
-                };
-                var result = await _userManager.CreateAsync(user, registerViewModel.Password);
-                if (result.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: true); // permanent, not just session
-                    return RedirectToAction("Index", "Home");
+                    var user = new ApplicationUser
+                    {
+                        UserName = registerViewModel.Email,
+                        Email = registerViewModel.Email,
+                        DateAdded = DateTime.Now
+                    };
+                    var result = await _userManager.CreateAsync(user, registerViewModel.Password);
+                    if (result.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: true); // permanent, not just session
+                        return RedirectToAction("Index", "Home");
+                    }
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
                 }
-                foreach (var error in result.Errors)
+                catch (DbUpdateException dbex)
                 {
-                    ModelState.AddModelError("", error.Description);
+                    ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                    return View("Error");
+                }
+                catch (Exception ex)
+                {
+                    ViewData["ErrorMessage"] = ex.Message;
+                    return View("Error");
                 }
             }
             return View(registerViewModel);
