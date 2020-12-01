@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,8 +41,15 @@ namespace Web.Controllers
         // Get
         [HttpGet]
         [Route("answers/addanswer/{questionId}")]
-        public IActionResult AddAnswer(int questionId)
+        public async Task<IActionResult> AddAnswer(int questionId)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (question == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
             var answerViewModel = new AnswerViewModel();
             answerViewModel.QuestionId = questionId;
             return View(answerViewModel);
@@ -53,24 +61,44 @@ namespace Web.Controllers
         [Route("answers/addanswer/{questionId}")]
         public async Task<IActionResult> AddAnswer(AnswerViewModel answerViewModel)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answerViewModel.QuestionId);
+            if (question == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
             if (ModelState.IsValid)
             {
-                var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
-                answerViewModel.UserId = currentlyLoggedInUser.Id;
-                string uniqueFileName = null;
-                if (answerViewModel.Image != null && _fileOperations.ValidateImageType(answerViewModel.Image.FileName) == true)
+                try
                 {
-                    // for more advanced projects add a composite file provider - for now wwwroot
-                    // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
-                    string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                    uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
-                    string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
-                    await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                    var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
+                    answerViewModel.UserId = currentlyLoggedInUser.Id;
+                    string uniqueFileName = null;
+                    if (answerViewModel.Image != null && _fileOperations.ValidateImageType(answerViewModel.Image.FileName) == true)
+                    {
+                        // for more advanced projects add a composite file provider - for now wwwroot
+                        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
+                        string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                        uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
+                        string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+                        await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                    }
+                    var answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
+                    answer.ImageNamePath = uniqueFileName;
+                    await _repository.AddAnswerAsync(answer);
+                    return RedirectToAction("Details", "Questions", new { questionId = answerViewModel.QuestionId });
                 }
-                var answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
-                answer.ImageNamePath = uniqueFileName;
-                await _repository.AddAnswerAsync(answer);
-                return RedirectToAction("Details", "Questions", new { questionId = answerViewModel.QuestionId });
+                catch (DbUpdateException dbex)
+                {
+                    ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                    return View("Error");
+                }
+                catch (Exception ex)
+                {
+                    ViewData["ErrorMessage"] = ex.Message;
+                    return View("Error");
+                }
             }
             return View(answerViewModel);
         }
@@ -81,6 +109,19 @@ namespace Web.Controllers
         public async Task<IActionResult> EditAnswer(int answerId)
         {
             var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+            if (answer == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answer.QuestionId);
+            if (question == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
             if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
             {
                 return RedirectToAction("AccessDenied", "Account");
@@ -96,28 +137,54 @@ namespace Web.Controllers
         public async Task<IActionResult> EditAnswer(AnswerViewModel answerViewModel)
         {
             var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerViewModel.Id);
+            if (answer == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answer.QuestionId);
+            if (question == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
             if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
             if (ModelState.IsValid)
             {
-                var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
-                answerViewModel.UserId = currentlyLoggedInUser.Id;
-                string uniqueFileName = null;
-                if (answerViewModel.Image != null)
+                try
                 {
-                    // for more advanced projects add a composite file provider - for now wwwroot
-                    // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
-                    string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                    uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
-                    string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
-                    await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                    var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
+                    answerViewModel.UserId = currentlyLoggedInUser.Id;
+                    string uniqueFileName = null;
+                    if (answerViewModel.Image != null)
+                    {
+                        // for more advanced projects add a composite file provider - for now wwwroot
+                        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
+                        string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                        uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
+                        string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+                        await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                    }
+                    answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
+                    answer.ImageNamePath = uniqueFileName;
+                    await _repository.EditAnswerAsync(answer);
+                    return RedirectToAction("Details", "Questions", new { questionId = answerViewModel.QuestionId });
                 }
-                answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
-                answer.ImageNamePath = uniqueFileName;
-                await _repository.EditAnswerAsync(answer);
-                return RedirectToAction("Details", "Questions", new { questionId = answerViewModel.QuestionId });
+                catch (DbUpdateException dbex)
+                {
+                    ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                    return View("Error");
+                }
+                catch (Exception ex)
+                {
+                    ViewData["ErrorMessage"] = ex.Message;
+                    return View("Error");
+                }
             }
             return View(answerViewModel);
         }
@@ -128,12 +195,37 @@ namespace Web.Controllers
         public async Task<IActionResult> Remove(int answerId, int questionId)
         {
             var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+            if (answer == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answer.QuestionId);
+            if (question == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
             if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
-            await _repository.RemoveAnswerById(answerId);
-
+            try
+            {
+                await _repository.RemoveAnswerById(answerId);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
@@ -143,12 +235,37 @@ namespace Web.Controllers
         public async Task<IActionResult> RemoveImage(int answerId, int questionId)
         {
             var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+            if (answer == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answer.QuestionId);
+            if (question == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
             if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
-            await _repository.RemoveAnswerImageByAnswerId(answerId);
-
+            try
+            {
+                await _repository.RemoveAnswerImageByAnswerId(answerId);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
@@ -157,8 +274,27 @@ namespace Web.Controllers
         [Route("answers/{answerId}/voteup")]
         public async Task<IActionResult> VoteUpAnswer(int answerId, int questionId)
         {
-            await _repository.VoteUpAnswerById(answerId);
-
+            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+            if (answer == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            try
+            {
+                await _repository.VoteUpAnswerById(answerId);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
@@ -167,8 +303,27 @@ namespace Web.Controllers
         [Route("answers/{answerId}/votedown")]
         public async Task<IActionResult> VoteDownAnswer(int answerId, int questionId)
         {
-            await _repository.VoteDownAnswerById(answerId);
-
+            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+            if (answer == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            try
+            {
+                await _repository.VoteDownAnswerById(answerId);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
@@ -177,12 +332,38 @@ namespace Web.Controllers
         [Route("answers/{answerId}/accept")]
         public async Task<IActionResult> AcceptAnswer(int answerId, int questionId)
         {
+            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+            if (answer == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
             var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (question == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
             if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
-            await _repository.EditAnswerAccepted(answerId);
+            try
+            {
+                await _repository.EditAnswerAccepted(answerId);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
     }

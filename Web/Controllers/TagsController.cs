@@ -4,6 +4,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,26 +30,76 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> AttachTag(int questionId)
         {
-            List<Tag> tagsFromDb = await _repository.GetAllTagsNoDuplicates(questionId);
-            List<TagViewModel> tagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
-            ViewData["questionId"] = questionId.ToString();
-            return View(tagsViewModel);
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (question == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            try
+            {
+                List<Tag> tagsFromDb = await _repository.GetAllTagsNoDuplicates(questionId);
+                List<TagViewModel> tagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
+                ViewData["questionId"] = questionId.ToString();
+                return View(tagsViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         // POST: TagsController/tags
         [HttpPost]
         public async Task<IActionResult> AttachTag(TagViewModel tagViewModel, int questionId)
         {
-            if (ModelState.IsValid == false)
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (question == null)
             {
-                return RedirectToAction("AttachTag", "Tags", new { questionId = questionId});
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
             }
-            // create new tag assuming it doesn't exist, will check in refactor/validation round
-            Tag newTag = _mapper.Map<TagViewModel, Tag>(tagViewModel);
-            await _repository.AddTagAsync(newTag);
+            //var tag = await _repository.GetTagByIdAsync(tagViewModel.Id);
+            //if (tag == null)
+            //{
+            //    Response.StatusCode = 404;
+            //    ViewData["ErrorMessage"] = "404 Resource not found.";
+            //    return View("Error");
+            //}
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var tag = await _repository.GetTagByIdAsync(tagViewModel.Id);
+                    if (tag == null)
+                    {
+                        // create new tag 
+                        Tag newTag = _mapper.Map<TagViewModel, Tag>(tagViewModel);
+                        tag = await _repository.AddTagAsync(newTag);
+                    }
 
-            // attach the new tag to q
-            await AddQuestionTag(questionId, newTag.Id);
+                    // attach the new tag to q
+                    await AddQuestionTag(tag.Id, questionId);
+                }
+                catch (DbUpdateException dbex)
+                {
+                    ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                    return View("Error");
+                }
+                catch (Exception ex)
+                {
+                    ViewData["ErrorMessage"] = ex.Message;
+                    return View("Error");
+                }
+            }
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
@@ -57,24 +108,78 @@ namespace Web.Controllers
         [Route("detach")]
         public async Task<IActionResult> DetachTag(int tagId, int questionId)
         {
-            QuestionTag newQuestionTag = new QuestionTag
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (question == null)
             {
-                QuestionId = questionId,
-                TagId = tagId
-            };
-            await _repository.DetachTag(newQuestionTag);
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            var tag = await _repository.GetTagByIdAsync(tagId);
+            if (tag == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            try
+            {
+                QuestionTag newQuestionTag = new QuestionTag
+                {
+                    QuestionId = questionId,
+                    TagId = tagId
+                };
+                await _repository.DetachTag(newQuestionTag);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
         // GET: TagsController/addQuestionTag
-        public async Task<IActionResult> AddQuestionTag(int questionId, int tagId)
+        public async Task<IActionResult> AddQuestionTag(int tagId, int questionId)
         {
-            QuestionTag newQuestionTag = new QuestionTag
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+            if (question == null)
             {
-                QuestionId = questionId,
-                TagId = tagId
-            };
-            await _repository.AddQuestionTagAsync(newQuestionTag);
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            var tag = await _repository.GetTagByIdAsync(tagId);
+            if (tag == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            try
+            {
+                QuestionTag newQuestionTag = new QuestionTag
+                {
+                    QuestionId = questionId,
+                    TagId = tagId
+                };
+                await _repository.AddQuestionTagAsync(newQuestionTag);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
@@ -82,15 +187,28 @@ namespace Web.Controllers
         [Route("info")]
         public async Task<IActionResult> TagInfo()
         {
-            Dictionary<int, int> tagInfo = await _repository.GetTagInfo();
-            List<Tag> allTags = await _repository.GetAllTags();
-            Dictionary<string, int> result = new Dictionary<string, int>();
-            foreach (var item in tagInfo)
+            try
             {
-                var tempTag = allTags.Where(t => t.Id == item.Key).FirstOrDefault();
-                result.Add(tempTag.Name, item.Value);
+                Dictionary<int, int> tagInfo = await _repository.GetTagInfo();
+                List<Tag> allTags = await _repository.GetAllTags();
+                Dictionary<string, int> result = new Dictionary<string, int>();
+                foreach (var item in tagInfo)
+                {
+                    var tempTag = allTags.Where(t => t.Id == item.Key).FirstOrDefault();
+                    result.Add(tempTag.Name, item.Value);
+                }
+                return View(result);
             }
-            return View(result);
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
         
     }

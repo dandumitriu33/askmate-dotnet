@@ -36,6 +36,7 @@ namespace ApplicationCore.Interfaces
         Task RemoveAnswerCommentById(int answerCommentId);
         Task RemoveQuestionCommentById(int questionCommentId);
         Task<List<Tag>> GetAllTags();
+        Task<Tag> GetTagByIdAsync(int tagId);
         Task<List<Tag>> GetAllTagsNoDuplicates(int questionId);
         Task AddQuestionTagAsync(QuestionTag questionTag);
         Task<Tag> AddTagAsync(Tag tag);

@@ -3,6 +3,7 @@ using ApplicationCore.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -32,31 +33,22 @@ namespace Web.Controllers
         public async Task<IActionResult> Index()
         {
             int numberOfQuestions = 5;
-            var latestQuestions = await _repository.GetLatestQuestions(numberOfQuestions);
-            var latestQuestionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(latestQuestions);
-            return View(latestQuestionsViewModel);
-        }
-
-        [Authorize]
-        // Get: HomeController/5/VoteUp
-        [HttpGet]
-        [Route("home/{questionId}/voteup")]
-        public async Task<IActionResult> VoteUpQuestion(int questionId)
-        {
-            await _repository.VoteUpQuestionById(questionId);
-
-            return RedirectToAction("Index", "Home");
-        }
-
-        [Authorize]
-        // Get: HomeController/5/VoteDown
-        [HttpGet]
-        [Route("home/{questionId}/votedown")]
-        public async Task<IActionResult> VoteDownQuestion(int questionId)
-        {
-            await _repository.VoteDownQuestionById(questionId);
-
-            return RedirectToAction("Index", "Home");
+            try
+            {
+                var latestQuestions = await _repository.GetLatestQuestions(numberOfQuestions);
+                var latestQuestionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(latestQuestions);
+                return View(latestQuestionsViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         // Get: HomeController/{searchPhrase}
@@ -64,10 +56,30 @@ namespace Web.Controllers
         [Route("home/{searchPhrase}")]
         public async Task<IActionResult> Search([FromQuery] string searchPhrase)
         {
-            var searchResults = await _repository.GetSearchResults(searchPhrase);
-            var searchResultsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(searchResults);
-            ViewData["searchPhrase"] = searchPhrase;
-            return View(searchResultsViewModel);
+            try
+            {
+                var searchResults = await _repository.GetSearchResults(searchPhrase);
+                var searchResultsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(searchResults);
+                ViewData["searchPhrase"] = searchPhrase;
+                return View(searchResultsViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
+        }
+
+        public async Task<IActionResult> AllQuestions(string orderBy = "DateAdded", string direction = "Descending")
+        {
+            var questions = await _repository.ListAllAsync(orderBy, direction);
+            var questionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(questions);
+            return View(questionsViewModel);
         }
 
         public IActionResult Privacy()

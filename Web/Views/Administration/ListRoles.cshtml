@@ -47,7 +47,17 @@
             <td colspan="3">
                 @foreach (var user in Model.UserLists[role.Name])
                 {
-                    <span>( @user ) </span>
+                    <span>
+                        ( @user 
+                        <a class="badge badge-danger"
+                           asp-action="RemoveUserFromRole"
+                           asp-controller="Administration"
+                           asp-route-userEmail="@user"
+                           asp-route-roleId="@role.Id">
+                            X
+                        </a>
+                        ) 
+                    </span>
                 }
             </td>
             

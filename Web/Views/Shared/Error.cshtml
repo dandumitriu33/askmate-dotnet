@@ -12,7 +12,7 @@
 @if (String.IsNullOrEmpty(errorMessage) == false)
 {
     <div class="text-center">
-        <p>@errorMessage</p>
+        <p>@errorMessage.Split(". ")[0]</p>
     </div>
 }
 

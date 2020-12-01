@@ -4,6 +4,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,37 +32,63 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> AllUsers()
         {
-            List<ApplicationUser> allUsersFromDb = await _repository.GetAllUsers();
-            var allUsersViewModel = _mapper.Map <List<ApplicationUser>, List<ApplicationUserViewModel>>(allUsersFromDb);
-            return View(allUsersViewModel);
+            try
+            {
+                List<ApplicationUser> allUsersFromDb = await _repository.GetAllUsers();
+                var allUsersViewModel = _mapper.Map<List<ApplicationUser>, List<ApplicationUserViewModel>>(allUsersFromDb);
+                return View(allUsersViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         [HttpGet]
         [Route("activity")]
         public async Task<IActionResult> UserActivity()
         {
-            var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
-            string userId = currentlyLoggedInUser.Id;
-                        
-            var userQuestionsFromDb = await _repository.GetUserQuestions(userId);
-            List<QuestionViewModel> userQuestionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(userQuestionsFromDb);
+            try
+            {
+                var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
+                string userId = currentlyLoggedInUser.Id;
 
-            var userAnswersFromDb = await _repository.GetUserAnswers(userId);
-            List<AnswerViewModel> userAnswersViewModel = _mapper.Map<List<Answer>, List<AnswerViewModel>>(userAnswersFromDb);
+                var userQuestionsFromDb = await _repository.GetUserQuestions(userId);
+                List<QuestionViewModel> userQuestionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(userQuestionsFromDb);
 
-            var userQuestionCommentsFromDb = await _repository.GetUserQuestionComments(userId);
-            List<QuestionCommentViewModel> userQuestionCommentsViewModel = _mapper.Map<List<QuestionComment>, List<QuestionCommentViewModel>>(userQuestionCommentsFromDb);
+                var userAnswersFromDb = await _repository.GetUserAnswers(userId);
+                List<AnswerViewModel> userAnswersViewModel = _mapper.Map<List<Answer>, List<AnswerViewModel>>(userAnswersFromDb);
 
-            var userAnswerCommentsFromDb = await _repository.GetUserAnswerComments(userId);
-            List<AnswerCommentViewModel> userAnswerCommentsViewModel = _mapper.Map<List<AnswerComment>, List<AnswerCommentViewModel>>(userAnswerCommentsFromDb);
+                var userQuestionCommentsFromDb = await _repository.GetUserQuestionComments(userId);
+                List<QuestionCommentViewModel> userQuestionCommentsViewModel = _mapper.Map<List<QuestionComment>, List<QuestionCommentViewModel>>(userQuestionCommentsFromDb);
 
-            UserActivitiesViewModel allUserActivities = new UserActivitiesViewModel();
-            allUserActivities.Questions = userQuestionsViewModel;
-            allUserActivities.Answers = userAnswersViewModel;
-            allUserActivities.QuestionComments = userQuestionCommentsViewModel;
-            allUserActivities.AnswerComments = userAnswerCommentsViewModel;
+                var userAnswerCommentsFromDb = await _repository.GetUserAnswerComments(userId);
+                List<AnswerCommentViewModel> userAnswerCommentsViewModel = _mapper.Map<List<AnswerComment>, List<AnswerCommentViewModel>>(userAnswerCommentsFromDb);
 
-            return View(allUserActivities);
+                UserActivitiesViewModel allUserActivities = new UserActivitiesViewModel();
+                allUserActivities.Questions = userQuestionsViewModel;
+                allUserActivities.Answers = userAnswersViewModel;
+                allUserActivities.QuestionComments = userQuestionCommentsViewModel;
+                allUserActivities.AnswerComments = userAnswerCommentsViewModel;
+
+                return View(allUserActivities);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
     }
 }
