@@ -166,7 +166,7 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = "404 Resource not found.";
                 return View("Error");
             }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionCommentId);
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionComment.QuestionId);
             if (question == null)
             {
                 Response.StatusCode = 404;
