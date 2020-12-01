@@ -239,38 +239,83 @@ namespace Web.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
-                ViewData["ErrorMessage"] = "The user cannot be found.";
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
                 return View("Error");
             }
-            var existingUserClaims = await _userManager.GetClaimsAsync(user);
-            var allClaims = await _repository.GetAllUserClaims();
-            var allClaimsViewModel = _mapper.Map<List<ApplicationClaim>, List<ApplicationClaimViewModel>>(allClaims);
-
-            ManageUserClaimsViewModel allInfo = new ManageUserClaimsViewModel()
+            try
             {
-                UserId = userId,
-                UserEmail = user.Email,
-                ExistingUserClaims = existingUserClaims,
-                AllClaims = allClaimsViewModel
-            };
-            return View(allInfo);
+                var existingUserClaims = await _userManager.GetClaimsAsync(user);
+                var allClaims = await _repository.GetAllUserClaims();
+                var allClaimsViewModel = _mapper.Map<List<ApplicationClaim>, List<ApplicationClaimViewModel>>(allClaims);
+
+                ManageUserClaimsViewModel allInfo = new ManageUserClaimsViewModel()
+                {
+                    UserId = userId,
+                    UserEmail = user.Email,
+                    ExistingUserClaims = existingUserClaims,
+                    AllClaims = allClaimsViewModel
+                };
+                return View(allInfo);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> AddClaimToUser(ClaimModificationViewModel claimModificationViewModel)
         {
             var claimFromDb = await _repository.GetApplicationClaimById(claimModificationViewModel.ClaimId);
-            string claimType = claimFromDb.ClaimType;
-            string claimValue = claimFromDb.ClaimValue;
-            var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
-            
-            Claim newClaim = new Claim(claimType, claimValue);
-            var result = await _userManager.AddClaimAsync(user, newClaim);
-            if (result.Succeeded)
+            if (claimFromDb == null)
             {
-                return RedirectToAction("ManageUserClaims", new { userId = user.Id });
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
             }
-            // error message UX 
+            var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
+            if (user == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    string claimType = claimFromDb.ClaimType;
+                    string claimValue = claimFromDb.ClaimValue;
+
+                    Claim newClaim = new Claim(claimType, claimValue);
+                    var result = await _userManager.AddClaimAsync(user, newClaim);
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("ManageUserClaims", new { userId = user.Id });
+                    }
+                    else
+                    {
+                        throw new Exception("Claim attachment error.");
+                    }
+                }
+                catch (DbUpdateException dbex)
+                {
+                    ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                    return View("Error");
+                }
+                catch (Exception ex)
+                {
+                    ViewData["ErrorMessage"] = ex.Message;
+                    return View("Error");
+                }
+            }
             return RedirectToAction("ManageUserClaims", new { userId = user.Id });
         }
 
@@ -278,17 +323,48 @@ namespace Web.Controllers
         public async Task<IActionResult> RemoveClaimFromUser(ClaimModificationViewModel claimModificationViewModel)
         {
             var claimFromDb = await _repository.GetApplicationClaimById(claimModificationViewModel.ClaimId);
-            string claimType = claimFromDb.ClaimType;
-            string claimValue = claimFromDb.ClaimValue;
-            var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
-
-            Claim newClaim = new Claim(claimType, claimValue);
-            var result = await _userManager.RemoveClaimAsync(user, newClaim);
-            if (result.Succeeded)
+            if (claimFromDb == null)
             {
-                return RedirectToAction("ManageUserClaims", new { userId = user.Id });
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
             }
-            // error message UX 
+            var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
+            if (user == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    string claimType = claimFromDb.ClaimType;
+                    string claimValue = claimFromDb.ClaimValue;
+
+                    Claim newClaim = new Claim(claimType, claimValue);
+                    var result = await _userManager.RemoveClaimAsync(user, newClaim);
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("ManageUserClaims", new { userId = user.Id });
+                    }
+                    else
+                    {
+                        throw new Exception("Claim attachment error.");
+                    }
+                }
+                catch (DbUpdateException dbex)
+                {
+                    ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                    return View("Error");
+                }
+                catch (Exception ex)
+                {
+                    ViewData["ErrorMessage"] = ex.Message;
+                    return View("Error");
+                }
+            }
             return RedirectToAction("ManageUserClaims", new { userId = user.Id });
         }
     }
