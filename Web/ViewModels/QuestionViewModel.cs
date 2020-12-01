@@ -11,7 +11,7 @@ namespace Web.ViewModels
     public class QuestionViewModel
     {
         public int Id { get; set; }
-        [Required(ErrorMessage ="The question title is required.")]
+        [Required]
         [MaxLength(100)]
         public string Title { get; set; }
         [MaxLength(1000)]

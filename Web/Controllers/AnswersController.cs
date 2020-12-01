@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -96,28 +97,47 @@ namespace Web.Controllers
         public async Task<IActionResult> EditAnswer(AnswerViewModel answerViewModel)
         {
             var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerViewModel.Id);
+            if (answer == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
             if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
             if (ModelState.IsValid)
             {
-                var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
-                answerViewModel.UserId = currentlyLoggedInUser.Id;
-                string uniqueFileName = null;
-                if (answerViewModel.Image != null)
+                try
                 {
-                    // for more advanced projects add a composite file provider - for now wwwroot
-                    // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
-                    string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                    uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
-                    string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
-                    await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                    var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
+                    answerViewModel.UserId = currentlyLoggedInUser.Id;
+                    string uniqueFileName = null;
+                    if (answerViewModel.Image != null)
+                    {
+                        // for more advanced projects add a composite file provider - for now wwwroot
+                        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
+                        string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+                        uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
+                        string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+                        await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                    }
+                    answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
+                    answer.ImageNamePath = uniqueFileName;
+                    await _repository.EditAnswerAsync(answer);
+                    return RedirectToAction("Details", "Questions", new { questionId = answerViewModel.QuestionId });
                 }
-                answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
-                answer.ImageNamePath = uniqueFileName;
-                await _repository.EditAnswerAsync(answer);
-                return RedirectToAction("Details", "Questions", new { questionId = answerViewModel.QuestionId });
+                catch (DbUpdateException dbex)
+                {
+                    ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                    return View("Error");
+                }
+                catch (Exception ex)
+                {
+                    ViewData["ErrorMessage"] = ex.Message;
+                    return View("Error");
+                }
             }
             return View(answerViewModel);
         }

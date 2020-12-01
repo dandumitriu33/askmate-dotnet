@@ -157,7 +157,7 @@ namespace Web.Controllers
         // GET: QuestionsController/5/Edit
         [HttpGet]
         [Route("questions/{questionId}/edit")]
-        public async Task<IActionResult> Edit(int questionId, string validationErrorMessage = "")
+        public async Task<IActionResult> EditQuestion(int questionId)
         {
             var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
             if (question == null)
@@ -171,7 +171,7 @@ namespace Web.Controllers
                 return RedirectToAction("AccessDenied", "Account");
             }
             var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
-            ViewData["ValidationErrorMessage"] = validationErrorMessage;
+            //ViewData["ValidationErrorMessage"] = validationErrorMessage;
             return View(questionViewModel);
         }
 
@@ -179,21 +179,21 @@ namespace Web.Controllers
         [HttpPost]
         [Route("questions/{questionId}/edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(QuestionViewModel questionViewModel)
+        public async Task<IActionResult> EditQuestion(QuestionViewModel questionViewModel)
         {
+            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionViewModel.Id);
+            if (question == null)
+            {
+                Response.StatusCode = 404;
+                ViewData["ErrorMessage"] = "404 Resource not found.";
+                return View("Error");
+            }
+            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
             if (ModelState.IsValid)
             {
-                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionViewModel.Id);
-                if (question == null)
-                {
-                    Response.StatusCode = 404;
-                    ViewData["ErrorMessage"] = "404 Resource not found.";
-                    return View("Error");
-                }
-                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
-                {
-                    return RedirectToAction("AccessDenied", "Account");
-                }
                 try
                 {
                     var currentlySignedInUser = await _userManager.GetUserAsync(User);
@@ -224,8 +224,11 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            string validationErrorMessage = "The question format was not valid.";
-            return RedirectToAction("Edit", "Questions", new { questionId = questionViewModel.Id, validationErrorMessage = validationErrorMessage });
+            // simply returning View somehow sends a Post request and parameter type error shows up as it expects a QVM
+            // did some research, stackoverflow old 6 and 3 yr questions - no answers
+            // also set up a custom error message via ViewData but this is more "expected behavior" as it sneds a Get, probably
+            // answers controller has no issues with this
+            return await EditQuestion(questionViewModel.Id);
         }
 
         // Get: QuestionsController/5/Remove
