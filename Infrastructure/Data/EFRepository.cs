@@ -566,6 +566,11 @@ namespace Infrastructure.Data
             return await _dbContext.Tags.Where(t => t.IsRemoved == false).OrderBy(t => t.Name).ToListAsync();
         }
 
+        public async Task<Tag> GetTagByIdAsync(int tagId)
+        {
+            return await _dbContext.Tags.Where(t => t.Id == tagId).FirstOrDefaultAsync();
+        }
+
         public async Task<List<Tag>> GetAllTagsNoDuplicates(int questionId)
         {
             List<int> currentQuestionTags = await _dbContext.QuestionTags.Where(qt => qt.QuestionId == questionId).Select(qt => qt.TagId).ToListAsync();
