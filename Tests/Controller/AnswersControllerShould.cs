@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Web.Controllers;
@@ -110,7 +111,63 @@ namespace Tests.Controller
             Assert.Equal("Error", viewResult.ViewName);
         }
 
-        // helper methods
+        [Fact]
+        public async Task EditAnswerGet_ReturnErrorViewResultForAccessCheckFail()
+        {
+            // Arrange
+            // access denied result test - UserManager mock needed for more
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+                .ReturnsAsync(GetQuestionWithoutDetails());
+            mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(1))
+                .ReturnsAsync(GetAnswerWithoutDetails());
+            
+            var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+
+            // Act
+            var result = await controller.EditAnswer(1);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", viewResult.ViewName);
+        }
+
+        [Fact]
+        public async Task EditAnswerPost_ReturnErrorViewResultForModelInvalid()
+        {
+            // Arrange
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+                .ReturnsAsync(GetQuestionWithoutDetails());
+            mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(1))
+                .ReturnsAsync(GetAnswerWithoutDetails());
+            AnswerViewModel tempAnswerViewModel = new AnswerViewModel
+            {
+                Id = 1,
+                QuestionId = 1,
+                Body = "Test Body",
+                UserId = "abcd"
+            };
+
+            var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+            controller.ModelState.AddModelError("Body", "Required");
+
+            // Act
+            var result = await controller.EditAnswer(tempAnswerViewModel);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.NotEqual("Error", viewResult.ViewName);
+        }
+
+
+
+
+
+
+
+
+
         private Question GetQuestionWithoutDetails()
         {
             Question tempQuestion = new Question
@@ -121,5 +178,25 @@ namespace Tests.Controller
             };
             return tempQuestion;
         }
+
+        private Question GetQuestionWithoutDetailsNull()
+        {
+            Question tempQuestion = null;
+            return tempQuestion;
+        }
+
+        private Answer GetAnswerWithoutDetails()
+        {
+            Answer tempAnswer = new Answer
+            {
+                Id = 1,
+                QuestionId = 1,
+                Body = "Test Body",
+                UserId = "abcd"
+            };
+            return tempAnswer;
+        }
+
+
     }
 }

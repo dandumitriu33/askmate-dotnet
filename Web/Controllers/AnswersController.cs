@@ -122,12 +122,25 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = "404 Resource not found.";
                 return View("Error");
             }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
+            try
             {
-                return RedirectToAction("AccessDenied", "Account");
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
+                var answerViewModel = _mapper.Map<Answer, AnswerViewModel>(answer);
+                return View(answerViewModel);
             }
-            var answerViewModel = _mapper.Map<Answer, AnswerViewModel>(answer);
-            return View(answerViewModel);
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         // POST: AnswersController/5/Edit
@@ -150,14 +163,14 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = "404 Resource not found.";
                 return View("Error");
             }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
+                    {
+                        return RedirectToAction("AccessDenied", "Account");
+                    }
                     var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
                     answerViewModel.UserId = currentlyLoggedInUser.Id;
                     string uniqueFileName = null;
