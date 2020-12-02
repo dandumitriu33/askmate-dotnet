@@ -67,17 +67,17 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public void ListRolesGet_ReturnAResult()
+        public async Task ListRolesGet_ReturnAResult()
         {
             // Arrange
             var controller = new AdministrationController(roleManager, userManager, repository, mapper);
 
             // Act
-            var result = controller.ListRoles();
+            var result = await controller.ListRoles();
 
             // Assert
-            var viewResult = Assert.IsType<Task<IActionResult>>(result);
-            Assert.Equal("Microsoft.AspNetCore.Mvc.ViewResult", viewResult.Result.ToString());
+            var badRequestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", badRequestResult.ViewName);
         }
 
     }

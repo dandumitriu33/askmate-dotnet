@@ -112,18 +112,18 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public void LogOutPost_ReturnViewResultErrorOnFail()
+        public async Task LogOutPost_ReturnViewResultErrorOnFail()
         {
             // Arrange
             // SignOutAsync is not mocked and should fail
             var controller = new AccountController(userManager, signInManager);
 
             // Act
-            var result = controller.LogOut();
+            var result = await controller.LogOut();
 
             // Assert
-            var viewResult = Assert.IsType<Task<IActionResult>>(result);
-            Assert.Equal("Microsoft.AspNetCore.Mvc.ViewResult", viewResult.Result.ToString());
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", viewResult.ViewName);
         }
 
         [Fact]
