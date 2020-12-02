@@ -53,6 +53,7 @@ namespace Tests.Controller
         [Fact]
         public async Task RegisterPost_ReturnsViewResultError_WhenModelStateIsValidAndCreateFails()
         {
+            // CreateAsync and SignInAsync are not mocked and should fail
             // Arrange
             var controller = new AccountController(userManager, signInManager);
             var newRegisterViewModel = new RegisterViewModel();
@@ -98,6 +99,7 @@ namespace Tests.Controller
         public async Task LogInPost_ReturnsViewResultError_WhenModelStateIsValidAndSignInFails()
         {
             // Arrange
+            // SignInAsync is not mocked and should fail
             var controller = new AccountController(userManager, signInManager);
             var newLogInViewModel = new LogInViewModel();
 
@@ -107,6 +109,21 @@ namespace Tests.Controller
             // Assert
             var badRequestResult = Assert.IsType<ViewResult>(result);
             Assert.Equal("Error", badRequestResult.ViewName);
+        }
+
+        [Fact]
+        public void LogOutPost_ReturnViewResultErrorOnFail()
+        {
+            // Arrange
+            // SignOutAsync is not mocked and should fail
+            var controller = new AccountController(userManager, signInManager);
+
+            // Act
+            var result = controller.LogOut();
+
+            // Assert
+            var viewResult = Assert.IsType<Task<IActionResult>>(result);
+            Assert.Equal("Microsoft.AspNetCore.Mvc.ViewResult", viewResult.Result.ToString());
         }
 
     }
