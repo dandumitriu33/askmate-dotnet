@@ -126,5 +126,18 @@ namespace Tests.Controller
             Assert.Equal("Microsoft.AspNetCore.Mvc.ViewResult", viewResult.Result.ToString());
         }
 
+        [Fact]
+        public void AccessDeniedGet_ReturnAViewResult()
+        {
+            // Arrange
+            var controller = new AccountController(userManager, signInManager);
+
+            // Act
+            var result = controller.AccessDenied();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+        }
+
     }
 }
