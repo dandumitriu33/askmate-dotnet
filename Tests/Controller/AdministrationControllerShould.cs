@@ -49,5 +49,20 @@ namespace Tests.Controller
             var badRequestResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<RoleViewModel>(badRequestResult.ViewData.Model);
         }
+
+        [Fact]
+        public async Task CreateRolePost_ReturnsViewResult_WhenModelStateIsValidCreateFails()
+        {
+            // Arrange
+            var controller = new AdministrationController(roleManager, userManager, repository, mapper);
+            var newRoleViewModel = new RoleViewModel();
+
+            // Act
+            var result = await controller.CreateRole(newRoleViewModel);
+
+            // Assert
+            var badRequestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", badRequestResult.ViewName);
+        }
     }
 }
