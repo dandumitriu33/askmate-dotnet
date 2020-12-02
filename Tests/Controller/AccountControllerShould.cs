@@ -78,6 +78,36 @@ namespace Tests.Controller
             var viewResult = Assert.IsType<ViewResult>(result);
         }
 
+        [Fact]
+        public async Task LogIPost_ReturnsViewResult_WhenModelStateIsInvalid()
+        {
+            // Arrange
+            var controller = new AccountController(userManager, signInManager);
+            controller.ModelState.AddModelError("Email", "Required");
+            var newLogInViewModel = new LogInViewModel();
+
+            // Act
+            var result = await controller.LogIn(newLogInViewModel);
+
+            // Assert
+            var badRequestResult = Assert.IsType<ViewResult>(result);
+            Assert.IsAssignableFrom<LogInViewModel>(badRequestResult.ViewData.Model);
+        }
+
+        [Fact]
+        public async Task LogInPost_ReturnsViewResultError_WhenModelStateIsValidAndSignInFails()
+        {
+            // Arrange
+            var controller = new AccountController(userManager, signInManager);
+            var newLogInViewModel = new LogInViewModel();
+
+            // Act
+            var result = await controller.LogIn(newLogInViewModel);
+
+            // Assert
+            var badRequestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", badRequestResult.ViewName);
+        }
 
     }
 }
