@@ -22,7 +22,7 @@ namespace Tests.Controller
         private SignInManager<ApplicationUser> signInManager { get; }
 
         [Fact]
-        public void Register_ReturnAViewResult()
+        public void RegisterGet_ReturnAViewResult()
         {
             // Arrange
             var controller = new AccountController(userManager, signInManager);
@@ -65,6 +65,18 @@ namespace Tests.Controller
             Assert.Equal("Error", badRequestResult.ViewName);
         }
 
+        [Fact]
+        public void LoginGet_ReturnAViewResult()
+        {
+            // Arrange
+            var controller = new AccountController(userManager, signInManager);
+
+            // Act
+            var result = controller.LogIn();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+        }
 
 
     }
