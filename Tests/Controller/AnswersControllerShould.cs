@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Web.Controllers;
+using Web.ViewModels;
 using Xunit;
 
 namespace Tests.Controller
@@ -26,7 +27,6 @@ namespace Tests.Controller
         public async Task AddAnswerGet_ReturnAViewResult()
         {
             // Arrange
-            //var controller = new AnswersController(repository, mapper, webHostEnvironment, fileOperations, userManager);
             var mockRepo = new Mock<IAsyncRepository>();
             mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
                 .ReturnsAsync(GetQuestionWithoutDetails());
@@ -40,6 +40,77 @@ namespace Tests.Controller
             Assert.NotEqual("Error", viewResult.ViewName);
         }
 
+        [Fact]
+        public async Task AddAnswerPost_ReturnErrorView()
+        {
+            // Arrange - question exists, model is valid, processing fails
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+                .ReturnsAsync(GetQuestionWithoutDetails());
+            var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+            AnswerViewModel answerViewModel = new AnswerViewModel
+            {
+                Id = 1,
+                QuestionId = 1,
+                Body = "Test Body"
+            };
+
+            // Act
+            var result = await controller.AddAnswer(answerViewModel);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", viewResult.ViewName);
+        }
+
+        [Fact]
+        public async Task AddAnswerPost_ReturnViewModelInvalid()
+        {
+            // Arrange - question exists, model is invalid, processing doesn't start
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+                .ReturnsAsync(GetQuestionWithoutDetails());
+            var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+            AnswerViewModel answerViewModel = new AnswerViewModel
+            {
+                Id = 1,
+                QuestionId = 1,
+                Body = ""
+            };
+            controller.ModelState.AddModelError("Body", "Required");
+
+            // Act
+            var result = await controller.AddAnswer(answerViewModel);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.NotEqual("Error", viewResult.ViewName);
+        }
+
+        [Fact]
+        public async Task AddAnswerPost_ReturnErrorQuestionInvalid()
+        {
+            // Arrange - question doesn't exist, model is valid, processing doesn't start
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+                .ReturnsAsync(GetQuestionWithoutDetails());
+            var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+            AnswerViewModel answerViewModel = new AnswerViewModel
+            {
+                Id = 1,
+                QuestionId = 1,
+                Body = "Test Body"
+            };
+
+            // Act
+            var result = await controller.AddAnswer(answerViewModel);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", viewResult.ViewName);
+        }
+
+        // helper methods
         private Question GetQuestionWithoutDetails()
         {
             Question tempQuestion = new Question
