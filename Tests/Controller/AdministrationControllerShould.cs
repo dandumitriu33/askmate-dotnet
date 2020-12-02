@@ -48,6 +48,7 @@ namespace Tests.Controller
             // Assert
             var badRequestResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<RoleViewModel>(badRequestResult.ViewData.Model);
+            Assert.NotEqual("Error", badRequestResult.ViewName);
         }
 
         [Fact]
@@ -64,5 +65,20 @@ namespace Tests.Controller
             var badRequestResult = Assert.IsType<ViewResult>(result);
             Assert.Equal("Error", badRequestResult.ViewName);
         }
+
+        [Fact]
+        public void ListRolesGet_ReturnAResult()
+        {
+            // Arrange
+            var controller = new AdministrationController(roleManager, userManager, repository, mapper);
+
+            // Act
+            var result = controller.ListRoles();
+
+            // Assert
+            var viewResult = Assert.IsType<Task<IActionResult>>(result);
+            Assert.Equal("Microsoft.AspNetCore.Mvc.ViewResult", viewResult.Result.ToString());
+        }
+
     }
 }
