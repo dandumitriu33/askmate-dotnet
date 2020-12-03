@@ -285,6 +285,34 @@ namespace Tests.Controller
             mockSignInManager.Verify(x => x.SignOutAsync(), Times.Once);
         }
 
+        [Fact]
+        public async Task LogOutPost_ReturnErrorViewOnException()
+        {
+            // Arrange
+
+            // mocking UserManager
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+
+            // mocking SignInManager
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
+            var mockSignInManager = new Mock<SignInManager<ApplicationUser>>(mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null, null);
+            mockSignInManager.Setup(sim => sim.SignOutAsync())
+                             .Throws(new Exception())
+                             .Verifiable();
+
+            var controller = new AccountController(mockUserManager.Object, mockSignInManager.Object);
+
+            // Act
+            var result = await controller.LogOut();
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockSignInManager.Verify(x => x.SignOutAsync(), Times.Once);
+        }
+
 
 
         //[Fact]
