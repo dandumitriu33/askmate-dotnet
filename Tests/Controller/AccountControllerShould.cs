@@ -169,7 +169,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task LogInPost_ReturnErrorViewOnSignInFail()
+        public async Task LogInPost_ReturnLogInViewOnSignInFail()
         {
             // Arrange
             LogInViewModel newLogInVM = new LogInViewModel();
@@ -195,6 +195,36 @@ namespace Tests.Controller
             var requestResult = Assert.IsType<ViewResult>(result);
             Assert.Equal("LogIn", requestResult.ViewName);
             mockSignInManager.Verify(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), false), Times.Once);
+        }
+
+        [Fact]
+        public async Task LogInPost_ReturnLoginViewOnModelIsInvalid()
+        {
+            // Arrange
+            LogInViewModel newLogInVM = new LogInViewModel();
+
+            // mocking UserManager
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+
+            // mocking SignInManager - no need to set up the method, just needs SignInManager to not be null
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
+            var mockSignInManager = new Mock<SignInManager<ApplicationUser>>(mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null, null);
+            mockSignInManager.Setup(sim => sim.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), false))
+                             .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success)
+                             .Verifiable();
+
+            var controller = new AccountController(mockUserManager.Object, mockSignInManager.Object);
+            controller.ModelState.AddModelError("Email", "Required");
+
+            // Act
+            var result = await controller.LogIn(newLogInVM);
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("LogIn", requestResult.ViewName);
+            mockSignInManager.Verify(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), false), Times.Never);
         }
 
         //[Fact]
