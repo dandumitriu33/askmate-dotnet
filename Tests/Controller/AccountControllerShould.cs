@@ -125,54 +125,22 @@ namespace Tests.Controller
             Assert.Equal("Register", badRequestResult.ViewName);
         }
 
+        [Fact]
+        public void LoginGet_ReturnAViewResult()
+        {
+            // Arrange
+            var controller = new AccountController(userManager, signInManager);
+
+            // Act
+            var result = controller.LogIn();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+        }
 
 
 
 
-        //[Fact]
-        //public async Task RegisterPost_ReturnsViewResult_WhenModelStateIsInvalid()
-        //{
-        //    // Arrange
-        //    var controller = new AccountController(userManager, signInManager);
-        //    controller.ModelState.AddModelError("Email", "Required");
-        //    var newRegisterViewModel = new RegisterViewModel();
-
-        //    // Act
-        //    var result = await controller.Register(newRegisterViewModel);
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<ViewResult>(result);
-        //    var model = Assert.IsAssignableFrom<RegisterViewModel>(badRequestResult.ViewData.Model);
-        //}
-
-        //[Fact]
-        //public async Task RegisterPost_ReturnsViewResultError_WhenModelStateIsValidAndCreateFails()
-        //{
-        //    // CreateAsync and SignInAsync are not mocked and should fail
-        //    // Arrange
-        //    var controller = new AccountController(userManager, signInManager);
-        //    var newRegisterViewModel = new RegisterViewModel();
-
-        //    // Act
-        //    var result = await controller.Register(newRegisterViewModel);
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<ViewResult>(result);
-        //    Assert.Equal("Error", badRequestResult.ViewName);
-        //}
-
-        //[Fact]
-        //public void LoginGet_ReturnAViewResult()
-        //{
-        //    // Arrange
-        //    var controller = new AccountController(userManager, signInManager);
-
-        //    // Act
-        //    var result = controller.LogIn();
-
-        //    // Assert
-        //    var viewResult = Assert.IsType<ViewResult>(result);
-        //}
 
         //[Fact]
         //public async Task LogIPost_ReturnsViewResult_WhenModelStateIsInvalid()
