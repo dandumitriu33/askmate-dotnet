@@ -100,7 +100,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(logInViewModel);
+            return View("LogIn", logInViewModel);
         }
 
         [HttpPost]
