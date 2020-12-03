@@ -58,7 +58,27 @@ namespace Tests.Controller
             mockRoleManager.Verify(x => x.CreateAsync(It.IsAny<IdentityRole>()), Times.Once);
         }
 
+        [Fact]
+        public async Task CreateRolePost_ReturnViewOnCreateRoleException()
+        {
+            // Arrange
+            RegisterViewModel newRegisterVM = new RegisterViewModel();
 
+            // mocking RoleManager
+            var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
+            mockRoleManager.Setup(rm => rm.CreateAsync(It.IsAny<IdentityRole>())).Throws(new Exception());
+
+            var controller = new AdministrationController(mockRoleManager.Object, userManager, repository, mapper);
+            RoleViewModel tempRole = new RoleViewModel() { RoleName = "Test role name" };
+
+            // Act
+            var result = await controller.CreateRole(tempRole);
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockRoleManager.Verify(x => x.CreateAsync(It.IsAny<IdentityRole>()), Times.Once);
+        }
 
 
 
