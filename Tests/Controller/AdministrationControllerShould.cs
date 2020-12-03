@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Tests.Shared;
@@ -125,6 +126,37 @@ namespace Tests.Controller
             Assert.Equal("CreateRole", requestResult.ViewName);
             mockRoleManager.Verify(x => x.CreateAsync(It.IsAny<IdentityRole>()), Times.Never);
         }
+
+        [Fact]
+        public async Task ListRolesGet_RedirectToListRoles()
+        {
+            // Arrange
+            RegisterViewModel newRegisterVM = new RegisterViewModel();
+
+            // mocking UserManager
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            List<ApplicationUser> usersInRole = new List<ApplicationUser>();
+            usersInRole.Add(new ApplicationUser { Email = "test@email.com" });
+            mockUserManager.Setup(um => um.GetUsersInRoleAsync(It.IsAny<string>())).ReturnsAsync(usersInRole);
+
+            // mocking RoleManager
+            var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
+            List<IdentityRole> returnedRoles = new List<IdentityRole>();
+            IdentityRole newRole = new IdentityRole { Name = "Test Role" };
+            returnedRoles.Add(newRole);
+            mockRoleManager.Setup(rm => rm.Roles).Returns(returnedRoles.AsQueryable());
+
+            var controller = new AdministrationController(mockRoleManager.Object, mockUserManager.Object, repository, mapper);
+
+            // Act
+            var result = await controller.ListRoles();
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("ListRoles", requestResult.ViewName);
+            mockUserManager.Verify(x => x.GetUsersInRoleAsync(It.IsAny<string>()), Times.Once);
+        }
+
 
 
 
