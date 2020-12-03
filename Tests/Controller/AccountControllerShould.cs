@@ -147,7 +147,7 @@ namespace Tests.Controller
             // mocking UserManager
             var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
             
-            // mocking SignInManager - no need to set up the method, just needs SignInManager to not be null
+            // mocking SignInManager
             var contextAccessor = new Mock<IHttpContextAccessor>();
             var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
             var mockSignInManager = new Mock<SignInManager<ApplicationUser>>(mockUserManager.Object,
@@ -177,7 +177,7 @@ namespace Tests.Controller
             // mocking UserManager
             var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
 
-            // mocking SignInManager - no need to set up the method, just needs SignInManager to not be null
+            // mocking SignInManager
             var contextAccessor = new Mock<IHttpContextAccessor>();
             var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
             var mockSignInManager = new Mock<SignInManager<ApplicationUser>>(mockUserManager.Object,
@@ -206,7 +206,7 @@ namespace Tests.Controller
             // mocking UserManager
             var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
 
-            // mocking SignInManager - no need to set up the method, just needs SignInManager to not be null
+            // mocking SignInManager
             var contextAccessor = new Mock<IHttpContextAccessor>();
             var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
             var mockSignInManager = new Mock<SignInManager<ApplicationUser>>(mockUserManager.Object,
@@ -236,7 +236,7 @@ namespace Tests.Controller
             // mocking UserManager
             var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
 
-            // mocking SignInManager - no need to set up the method, just needs SignInManager to not be null
+            // mocking SignInManager
             var contextAccessor = new Mock<IHttpContextAccessor>();
             var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
             var mockSignInManager = new Mock<SignInManager<ApplicationUser>>(mockUserManager.Object,
@@ -256,6 +256,34 @@ namespace Tests.Controller
             mockSignInManager.Verify(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), false), Times.Once);
         }
 
+        [Fact]
+        public async Task LogOutPost_ReturnRedirectToActionHomeIndex()
+        {
+            // Arrange
+
+            // mocking UserManager
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+
+            // mocking SignInManager
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
+            var mockSignInManager = new Mock<SignInManager<ApplicationUser>>(mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null, null);
+            mockSignInManager.Setup(sim => sim.SignOutAsync())
+                             .Returns(Task.CompletedTask)
+                             .Verifiable();
+
+            var controller = new AccountController(mockUserManager.Object, mockSignInManager.Object);
+
+            // Act
+            var result = await controller.LogOut();
+
+            // Assert
+            var requestResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", requestResult.ActionName);
+            Assert.Equal("Home", requestResult.ControllerName);
+            mockSignInManager.Verify(x => x.SignOutAsync(), Times.Once);
+        }
 
 
 
