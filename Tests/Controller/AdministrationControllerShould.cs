@@ -157,7 +157,32 @@ namespace Tests.Controller
             mockUserManager.Verify(x => x.GetUsersInRoleAsync(It.IsAny<string>()), Times.Once);
         }
 
+        [Fact]
+        public async Task ListRolesGet_ReturnsErrorViewOnException()
+        {
+            // Arrange
+            RegisterViewModel newRegisterVM = new RegisterViewModel();
 
+            // mocking UserManager
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            List<ApplicationUser> usersInRole = new List<ApplicationUser>();
+            usersInRole.Add(new ApplicationUser { Email = "test@email.com" });
+            mockUserManager.Setup(um => um.GetUsersInRoleAsync(It.IsAny<string>())).ReturnsAsync(usersInRole);
+
+            // mocking RoleManager
+            var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
+            mockRoleManager.Setup(rm => rm.Roles).Throws(new Exception());
+
+            var controller = new AdministrationController(mockRoleManager.Object, mockUserManager.Object, repository, mapper);
+
+            // Act
+            var result = await controller.ListRoles();
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockUserManager.Verify(x => x.GetUsersInRoleAsync(It.IsAny<string>()), Times.Never);
+        }
 
 
 
