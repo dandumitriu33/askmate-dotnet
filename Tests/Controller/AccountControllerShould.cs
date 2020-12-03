@@ -313,20 +313,18 @@ namespace Tests.Controller
             mockSignInManager.Verify(x => x.SignOutAsync(), Times.Once);
         }
 
+        [Fact]
+        public void AccessDeniedGet_ReturnAViewResult()
+        {
+            // Arrange
+            var controller = new AccountController(userManager, signInManager);
 
+            // Act
+            var result = controller.AccessDenied();
 
-        //[Fact]
-        //public void AccessDeniedGet_ReturnAViewResult()
-        //{
-        //    // Arrange
-        //    var controller = new AccountController(userManager, signInManager);
-
-        //    // Act
-        //    var result = controller.AccessDenied();
-
-        //    // Assert
-        //    var viewResult = Assert.IsType<ViewResult>(result);
-        //}
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+        }
 
     }
 }
