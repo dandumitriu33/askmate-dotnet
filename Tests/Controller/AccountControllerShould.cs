@@ -138,56 +138,37 @@ namespace Tests.Controller
             var viewResult = Assert.IsType<ViewResult>(result);
         }
 
+        [Fact]
+        public async Task LogInPost_ReturnRedirectToActionHomeIndex()
+        {
+            // Arrange
+            LogInViewModel newLogInVM = new LogInViewModel();
+
+            // mocking UserManager
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            
+            // mocking SignInManager - no need to set up the method, just needs SignInManager to not be null
+            var contextAccessor = new Mock<IHttpContextAccessor>();
+            var userPrincipalFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
+            var mockSignInManager = new Mock<SignInManager<ApplicationUser>>(mockUserManager.Object,
+                contextAccessor.Object, userPrincipalFactory.Object, null, null, null, null);
+            mockSignInManager.Setup(sim => sim.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), false))
+                             .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success)
+                             .Verifiable();
+
+            var controller = new AccountController(mockUserManager.Object, mockSignInManager.Object);
+
+            // Act
+            var result = await controller.LogIn(newLogInVM);
+
+            // Assert
+            var requestResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", requestResult.ActionName);
+            Assert.Equal("Home", requestResult.ControllerName);
+            mockSignInManager.Verify(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), false), Times.Once);
+        }
 
 
-
-
-        //[Fact]
-        //public async Task LogIPost_ReturnsViewResult_WhenModelStateIsInvalid()
-        //{
-        //    // Arrange
-        //    var controller = new AccountController(userManager, signInManager);
-        //    controller.ModelState.AddModelError("Email", "Required");
-        //    var newLogInViewModel = new LogInViewModel();
-
-        //    // Act
-        //    var result = await controller.LogIn(newLogInViewModel);
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<ViewResult>(result);
-        //    Assert.IsAssignableFrom<LogInViewModel>(badRequestResult.ViewData.Model);
-        //}
-
-        //[Fact]
-        //public async Task LogInPost_ReturnsViewResultError_WhenModelStateIsValidAndSignInFails()
-        //{
-        //    // Arrange
-        //    // SignInAsync is not mocked and should fail
-        //    var controller = new AccountController(userManager, signInManager);
-        //    var newLogInViewModel = new LogInViewModel();
-
-        //    // Act
-        //    var result = await controller.LogIn(newLogInViewModel);
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<ViewResult>(result);
-        //    Assert.Equal("Error", badRequestResult.ViewName);
-        //}
-
-        //[Fact]
-        //public async Task LogOutPost_ReturnViewResultErrorOnFail()
-        //{
-        //    // Arrange
-        //    // SignOutAsync is not mocked and should fail
-        //    var controller = new AccountController(userManager, signInManager);
-
-        //    // Act
-        //    var result = await controller.LogOut();
-
-        //    // Assert
-        //    var viewResult = Assert.IsType<ViewResult>(result);
-        //    Assert.Equal("Error", viewResult.ViewName);
-        //}
 
         //[Fact]
         //public void AccessDeniedGet_ReturnAViewResult()
