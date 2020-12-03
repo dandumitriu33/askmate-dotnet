@@ -47,6 +47,7 @@ namespace Web.Controllers
                     {
                         await _signInManager.SignInAsync(user, isPersistent: true); // permanent, not just session
                         return RedirectToAction("Index", "Home");
+                        //return View("Index");
                     }
                     foreach (var error in result.Errors)
                     {
@@ -64,7 +65,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(registerViewModel);
+            return View("Register", registerViewModel);
         }
 
         [HttpGet]
@@ -99,7 +100,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(logInViewModel);
+            return View("LogIn", logInViewModel);
         }
 
         [HttpPost]

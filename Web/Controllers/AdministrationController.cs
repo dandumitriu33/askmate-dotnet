@@ -74,7 +74,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(roleViewModel);
+            return View("CreateRole", roleViewModel);
         }
 
         [HttpGet]
@@ -100,7 +100,7 @@ namespace Web.Controllers
                     Roles = roles,
                     UserLists = roleUsers
                 };
-                return View(rolesAndMembers);
+                return View("ListRoles", rolesAndMembers);
             }
             catch (DbUpdateException dbex)
             {
