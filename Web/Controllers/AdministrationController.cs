@@ -74,7 +74,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(roleViewModel);
+            return View("CreateRole", roleViewModel);
         }
 
         [HttpGet]

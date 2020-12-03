@@ -59,6 +59,28 @@ namespace Tests.Controller
         }
 
         [Fact]
+        public async Task CreateRolePost_ReturnViewOnCreateRoleFail()
+        {
+            // Arrange
+            RegisterViewModel newRegisterVM = new RegisterViewModel();
+
+            // mocking RoleManager
+            var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
+            mockRoleManager.Setup(rm => rm.CreateAsync(It.IsAny<IdentityRole>())).ReturnsAsync(IdentityResult.Failed());
+
+            var controller = new AdministrationController(mockRoleManager.Object, userManager, repository, mapper);
+            RoleViewModel tempRole = new RoleViewModel() { RoleName = "Test role name" };
+
+            // Act
+            var result = await controller.CreateRole(tempRole);
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("CreateRole", requestResult.ViewName);
+            mockRoleManager.Verify(x => x.CreateAsync(It.IsAny<IdentityRole>()), Times.Once);
+        }
+
+        [Fact]
         public async Task CreateRolePost_ReturnViewOnCreateRoleException()
         {
             // Arrange
