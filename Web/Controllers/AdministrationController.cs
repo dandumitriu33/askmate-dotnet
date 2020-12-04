@@ -117,22 +117,23 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> EditUsersInRole(string roleId)
         {
-            var role = await _roleManager.FindByIdAsync(roleId);
-            if (role == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var role = await _roleManager.FindByIdAsync(roleId);
+                if (role == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+
                 ViewData["roleId"] = roleId;
                 ViewData["roleName"] = role.Name;
 
                 List<ApplicationUser> allUsersFromDb = await _repository.GetAllUsers();
                 var allUsersViewModel = _mapper.Map<List<ApplicationUser>, List<ApplicationUserViewModel>>(allUsersFromDb);
 
-                return View(allUsersViewModel);
+                return View("EditUsersInRole", allUsersViewModel);
             }
             catch (DbUpdateException dbex)
             {
@@ -149,24 +150,24 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUserToRole(UserRoleViewModel userRoleViewModel)
         {
-            var user = await _userManager.FindByIdAsync(userRoleViewModel.UserId);
-            if (user == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var role = await _roleManager.FindByIdAsync(userRoleViewModel.RoleId);
-            if (role == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var user = await _userManager.FindByIdAsync(userRoleViewModel.UserId);
+                    if (user == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    var role = await _roleManager.FindByIdAsync(userRoleViewModel.RoleId);
+                    if (role == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
                     if ((await _userManager.IsInRoleAsync(user, role.Name)) == false)
                     {
                         IdentityResult result = await _userManager.AddToRoleAsync(user, role.Name);
@@ -195,22 +196,22 @@ namespace Web.Controllers
         [Route("administration/{roleId}/remove/{userEmail}")]
         public async Task<IActionResult> RemoveUserFromRole(string userEmail, string roleId)
         {
-            var user = await _userManager.FindByEmailAsync(userEmail);
-            if (user == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var role = await _roleManager.FindByIdAsync(roleId);
-            if (role == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                if (user == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var role = await _roleManager.FindByIdAsync(roleId);
+                if (role == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 if ((await _userManager.IsInRoleAsync(user, role.Name)) == true)
                 {
                     IdentityResult result = await _userManager.RemoveFromRoleAsync(user, role.Name);
@@ -236,15 +237,15 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> ManageUserClaims(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 var existingUserClaims = await _userManager.GetClaimsAsync(user);
                 var allClaims = await _repository.GetAllUserClaims();
                 var allClaimsViewModel = _mapper.Map<List<ApplicationClaim>, List<ApplicationClaimViewModel>>(allClaims);
@@ -256,7 +257,7 @@ namespace Web.Controllers
                     ExistingUserClaims = existingUserClaims,
                     AllClaims = allClaimsViewModel
                 };
-                return View(allInfo);
+                return View("ManageUserClaims", allInfo);
             }
             catch (DbUpdateException dbex)
             {
@@ -273,24 +274,24 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> AddClaimToUser(ClaimModificationViewModel claimModificationViewModel)
         {
-            var claimFromDb = await _repository.GetApplicationClaimById(claimModificationViewModel.ClaimId);
-            if (claimFromDb == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
-            if (user == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var claimFromDb = await _repository.GetApplicationClaimById(claimModificationViewModel.ClaimId);
+                    if (claimFromDb == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
+                    if (user == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
                     string claimType = claimFromDb.ClaimType;
                     string claimValue = claimFromDb.ClaimValue;
 
@@ -316,30 +317,31 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return RedirectToAction("ManageUserClaims", new { userId = user.Id });
+            return RedirectToAction("ManageUserClaims", new { userId = claimModificationViewModel.UserId });
         }
 
         [HttpPost]
         public async Task<IActionResult> RemoveClaimFromUser(ClaimModificationViewModel claimModificationViewModel)
         {
-            var claimFromDb = await _repository.GetApplicationClaimById(claimModificationViewModel.ClaimId);
-            if (claimFromDb == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
-            if (user == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
+            
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var claimFromDb = await _repository.GetApplicationClaimById(claimModificationViewModel.ClaimId);
+                    if (claimFromDb == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
+                    if (user == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
                     string claimType = claimFromDb.ClaimType;
                     string claimValue = claimFromDb.ClaimValue;
 
@@ -351,7 +353,7 @@ namespace Web.Controllers
                     }
                     else
                     {
-                        throw new Exception("Claim attachment error.");
+                        throw new Exception("Claim detachment error.");
                     }
                 }
                 catch (DbUpdateException dbex)
@@ -365,7 +367,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return RedirectToAction("ManageUserClaims", new { userId = user.Id });
+            return RedirectToAction("ManageUserClaims", new { userId = claimModificationViewModel.UserId });
         }
     }
 }
