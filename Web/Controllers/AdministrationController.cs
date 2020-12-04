@@ -150,24 +150,24 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> AddUserToRole(UserRoleViewModel userRoleViewModel)
         {
-            var user = await _userManager.FindByIdAsync(userRoleViewModel.UserId);
-            if (user == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var role = await _roleManager.FindByIdAsync(userRoleViewModel.RoleId);
-            if (role == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var user = await _userManager.FindByIdAsync(userRoleViewModel.UserId);
+                    if (user == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    var role = await _roleManager.FindByIdAsync(userRoleViewModel.RoleId);
+                    if (role == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
                     if ((await _userManager.IsInRoleAsync(user, role.Name)) == false)
                     {
                         IdentityResult result = await _userManager.AddToRoleAsync(user, role.Name);
