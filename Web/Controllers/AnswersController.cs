@@ -157,24 +157,24 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditAnswer(AnswerViewModel answerViewModel)
         {
-            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerViewModel.Id);
-            if (answer == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answer.QuestionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerViewModel.Id);
+                    if (answer == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answer.QuestionId);
+                    if (question == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
                     if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
                     {
                         return RedirectToAction("AccessDenied", "Account");
@@ -182,14 +182,13 @@ namespace Web.Controllers
                     var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
                     answerViewModel.UserId = currentlyLoggedInUser.Id;
                     string uniqueFileName = null;
-                    if (answerViewModel.Image != null)
+                    if (answerViewModel.Image != null && _fileOperations.ValidateImageType(answerViewModel.Image.FileName) == true)
                     {
-                        // for more advanced projects add a composite file provider - for now wwwroot
-                        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
-                        string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                        uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
-                        string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
-                        await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                        uniqueFileName = await SetPathAndUpload(answerViewModel);
+                    }
+                    else if (answerViewModel.Image != null && _fileOperations.ValidateImageType(answerViewModel.Image.FileName) == false)
+                    {
+                        return View("EditAnswer", answerViewModel);
                     }
                     answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
                     answer.ImageNamePath = uniqueFileName;
@@ -391,6 +390,8 @@ namespace Web.Controllers
         // helper methods
         private async Task<string> SetPathAndUpload(AnswerViewModel answerViewModel)
         {
+            // for more advanced projects add a composite file provider - for now wwwroot
+            // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
             string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
             string uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
             string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
