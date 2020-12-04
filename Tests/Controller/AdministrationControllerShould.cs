@@ -352,6 +352,56 @@ namespace Tests.Controller
         }
 
         [Fact]
+        public async Task AddUserToRolePost_RedirectToActionOnModelInvalid()
+        {
+            // Arrange
+
+            // mocking UserManager            
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            ApplicationUser tempUser = new ApplicationUser { Email = "test@email.com" };
+            mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(tempUser).Verifiable();
+            mockUserManager.Setup(um => um.IsInRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>())).ReturnsAsync(false).Verifiable();
+            mockUserManager.Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success).Verifiable();
+
+            // mocking RoleManager
+            var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
+            IdentityRole tempRole = new IdentityRole() { Name = "Test Role" };
+            mockRoleManager.Setup(rm => rm.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(tempRole).Verifiable();
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new AdministrationController(mockRoleManager.Object, mockUserManager.Object, repository, mapper)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+            UserRoleViewModel tempUserRoleViewModel = new UserRoleViewModel
+            {
+                RoleId = "abcd",
+                UserId = "efgh"
+            };
+            controller.ModelState.AddModelError("RoleId", "Required");
+
+            // Act
+            var result = await controller.AddUserToRole(tempUserRoleViewModel);
+
+            // Assert
+            var requestResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("ListRoles", requestResult.ActionName);
+            Assert.Equal("Administration", requestResult.ControllerName);
+            mockRoleManager.Verify(rm => rm.FindByIdAsync(It.IsAny<string>()), Times.Never);
+            mockUserManager.Verify(um => um.FindByIdAsync(It.IsAny<string>()), Times.Never);
+            mockUserManager.Verify(um => um.IsInRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+            mockUserManager.Verify(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
         public async Task AddUserToRolePost_EditUsersInRoleViewOnAlreadyInRole()
         {
             // Arrange
