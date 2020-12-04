@@ -57,6 +57,37 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
         }
 
+        [Fact]
+        public async Task AddAnswerGet_ReturnViewErrorOnException()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Question tempQuestion = new Question { Id = 1, Title = "Test Title" };
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).Throws(new Exception()).Verifiable();
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+
+            // Act
+            var result = await controller.AddAnswer(1);
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+        }
 
 
 
@@ -159,7 +190,7 @@ namespace Tests.Controller
         //        .ReturnsAsync(GetQuestionWithoutDetails());
         //    mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(1))
         //        .ReturnsAsync(GetAnswerWithoutDetails());
-            
+
         //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
 
         //    // Act
