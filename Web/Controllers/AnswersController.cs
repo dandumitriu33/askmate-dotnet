@@ -111,42 +111,33 @@ namespace Web.Controllers
             return View("AddAnswer", answerViewModel);
         }
 
-        public async Task<string> SetPathAndUpload(AnswerViewModel answerViewModel)
-        {
-            string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-            string uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
-            string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
-            await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
-            return uniqueFileName;
-        }
-
         // GET: AnswersController/5/Edit
         [HttpGet]
         [Route("answers/{answerId}/edit")]
         public async Task<IActionResult> EditAnswer(int answerId)
         {
-            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
-            if (answer == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answer.QuestionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+                if (answer == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answer.QuestionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
                 {
                     return RedirectToAction("AccessDenied", "Account");
                 }
                 var answerViewModel = _mapper.Map<Answer, AnswerViewModel>(answer);
-                return View(answerViewModel);
+                return View("EditAnswer", answerViewModel);
             }
             catch (DbUpdateException dbex)
             {
@@ -396,5 +387,16 @@ namespace Web.Controllers
             }
             return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
+
+        // helper methods
+        private async Task<string> SetPathAndUpload(AnswerViewModel answerViewModel)
+        {
+            string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+            string uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
+            string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+            await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+            return uniqueFileName;
+        }
+
     }
 }
