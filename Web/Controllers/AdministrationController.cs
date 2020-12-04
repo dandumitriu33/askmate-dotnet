@@ -196,22 +196,22 @@ namespace Web.Controllers
         [Route("administration/{roleId}/remove/{userEmail}")]
         public async Task<IActionResult> RemoveUserFromRole(string userEmail, string roleId)
         {
-            var user = await _userManager.FindByEmailAsync(userEmail);
-            if (user == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var role = await _roleManager.FindByIdAsync(roleId);
-            if (role == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                if (user == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var role = await _roleManager.FindByIdAsync(roleId);
+                if (role == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 if ((await _userManager.IsInRoleAsync(user, role.Name)) == true)
                 {
                     IdentityResult result = await _userManager.RemoveFromRoleAsync(user, role.Name);
