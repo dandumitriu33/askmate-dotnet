@@ -769,7 +769,50 @@ namespace Tests.Controller
             mockRepo.Verify(um => um.GetAllUserClaims(), Times.Once);
         }
 
+        [Fact]
+        public async Task ManageUserClaimsGet_ErrorViewOnNullUser()
+        {
+            // Arrange
 
+            // mocking UserManager            
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            ApplicationUser tempUser = null;
+            mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(tempUser).Verifiable();
+            mockUserManager.Setup(um => um.GetClaimsAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(GetClaimsListForMock()).Verifiable();
+
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetAllUserClaims()).ReturnsAsync(GetApplicationClaimsListForMock()).Verifiable();
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new AdministrationController(roleManager, mockUserManager.Object, mockRepo.Object, realMapper)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+
+            // Act
+            var result = await controller.ManageUserClaims("abcd");
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockUserManager.Verify(um => um.FindByIdAsync(It.IsAny<string>()), Times.Once);
+            mockUserManager.Verify(um => um.GetClaimsAsync(It.IsAny<ApplicationUser>()), Times.Never);
+            mockRepo.Verify(um => um.GetAllUserClaims(), Times.Never);
+        }
 
 
 
