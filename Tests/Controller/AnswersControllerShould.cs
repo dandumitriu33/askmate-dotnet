@@ -8,9 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Tests.Shared;
+using Web.AutomapperProfiles;
 using Web.Controllers;
 using Web.ViewModels;
 using Xunit;
@@ -120,6 +123,65 @@ namespace Tests.Controller
             Assert.Equal("Error", requestResult.ViewName);
             mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
         }
+
+        [Fact]
+        public async Task AddAnswerPost_RedirectToDetailsOnSuccess() // NOT TESTING WITH IMAGE - too advanced for me at this time
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Question tempQuestion = new Question { Id = 1, Title = "Test Title" };
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempQuestion).Verifiable();
+            mockRepo.Setup(repo => repo.AddAnswerAsync(It.IsAny<Answer>())).ReturnsAsync(new Answer()).Verifiable();
+
+            // mocking UserManager            
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            ApplicationUser tempUser = new ApplicationUser { Id = "abcd", Email = "test@email.com" };
+            mockUserManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(tempUser).Verifiable();
+
+            // mock fileOperations
+            var mockFileOperations = new Mock<IFileOperations>();
+            mockFileOperations.Setup(fo => fo.ValidateImageType(It.IsAny<string>())).Returns(false).Verifiable();
+
+            //// controller mock for SetPathAndUpload(answerViewModel)
+            //var mockController = new Mock<AnswersController>();
+            //mockController.Setup(c => c.SetPathAndUpload(It.IsAny<AnswerViewModel>())).ReturnsAsync("TestUniqueFileName").Verifiable();
+
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new AnswersController(mockRepo.Object, realMapper, webHostEnvironment, mockFileOperations.Object, mockUserManager.Object)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+            FormFile tempFormFile = new FormFile(new MemoryStream(), 123, 123, "test", "test.xyz");
+            AnswerViewModel tempAnswerViewModel = new AnswerViewModel { QuestionId = 1, UserId = "abcd", Image = tempFormFile };
+
+            // Act
+            var result = await controller.AddAnswer(tempAnswerViewModel);
+
+            // Assert
+            var requestResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Details", requestResult.ActionName);
+            Assert.Equal("Questions", requestResult.ControllerName);
+            mockRepo.Verify(r => r.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(r => r.AddAnswerAsync(It.IsAny<Answer>()), Times.Once);
+            mockUserManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+            mockFileOperations.Verify(fo => fo.ValidateImageType(It.IsAny<string>()), Times.Once);
+        }
+
+
 
 
 

@@ -74,28 +74,23 @@ namespace Web.Controllers
         [Route("answers/addanswer/{questionId}")]
         public async Task<IActionResult> AddAnswer(AnswerViewModel answerViewModel)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answerViewModel.QuestionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answerViewModel.QuestionId);
+                    if (question == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
                     var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
                     answerViewModel.UserId = currentlyLoggedInUser.Id;
                     string uniqueFileName = null;
                     if (answerViewModel.Image != null && _fileOperations.ValidateImageType(answerViewModel.Image.FileName) == true)
                     {
-                        // for more advanced projects add a composite file provider - for now wwwroot
-                        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
-                        string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                        uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
-                        string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
-                        await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                        uniqueFileName = await SetPathAndUpload(answerViewModel);
                     }
                     var answer = _mapper.Map<AnswerViewModel, Answer>(answerViewModel);
                     answer.ImageNamePath = uniqueFileName;
@@ -114,6 +109,15 @@ namespace Web.Controllers
                 }
             }
             return View(answerViewModel);
+        }
+
+        public async Task<string> SetPathAndUpload(AnswerViewModel answerViewModel)
+        {
+            string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+            string uniqueFileName = _fileOperations.AssembleAnswerUploadedFileName(answerViewModel.UserId, answerViewModel.Image.FileName);
+            string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+            await answerViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+            return uniqueFileName;
         }
 
         // GET: AnswersController/5/Edit
