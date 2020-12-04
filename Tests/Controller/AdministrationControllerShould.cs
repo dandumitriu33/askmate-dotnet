@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Tests.Shared;
+using Web.AutomapperProfiles;
 using Web.Controllers;
 using Web.ViewModels;
 using Xunit;
@@ -40,7 +41,6 @@ namespace Tests.Controller
         public async Task CreateRolePost_RedirectToListRoles()
         {
             // Arrange
-            RegisterViewModel newRegisterVM = new RegisterViewModel();
 
             // mocking RoleManager
             var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
@@ -63,7 +63,6 @@ namespace Tests.Controller
         public async Task CreateRolePost_ReturnViewOnCreateRoleFail()
         {
             // Arrange
-            RegisterViewModel newRegisterVM = new RegisterViewModel();
 
             // mocking RoleManager
             var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
@@ -85,7 +84,6 @@ namespace Tests.Controller
         public async Task CreateRolePost_ReturnViewOnCreateRoleException()
         {
             // Arrange
-            RegisterViewModel newRegisterVM = new RegisterViewModel();
 
             // mocking RoleManager
             var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
@@ -107,7 +105,6 @@ namespace Tests.Controller
         public async Task CreateRolePost_ReturnCreateRoleViewOnModelInvalid()
         {
             // Arrange
-            RegisterViewModel newRegisterVM = new RegisterViewModel();
 
             // mocking RoleManager
             var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
@@ -131,7 +128,6 @@ namespace Tests.Controller
         public async Task ListRolesGet_RedirectToListRoles()
         {
             // Arrange
-            RegisterViewModel newRegisterVM = new RegisterViewModel();
 
             // mocking UserManager
             var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
@@ -161,7 +157,6 @@ namespace Tests.Controller
         public async Task ListRolesGet_ReturnsErrorViewOnException()
         {
             // Arrange
-            RegisterViewModel newRegisterVM = new RegisterViewModel();
 
             // mocking UserManager
             var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
@@ -183,6 +178,51 @@ namespace Tests.Controller
             Assert.Equal("Error", requestResult.ViewName);
             mockUserManager.Verify(x => x.GetUsersInRoleAsync(It.IsAny<string>()), Times.Never);
         }
+
+        [Fact]
+        public async Task EditUsersInRoleGet_RedirectToListRoles()
+        {
+            // Arrange
+
+            // mocking RoleManager
+            var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
+            IdentityRole newRole = new IdentityRole { Name = "Test Role" };
+            mockRoleManager.Setup(rm => rm.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(newRole).Verifiable();
+
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetAllUsers())
+                .ReturnsAsync(GetAllUsersForMock());
+
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            var controller = new AdministrationController(mockRoleManager.Object, userManager, mockRepo.Object, realMapper);
+
+            // Act
+            var result = await controller.EditUsersInRole("abcdefg");
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("EditUsersInRole", requestResult.ViewName);
+            mockRoleManager.Verify(x => x.FindByIdAsync(It.IsAny<string>()), Times.Once);
+            mockRepo.Verify(repo => repo.GetAllUsers(), Times.Once);
+        }
+
+        private List<ApplicationUser> GetAllUsersForMock()
+        {
+            ApplicationUser tempUser = new ApplicationUser
+            {
+                Id = "abcd",
+                Email = "test@email.com"
+            };
+            List<ApplicationUser> tempList = new List<ApplicationUser>();
+            tempList.Add(tempUser);
+            return tempList;
+        }
+
 
 
 
