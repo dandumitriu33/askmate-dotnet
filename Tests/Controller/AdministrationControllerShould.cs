@@ -859,6 +859,53 @@ namespace Tests.Controller
             mockRepo.Verify(um => um.GetAllUserClaims(), Times.Never);
         }
 
+        [Fact]
+        public async Task AddClaimToUserPost_ManageUserClaimsRedirectToActionOnSuccess()
+        {
+            // Arrange
+
+            // mocking UserManager            
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            ApplicationUser tempUser = new ApplicationUser { Email = "test@email.com" };
+            mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(tempUser).Verifiable();
+            mockUserManager.Setup(um => um.AddClaimAsync(It.IsAny<ApplicationUser>(), It.IsAny<Claim>())).ReturnsAsync(IdentityResult.Success).Verifiable();
+
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            ApplicationClaim tempClaim = new ApplicationClaim() { ClaimType = ClaimTypes.Name, ClaimValue = "Test name" };
+            mockRepo.Setup(repo => repo.GetApplicationClaimById(It.IsAny<int>())).ReturnsAsync(tempClaim).Verifiable();
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new AdministrationController(roleManager, mockUserManager.Object, mockRepo.Object, mapper)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+            ClaimModificationViewModel tempClaimModificationVM = new ClaimModificationViewModel { ClaimId = 123, UserId = "abcd" };
+
+            // Act
+            var result = await controller.AddClaimToUser(tempClaimModificationVM);
+
+            // Assert
+            var requestResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("ManageUserClaims", requestResult.ActionName);
+            mockUserManager.Verify(um => um.FindByIdAsync(It.IsAny<string>()), Times.Once);
+            mockUserManager.Verify(um => um.AddClaimAsync(It.IsAny<ApplicationUser>(), It.IsAny<Claim>()), Times.Once);
+            mockRepo.Verify(um => um.GetApplicationClaimById(It.IsAny<int>()), Times.Once);
+        }
+
+
+
+
+
+
 
 
 
