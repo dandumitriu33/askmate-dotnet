@@ -108,7 +108,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(answerViewModel);
+            return View("AddAnswer", answerViewModel);
         }
 
         public async Task<string> SetPathAndUpload(AnswerViewModel answerViewModel)
