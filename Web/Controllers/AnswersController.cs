@@ -206,7 +206,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(answerViewModel);
+            return View("EditAnswer", answerViewModel);
         }
 
         // Get: AnswersController/5/Remove
