@@ -323,24 +323,25 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> RemoveClaimFromUser(ClaimModificationViewModel claimModificationViewModel)
         {
-            var claimFromDb = await _repository.GetApplicationClaimById(claimModificationViewModel.ClaimId);
-            if (claimFromDb == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
-            if (user == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
+            
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var claimFromDb = await _repository.GetApplicationClaimById(claimModificationViewModel.ClaimId);
+                    if (claimFromDb == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    var user = await _userManager.FindByIdAsync(claimModificationViewModel.UserId);
+                    if (user == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
                     string claimType = claimFromDb.ClaimType;
                     string claimValue = claimFromDb.ClaimValue;
 
@@ -366,7 +367,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return RedirectToAction("ManageUserClaims", new { userId = user.Id });
+            return RedirectToAction("ManageUserClaims", new { userId = claimModificationViewModel.UserId });
         }
     }
 }
