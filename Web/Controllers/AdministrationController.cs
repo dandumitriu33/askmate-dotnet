@@ -117,15 +117,16 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> EditUsersInRole(string roleId)
         {
-            var role = await _roleManager.FindByIdAsync(roleId);
-            if (role == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var role = await _roleManager.FindByIdAsync(roleId);
+                if (role == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+
                 ViewData["roleId"] = roleId;
                 ViewData["roleName"] = role.Name;
 

@@ -233,6 +233,7 @@ namespace Tests.Controller
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
             var realMapper = new Mapper(configuration);
 
+            // mocking Response.StatusCode = 404 setter
             var mockHttpContext = new Mock<HttpContext>();
             var response = new Mock<HttpResponse>();
             mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
@@ -255,6 +256,53 @@ namespace Tests.Controller
             mockRoleManager.Verify(x => x.FindByIdAsync(It.IsAny<string>()), Times.Once);
             mockRepo.Verify(repo => repo.GetAllUsers(), Times.Never);
         }
+
+        [Fact]
+        public async Task EditUsersInRoleGet_ErrorViewOnException()
+        {
+            // Arrange
+
+            // mocking RoleManager
+            var mockRoleManager = MockHelpers.MockRoleManager<IdentityRole>();
+            //IdentityRole newRole = new IdentityRole { Name = "Test Role" };
+            IdentityRole newRole = null;
+            mockRoleManager.Setup(rm => rm.FindByIdAsync(It.IsAny<string>())).Throws(new Exception()).Verifiable();
+
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetAllUsers())
+                .ReturnsAsync(GetAllUsersForMock());
+
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new AdministrationController(mockRoleManager.Object, userManager, mockRepo.Object, realMapper)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            }; ;
+
+            // Act
+            var result = await controller.EditUsersInRole("abcdefg");
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockRoleManager.Verify(x => x.FindByIdAsync(It.IsAny<string>()), Times.Once);
+            mockRepo.Verify(repo => repo.GetAllUsers(), Times.Never);
+        }
+
+
 
 
 
