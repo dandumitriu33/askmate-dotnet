@@ -353,7 +353,7 @@ namespace Web.Controllers
                     }
                     else
                     {
-                        throw new Exception("Claim attachment error.");
+                        throw new Exception("Claim detachment error.");
                     }
                 }
                 catch (DbUpdateException dbex)
