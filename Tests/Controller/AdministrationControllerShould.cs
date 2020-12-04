@@ -8,6 +8,7 @@ using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Tests.Shared;
@@ -723,12 +724,78 @@ namespace Tests.Controller
             mockUserManager.Verify(um => um.RemoveFromRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()), Times.Never);
         }
 
+        [Fact]
+        public async Task ManageUserClaimsGet_ManageUserClaimsViewOnSuccess()
+        {
+            // Arrange
+
+            // mocking UserManager            
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            ApplicationUser tempUser = new ApplicationUser { Email = "test@email.com" };
+            mockUserManager.Setup(um => um.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(tempUser).Verifiable();
+            mockUserManager.Setup(um => um.GetClaimsAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(GetClaimsListForMock()).Verifiable();
+
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetAllUserClaims()).ReturnsAsync(GetApplicationClaimsListForMock()).Verifiable();
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new AdministrationController(roleManager, mockUserManager.Object, mockRepo.Object, realMapper)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+
+            // Act
+            var result = await controller.ManageUserClaims("abcd");
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("ManageUserClaims", requestResult.ViewName);
+            mockUserManager.Verify(um => um.FindByIdAsync(It.IsAny<string>()), Times.Once);
+            mockUserManager.Verify(um => um.GetClaimsAsync(It.IsAny<ApplicationUser>()), Times.Once);
+            mockRepo.Verify(um => um.GetAllUserClaims(), Times.Once);
+        }
+
+
+
+
+
+
 
 
 
 
 
         // helper methods
+
+        private List<Claim> GetClaimsListForMock()
+        {
+            var claims = new List<Claim>();
+            claims.Add(new Claim(ClaimTypes.Name, "Brock"));
+            claims.Add(new Claim(ClaimTypes.Email, "brockallen@gmail.com"));
+            return claims;
+        }
+
+        private List<ApplicationClaim> GetApplicationClaimsListForMock()
+        {
+            var applicationClaims = new List<ApplicationClaim>();
+            applicationClaims.Add(new ApplicationClaim() { ClaimType = ClaimTypes.Name, ClaimValue = "Test name" });
+            applicationClaims.Add(new ApplicationClaim() { ClaimType = ClaimTypes.Email, ClaimValue = "test@email.com" });
+            return applicationClaims;
+        }
 
         private List<ApplicationUser> GetAllUsersForMock()
         {

@@ -237,15 +237,15 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> ManageUserClaims(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 var existingUserClaims = await _userManager.GetClaimsAsync(user);
                 var allClaims = await _repository.GetAllUserClaims();
                 var allClaimsViewModel = _mapper.Map<List<ApplicationClaim>, List<ApplicationClaimViewModel>>(allClaims);
@@ -257,7 +257,7 @@ namespace Web.Controllers
                     ExistingUserClaims = existingUserClaims,
                     AllClaims = allClaimsViewModel
                 };
-                return View(allInfo);
+                return View("ManageUserClaims", allInfo);
             }
             catch (DbUpdateException dbex)
             {
