@@ -43,16 +43,29 @@ namespace Web.Controllers
         [Route("answers/addanswer/{questionId}")]
         public async Task<IActionResult> AddAnswer(int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
+            try
             {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
             var answerViewModel = new AnswerViewModel();
             answerViewModel.QuestionId = questionId;
-            return View(answerViewModel);
+            return View("AddAnswer", answerViewModel);
         }
 
         // POST: AnswersController/AddAnswer

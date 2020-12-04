@@ -246,7 +246,7 @@ namespace Tests.Controller
                 {
                     HttpContext = mockHttpContext.Object
                 }
-            }; ;
+            };
 
             // Act
             var result = await controller.EditUsersInRole("abcdefg");
@@ -1114,9 +1114,6 @@ namespace Tests.Controller
         }
 
 
-
-
-
         // helper methods
 
         private List<Claim> GetClaimsListForMock()
@@ -1146,55 +1143,6 @@ namespace Tests.Controller
             tempList.Add(tempUser);
             return tempList;
         }
-
-
-
-
-        //[Fact]
-        //public async Task CreateRolePost_ReturnsViewResult_WhenModelStateIsInvalid()
-        //{
-        //    // Arrange
-        //    var controller = new AdministrationController(roleManager, userManager, repository, mapper);
-        //    controller.ModelState.AddModelError("RoleName", "Required");
-        //    var newRoleViewModel = new RoleViewModel();
-
-        //    // Act
-        //    var result = await controller.CreateRole(newRoleViewModel);
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<ViewResult>(result);
-        //    var model = Assert.IsAssignableFrom<RoleViewModel>(badRequestResult.ViewData.Model);
-        //    Assert.NotEqual("Error", badRequestResult.ViewName);
-        //}
-
-        //[Fact]
-        //public async Task CreateRolePost_ReturnsViewResult_WhenModelStateIsValidCreateFails()
-        //{
-        //    // Arrange
-        //    var controller = new AdministrationController(roleManager, userManager, repository, mapper);
-        //    var newRoleViewModel = new RoleViewModel();
-
-        //    // Act
-        //    var result = await controller.CreateRole(newRoleViewModel);
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<ViewResult>(result);
-        //    Assert.Equal("Error", badRequestResult.ViewName);
-        //}
-
-        //[Fact]
-        //public async Task ListRolesGet_ReturnAResult()
-        //{
-        //    // Arrange
-        //    var controller = new AdministrationController(roleManager, userManager, repository, mapper);
-
-        //    // Act
-        //    var result = await controller.ListRoles();
-
-        //    // Assert
-        //    var badRequestResult = Assert.IsType<ViewResult>(result);
-        //    Assert.Equal("Error", badRequestResult.ViewName);
-        //}
 
     }
 }
