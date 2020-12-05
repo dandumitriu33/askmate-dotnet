@@ -185,26 +185,39 @@ namespace Web.Controllers
         [Route("comments/questionComments/{questionCommentId}/edit")]
         public async Task<IActionResult> EditQuestionComment(int questionCommentId)
         {
-            var questionComment = await _repository.GetQuestionCommentById(questionCommentId);
-            if (questionComment == null)
+            try
             {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
+                var questionComment = await _repository.GetQuestionCommentById(questionCommentId);
+                if (questionComment == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionComment.QuestionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), questionComment.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
+                var questionCommentViewModel = _mapper.Map<QuestionComment, QuestionCommentViewModel>(questionComment);
+                return View("EditQuestionComment", questionCommentViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
                 return View("Error");
             }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionComment.QuestionId);
-            if (question == null)
+            catch (Exception ex)
             {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
+                ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
-            }            
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), questionComment.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
             }
-            var questionCommentViewModel = _mapper.Map<QuestionComment, QuestionCommentViewModel>(questionComment);
-            return View(questionCommentViewModel);
         }
 
         // GET: CommentsController/answerComments/5/Edit
