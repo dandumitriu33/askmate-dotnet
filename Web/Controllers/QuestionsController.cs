@@ -110,7 +110,7 @@ namespace Web.Controllers
         [HttpGet]
         public IActionResult AddQuestion()
         {
-            return View();            
+            return View("AddQuestion");            
         }
 
         // POST: QuestionsController/AddQuestion
