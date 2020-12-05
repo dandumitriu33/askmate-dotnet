@@ -37,7 +37,7 @@ namespace Web.Controllers
             {
                 var latestQuestions = await _repository.GetLatestQuestions(numberOfQuestions);
                 var latestQuestionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(latestQuestions);
-                return View(latestQuestionsViewModel);
+                return View("Index", latestQuestionsViewModel);
             }
             catch (DbUpdateException dbex)
             {
