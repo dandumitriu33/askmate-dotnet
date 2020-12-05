@@ -49,8 +49,8 @@ namespace Web.Controllers
         {
             try
             {
-                var tempQuestion = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-                if (tempQuestion == null)
+                var simpleQuestion = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (simpleQuestion == null)
                 {
                     Response.StatusCode = 404;
                     ViewData["ErrorMessage"] = "404 Resource not found.";
