@@ -214,26 +214,26 @@ namespace Web.Controllers
         [Route("answers/remove/{answerId}")]
         public async Task<IActionResult> Remove(int answerId, int questionId)
         {
-            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
-            if (answer == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answer.QuestionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             try
             {
+                var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+                if (answer == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answer.QuestionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answer.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
                 await _repository.RemoveAnswerById(answerId);
             }
             catch (DbUpdateException dbex)
