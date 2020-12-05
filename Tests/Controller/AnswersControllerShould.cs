@@ -964,186 +964,235 @@ namespace Tests.Controller
             mockRepo.Verify(mr => mr.RemoveAnswerById(It.IsAny<int>()), Times.Never);
         }
 
+        [Fact]
+        public async Task RemoveImageGet_RedirectToDetailsOnSuccess()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Answer tempAnswer = new Answer { Id = 1, Body = "Test Body", UserId = "abcd" };
+            mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempAnswer).Verifiable();
+            Question tempQuestion = new Question { Id = 1, Title = "Test Title" };
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempQuestion).Verifiable();
+            mockRepo.Setup(repo => repo.RemoveAnswerImageByAnswerId(It.IsAny<int>())).Verifiable();
 
+            // mock ClaimsPrincipal
+            // https://stackoverflow.com/questions/38557942/mocking-iprincipal-in-asp-net-core
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, "example name"),
+                new Claim(ClaimTypes.NameIdentifier, "abcd"),
+                new Claim("custom-claim", "example claim value"),
+            }, "mock"));
 
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
 
+            //creates an instance of an asp.net mvc controller
+            var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = user }
+            };
 
+            // Act
+            var result = await controller.RemoveImage(1, 1);
 
-
-
-            //[Fact]
-            //public async Task AddAnswerGet_ReturnAViewResult()
-            //{
-            //    // Arrange
-            //    var mockRepo = new Mock<IAsyncRepository>();
-            //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
-            //        .ReturnsAsync(GetQuestionWithoutDetails());
-            //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
-
-            //    // Act
-            //    var result = await controller.AddAnswer(1);
-
-            //    // Assert
-            //    var viewResult = Assert.IsType<ViewResult>(result);
-            //    Assert.NotEqual("Error", viewResult.ViewName);
-            //}
-
-            //[Fact]
-            //public async Task AddAnswerPost_ReturnErrorView()
-            //{
-            //    // Arrange - question exists, model is valid, processing fails
-            //    var mockRepo = new Mock<IAsyncRepository>();
-            //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
-            //        .ReturnsAsync(GetQuestionWithoutDetails());
-            //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
-            //    AnswerViewModel answerViewModel = new AnswerViewModel
-            //    {
-            //        Id = 1,
-            //        QuestionId = 1,
-            //        Body = "Test Body"
-            //    };
-
-            //    // Act
-            //    var result = await controller.AddAnswer(answerViewModel);
-
-            //    // Assert
-            //    var viewResult = Assert.IsType<ViewResult>(result);
-            //    Assert.Equal("Error", viewResult.ViewName);
-            //}
-
-            //[Fact]
-            //public async Task AddAnswerPost_ReturnViewModelInvalid()
-            //{
-            //    // Arrange - question exists, model is invalid, processing doesn't start
-            //    var mockRepo = new Mock<IAsyncRepository>();
-            //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
-            //        .ReturnsAsync(GetQuestionWithoutDetails());
-            //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
-            //    AnswerViewModel answerViewModel = new AnswerViewModel
-            //    {
-            //        Id = 1,
-            //        QuestionId = 1,
-            //        Body = ""
-            //    };
-            //    controller.ModelState.AddModelError("Body", "Required");
-
-            //    // Act
-            //    var result = await controller.AddAnswer(answerViewModel);
-
-            //    // Assert
-            //    var viewResult = Assert.IsType<ViewResult>(result);
-            //    Assert.NotEqual("Error", viewResult.ViewName);
-            //}
-
-            //[Fact]
-            //public async Task AddAnswerPost_ReturnErrorQuestionInvalid()
-            //{
-            //    // Arrange - question doesn't exist, model is valid, processing doesn't start
-            //    var mockRepo = new Mock<IAsyncRepository>();
-            //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
-            //        .ReturnsAsync(GetQuestionWithoutDetails());
-            //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
-            //    AnswerViewModel answerViewModel = new AnswerViewModel
-            //    {
-            //        Id = 1,
-            //        QuestionId = 1,
-            //        Body = "Test Body"
-            //    };
-
-            //    // Act
-            //    var result = await controller.AddAnswer(answerViewModel);
-
-            //    // Assert
-            //    var viewResult = Assert.IsType<ViewResult>(result);
-            //    Assert.Equal("Error", viewResult.ViewName);
-            //}
-
-            //[Fact]
-            //public async Task EditAnswerGet_ReturnErrorViewResultForAccessCheckFail()
-            //{
-            //    // Arrange
-            //    // access denied result test - UserManager mock needed for more
-            //    var mockRepo = new Mock<IAsyncRepository>();
-            //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
-            //        .ReturnsAsync(GetQuestionWithoutDetails());
-            //    mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(1))
-            //        .ReturnsAsync(GetAnswerWithoutDetails());
-
-            //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
-
-            //    // Act
-            //    var result = await controller.EditAnswer(1);
-
-            //    // Assert
-            //    var viewResult = Assert.IsType<ViewResult>(result);
-            //    Assert.Equal("Error", viewResult.ViewName);
-            //}
-
-            //[Fact]
-            //public async Task EditAnswerPost_ReturnErrorViewResultForModelInvalid()
-            //{
-            //    // Arrange
-            //    var mockRepo = new Mock<IAsyncRepository>();
-            //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
-            //        .ReturnsAsync(GetQuestionWithoutDetails());
-            //    mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(1))
-            //        .ReturnsAsync(GetAnswerWithoutDetails());
-            //    AnswerViewModel tempAnswerViewModel = new AnswerViewModel
-            //    {
-            //        Id = 1,
-            //        QuestionId = 1,
-            //        Body = "Test Body",
-            //        UserId = "abcd"
-            //    };
-
-            //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
-            //    controller.ModelState.AddModelError("Body", "Required");
-
-            //    // Act
-            //    var result = await controller.EditAnswer(tempAnswerViewModel);
-
-            //    // Assert
-            //    var viewResult = Assert.IsType<ViewResult>(result);
-            //    Assert.NotEqual("Error", viewResult.ViewName);
-            //}
-
-
-
-
-
-
-
-            // helper methods
-
-            //private Question GetQuestionWithoutDetails()
-            //{
-            //    Question tempQuestion = new Question
-            //    {
-            //        Id = 1,
-            //        Title = "Test Title",
-            //        Body = "Test Body"
-            //    };
-            //    return tempQuestion;
-            //}
-
-            //private Question GetQuestionWithoutDetailsNull()
-            //{
-            //    Question tempQuestion = null;
-            //    return tempQuestion;
-            //}
-
-            //private Answer GetAnswerWithoutDetails()
-            //{
-            //    Answer tempAnswer = new Answer
-            //    {
-            //        Id = 1,
-            //        QuestionId = 1,
-            //        Body = "Test Body",
-            //        UserId = "abcd"
-            //    };
-            //    return tempAnswer;
-            //}
-
-
+            // Assert
+            var requestResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Details", requestResult.ActionName);
+            Assert.Equal("Questions", requestResult.ControllerName);
+            mockRepo.Verify(mr => mr.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(mr => mr.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(mr => mr.RemoveAnswerImageByAnswerId(It.IsAny<int>()), Times.Once);
         }
+
+
+
+
+
+
+        //[Fact]
+        //public async Task AddAnswerGet_ReturnAViewResult()
+        //{
+        //    // Arrange
+        //    var mockRepo = new Mock<IAsyncRepository>();
+        //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+        //        .ReturnsAsync(GetQuestionWithoutDetails());
+        //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+
+        //    // Act
+        //    var result = await controller.AddAnswer(1);
+
+        //    // Assert
+        //    var viewResult = Assert.IsType<ViewResult>(result);
+        //    Assert.NotEqual("Error", viewResult.ViewName);
+        //}
+
+        //[Fact]
+        //public async Task AddAnswerPost_ReturnErrorView()
+        //{
+        //    // Arrange - question exists, model is valid, processing fails
+        //    var mockRepo = new Mock<IAsyncRepository>();
+        //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+        //        .ReturnsAsync(GetQuestionWithoutDetails());
+        //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+        //    AnswerViewModel answerViewModel = new AnswerViewModel
+        //    {
+        //        Id = 1,
+        //        QuestionId = 1,
+        //        Body = "Test Body"
+        //    };
+
+        //    // Act
+        //    var result = await controller.AddAnswer(answerViewModel);
+
+        //    // Assert
+        //    var viewResult = Assert.IsType<ViewResult>(result);
+        //    Assert.Equal("Error", viewResult.ViewName);
+        //}
+
+        //[Fact]
+        //public async Task AddAnswerPost_ReturnViewModelInvalid()
+        //{
+        //    // Arrange - question exists, model is invalid, processing doesn't start
+        //    var mockRepo = new Mock<IAsyncRepository>();
+        //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+        //        .ReturnsAsync(GetQuestionWithoutDetails());
+        //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+        //    AnswerViewModel answerViewModel = new AnswerViewModel
+        //    {
+        //        Id = 1,
+        //        QuestionId = 1,
+        //        Body = ""
+        //    };
+        //    controller.ModelState.AddModelError("Body", "Required");
+
+        //    // Act
+        //    var result = await controller.AddAnswer(answerViewModel);
+
+        //    // Assert
+        //    var viewResult = Assert.IsType<ViewResult>(result);
+        //    Assert.NotEqual("Error", viewResult.ViewName);
+        //}
+
+        //[Fact]
+        //public async Task AddAnswerPost_ReturnErrorQuestionInvalid()
+        //{
+        //    // Arrange - question doesn't exist, model is valid, processing doesn't start
+        //    var mockRepo = new Mock<IAsyncRepository>();
+        //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+        //        .ReturnsAsync(GetQuestionWithoutDetails());
+        //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+        //    AnswerViewModel answerViewModel = new AnswerViewModel
+        //    {
+        //        Id = 1,
+        //        QuestionId = 1,
+        //        Body = "Test Body"
+        //    };
+
+        //    // Act
+        //    var result = await controller.AddAnswer(answerViewModel);
+
+        //    // Assert
+        //    var viewResult = Assert.IsType<ViewResult>(result);
+        //    Assert.Equal("Error", viewResult.ViewName);
+        //}
+
+        //[Fact]
+        //public async Task EditAnswerGet_ReturnErrorViewResultForAccessCheckFail()
+        //{
+        //    // Arrange
+        //    // access denied result test - UserManager mock needed for more
+        //    var mockRepo = new Mock<IAsyncRepository>();
+        //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+        //        .ReturnsAsync(GetQuestionWithoutDetails());
+        //    mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(1))
+        //        .ReturnsAsync(GetAnswerWithoutDetails());
+
+        //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+
+        //    // Act
+        //    var result = await controller.EditAnswer(1);
+
+        //    // Assert
+        //    var viewResult = Assert.IsType<ViewResult>(result);
+        //    Assert.Equal("Error", viewResult.ViewName);
+        //}
+
+        //[Fact]
+        //public async Task EditAnswerPost_ReturnErrorViewResultForModelInvalid()
+        //{
+        //    // Arrange
+        //    var mockRepo = new Mock<IAsyncRepository>();
+        //    mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(1))
+        //        .ReturnsAsync(GetQuestionWithoutDetails());
+        //    mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(1))
+        //        .ReturnsAsync(GetAnswerWithoutDetails());
+        //    AnswerViewModel tempAnswerViewModel = new AnswerViewModel
+        //    {
+        //        Id = 1,
+        //        QuestionId = 1,
+        //        Body = "Test Body",
+        //        UserId = "abcd"
+        //    };
+
+        //    var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager);
+        //    controller.ModelState.AddModelError("Body", "Required");
+
+        //    // Act
+        //    var result = await controller.EditAnswer(tempAnswerViewModel);
+
+        //    // Assert
+        //    var viewResult = Assert.IsType<ViewResult>(result);
+        //    Assert.NotEqual("Error", viewResult.ViewName);
+        //}
+
+
+
+
+
+
+
+        // helper methods
+
+        //private Question GetQuestionWithoutDetails()
+        //{
+        //    Question tempQuestion = new Question
+        //    {
+        //        Id = 1,
+        //        Title = "Test Title",
+        //        Body = "Test Body"
+        //    };
+        //    return tempQuestion;
+        //}
+
+        //private Question GetQuestionWithoutDetailsNull()
+        //{
+        //    Question tempQuestion = null;
+        //    return tempQuestion;
+        //}
+
+        //private Answer GetAnswerWithoutDetails()
+        //{
+        //    Answer tempAnswer = new Answer
+        //    {
+        //        Id = 1,
+        //        QuestionId = 1,
+        //        Body = "Test Body",
+        //        UserId = "abcd"
+        //    };
+        //    return tempAnswer;
+        //}
+
+
+    }
 }
