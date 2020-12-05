@@ -142,24 +142,24 @@ namespace Web.Controllers
         [Route("comments/addAnswerComment/{answerId}")]
         public async Task<IActionResult> AddAnswerComment(AnswerCommentViewModel answerCommentViewModel)
         {
-            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerCommentViewModel.AnswerId);
-            if (answer == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answerCommentViewModel.QuestionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerCommentViewModel.AnswerId);
+                    if (answer == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answerCommentViewModel.QuestionId);
+                    if (question == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
                     var currentlyLoggedInUser = await _userManager.GetUserAsync(User);
                     answerCommentViewModel.UserId = currentlyLoggedInUser.Id;
                     var answerComment = _mapper.Map<AnswerCommentViewModel, AnswerComment>(answerCommentViewModel);
