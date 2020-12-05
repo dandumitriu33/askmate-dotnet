@@ -37,7 +37,7 @@ namespace Web.Controllers
             {
                 var latestQuestions = await _repository.GetLatestQuestions(numberOfQuestions);
                 var latestQuestionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(latestQuestions);
-                return View(latestQuestionsViewModel);
+                return View("Index", latestQuestionsViewModel);
             }
             catch (DbUpdateException dbex)
             {
@@ -61,7 +61,7 @@ namespace Web.Controllers
                 var searchResults = await _repository.GetSearchResults(searchPhrase);
                 var searchResultsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(searchResults);
                 ViewData["searchPhrase"] = searchPhrase;
-                return View(searchResultsViewModel);
+                return View("Search", searchResultsViewModel);
             }
             catch (DbUpdateException dbex)
             {
@@ -77,14 +77,27 @@ namespace Web.Controllers
 
         public async Task<IActionResult> AllQuestions(string orderBy = "DateAdded", string direction = "Descending")
         {
-            var questions = await _repository.ListAllAsync(orderBy, direction);
-            var questionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(questions);
-            return View(questionsViewModel);
+            try
+            {
+                var questions = await _repository.ListAllAsync(orderBy, direction);
+                var questionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(questions);
+                return View("AllQuestions", questionsViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         public IActionResult Privacy()
         {
-            return View();
+            return View("Privacy");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
