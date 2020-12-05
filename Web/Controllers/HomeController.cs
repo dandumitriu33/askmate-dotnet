@@ -77,9 +77,22 @@ namespace Web.Controllers
 
         public async Task<IActionResult> AllQuestions(string orderBy = "DateAdded", string direction = "Descending")
         {
-            var questions = await _repository.ListAllAsync(orderBy, direction);
-            var questionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(questions);
-            return View(questionsViewModel);
+            try
+            {
+                var questions = await _repository.ListAllAsync(orderBy, direction);
+                var questionsViewModel = _mapper.Map<List<Question>, List<QuestionViewModel>>(questions);
+                return View("AllQuestions", questionsViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
+            }
         }
 
         public IActionResult Privacy()
