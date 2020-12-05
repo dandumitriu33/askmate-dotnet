@@ -66,24 +66,37 @@ namespace Web.Controllers
         [Route("comments/addAnswerComment/{answerId}")]
         public async Task<IActionResult> AddAnswerComment(int answerId, int questionId)
         {
-            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
-            if (answer == null)
+            try
             {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
+                var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+                if (answer == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
                 return View("Error");
             }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
+            catch (Exception ex)
             {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
+                ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
             var answerCommentViewModel = new AnswerCommentViewModel();
             answerCommentViewModel.QuestionId = questionId;
             answerCommentViewModel.AnswerId = answerId;
-            return View(answerCommentViewModel);
+            return View("AddAnswerComment", answerCommentViewModel);
         }
 
         // POST: comments/addQuestionComment/{questionId}
