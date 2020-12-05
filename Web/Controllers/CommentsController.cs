@@ -177,7 +177,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(answerCommentViewModel);
+            return View("AddAnswerComment", answerCommentViewModel);
         }
 
         // GET: CommentsController/QuestionComments/5/Edit

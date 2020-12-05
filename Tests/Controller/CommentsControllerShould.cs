@@ -496,7 +496,55 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.AddAnswerCommentAsync(It.IsAny<AnswerComment>()), Times.Once);
         }
 
+        [Fact]
+        public async Task AddAnswerCommentPost_ReturnAddAnswerCommentViewOnInvalidModel()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Answer tempAnswer = new Answer { Id = 1, Body = "Test Body", UserId = "abcd" };
+            mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempAnswer).Verifiable();
+            Question tempQuestion = new Question { Id = 1, Title = "Test Title" };
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempQuestion).Verifiable();
+            mockRepo.Setup(repo => repo.AddAnswerCommentAsync(It.IsAny<AnswerComment>())).ReturnsAsync(new AnswerComment()).Verifiable();
 
+            // mocking UserManager            
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            ApplicationUser tempUser = new ApplicationUser { Id = "abcd", Email = "test@email.com" };
+            mockUserManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(tempUser).Verifiable();
+
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new CommentsController(realMapper, mockRepo.Object, mockUserManager.Object)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+            AnswerCommentViewModel tempAnswerCommentVM = new AnswerCommentViewModel() { AnswerId = 1, Body = "Test Body" };
+            controller.ModelState.AddModelError("AnswerId", "Required");
+
+            // Act
+            var result = await controller.AddAnswerComment(tempAnswerCommentVM);
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("AddAnswerComment", requestResult.ViewName);
+            mockRepo.Verify(x => x.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Never);
+            mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Never);
+            mockUserManager.Verify(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Never);
+            mockRepo.Verify(x => x.AddAnswerCommentAsync(It.IsAny<AnswerComment>()), Times.Never);
+        }
 
 
 
