@@ -273,28 +273,28 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditQuestionComment(QuestionCommentViewModel questionCommentViewModel)
         {
-            var questionComment = await _repository.GetQuestionCommentById(questionCommentViewModel.Id);
-            if (questionComment == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionComment.QuestionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), questionComment.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var questionComment = await _repository.GetQuestionCommentById(questionCommentViewModel.Id);
+                    if (questionComment == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionComment.QuestionId);
+                    if (question == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), questionComment.UserId) == false)
+                    {
+                        return RedirectToAction("AccessDenied", "Account");
+                    }
                     questionComment = _mapper.Map<QuestionCommentViewModel, QuestionComment>(questionCommentViewModel);
                     // adding the "Edited" mark and refreshing the DateAdded
                     // this replaces the old Body
@@ -315,7 +315,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(questionCommentViewModel);
+            return View("EditQuestionComment", questionCommentViewModel);
         }
 
         // POST: CommentsController/AnswerComments/5/Edit
