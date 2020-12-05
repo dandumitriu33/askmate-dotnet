@@ -267,7 +267,19 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.ListAllAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
         }
 
+        [Fact]
+        public void PrivacyGet_ReturnViewOnSuccess()
+        {
+            // Arrange
+            var controller = new HomeController(logger, repository, mapper);
 
+            // Act
+            var result = controller.Privacy();
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Privacy", requestResult.ViewName);
+        }
 
 
 
