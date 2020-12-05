@@ -186,5 +186,43 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Never);
         }
 
+        [Fact]
+        public async Task AddAnswerCommentGet_ReturnViewErrorCommentOnNullQuestion()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Answer tempAnswer = new Answer { Id = 1, Body = "Test Body", UserId = "abcd" };
+            mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempAnswer).Verifiable();
+            Question tempQuestion = null;
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempQuestion).Verifiable();
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new CommentsController(mapper, mockRepo.Object, userManager)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+
+            // Act
+            var result = await controller.AddAnswerComment(1, 1);
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockRepo.Verify(x => x.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+        }
+
+
+
+
     }
 }
