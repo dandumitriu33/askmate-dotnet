@@ -421,34 +421,35 @@ namespace Web.Controllers
         [Route("comments/answerComments/{answerCommentId}/remove")]
         public async Task<IActionResult> RemoveAnswerComment(int answerCommentId, int questionId)
         {
-            var answerComment = await _repository.GetAnswerCommentById(answerCommentId);
-            if (answerComment == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerComment.AnswerId);
-            if (answer == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answerComment.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             try
             {
+                var answerComment = await _repository.GetAnswerCommentById(answerCommentId);
+                if (answerComment == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerComment.AnswerId);
+                if (answer == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answerComment.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
                 await _repository.RemoveAnswerCommentById(answerCommentId);
+                return RedirectToAction("Details", "Questions", new { questionId = questionId });
             }
             catch (DbUpdateException dbex)
             {
@@ -460,7 +461,6 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
-            return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
         
     }
