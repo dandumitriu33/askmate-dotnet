@@ -47,15 +47,15 @@ namespace Web.Controllers
         [Route("questions/{questionId}")]
         public async Task<IActionResult> Details(int questionId)
         {
-            var tempQuestion = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (tempQuestion == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var tempQuestion = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (tempQuestion == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 var question = await _repository.GetQuestionByIdAsync(questionId);
 
                 // pack question comments
@@ -92,7 +92,7 @@ namespace Web.Controllers
                 questionViewModel.QuestionComments = questionCommentsViewModel;
                 questionViewModel.Tags = questionTagsViewModel;
 
-                return View(questionViewModel);
+                return View("Details", questionViewModel);
             }
             catch(DbUpdateException dbex)
             {

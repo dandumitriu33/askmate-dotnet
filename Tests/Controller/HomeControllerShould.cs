@@ -281,12 +281,5 @@ namespace Tests.Controller
             Assert.Equal("Privacy", requestResult.ViewName);
         }
 
-
-
-
-
-
-
-
     }
 }
