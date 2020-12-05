@@ -381,27 +381,28 @@ namespace Web.Controllers
         [Route("comments/questionComments/{questionCommentId}/remove")]
         public async Task<IActionResult> RemoveQuestionComment(int questionCommentId, int questionId)
         {
-            var questionComment = await _repository.GetQuestionCommentById(questionCommentId);
-            if (questionComment == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), questionComment.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             try
             {
+                var questionComment = await _repository.GetQuestionCommentById(questionCommentId);
+                if (questionComment == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), questionComment.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
                 await _repository.RemoveQuestionCommentById(questionCommentId);
+                return RedirectToAction("Details", "Questions", new { questionId = questionId });
             }
             catch (DbUpdateException dbex)
             {
@@ -413,7 +414,6 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
-            return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
         // GET: CommentsController/AnswerComment/{answerCommentId}/Remove
