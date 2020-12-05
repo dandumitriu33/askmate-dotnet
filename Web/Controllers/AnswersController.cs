@@ -323,15 +323,15 @@ namespace Web.Controllers
         [Route("answers/{answerId}/votedown")]
         public async Task<IActionResult> VoteDownAnswer(int answerId, int questionId)
         {
-            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
-            if (answer == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+                if (answer == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 await _repository.VoteDownAnswerById(answerId);
             }
             catch (DbUpdateException dbex)
