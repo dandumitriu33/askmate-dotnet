@@ -324,35 +324,35 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditAnswerComment(AnswerCommentViewModel answerCommentViewModel)
         {
-            var answerComment = await _repository.GetAnswerCommentById(answerCommentViewModel.Id);
-            if (answerComment == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answerComment.QuestionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerComment.AnswerId);
-            if (answer == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answerComment.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var answerComment = await _repository.GetAnswerCommentById(answerCommentViewModel.Id);
+                    if (answerComment == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answerComment.QuestionId);
+                    if (question == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerComment.AnswerId);
+                    if (answer == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answerComment.UserId) == false)
+                    {
+                        return RedirectToAction("AccessDenied", "Account");
+                    }
                     answerComment = _mapper.Map<AnswerCommentViewModel, AnswerComment>(answerCommentViewModel);
                     // adding the "Edited" mark and refreshing the DateAdded
                     // this replaces the old Body
@@ -373,7 +373,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return View(answerCommentViewModel);
+            return View("EditAnswerComment", answerCommentViewModel);
         }
 
         // GET: CommentsController/QuestionComment/{questionCommentId}/Remove
