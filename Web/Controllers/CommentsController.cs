@@ -225,33 +225,46 @@ namespace Web.Controllers
         [Route("comments/answerComments/{answerCommentId}/edit")]
         public async Task<IActionResult> EditAnswerComment(int answerCommentId)
         {
-            var answerComment = await _repository.GetAnswerCommentById(answerCommentId);
-            if (answerComment == null)
+            try
             {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
+                var answerComment = await _repository.GetAnswerCommentById(answerCommentId);
+                if (answerComment == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answerComment.QuestionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerComment.AnswerId);
+                if (answer == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answerComment.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
+                var answerCommentViewModel = _mapper.Map<AnswerComment, AnswerCommentViewModel>(answerComment);
+                return View("EditAnswerComment", answerCommentViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
                 return View("Error");
             }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(answerComment.QuestionId);
-            if (question == null)
+            catch (Exception ex)
             {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
+                ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
-            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerComment.AnswerId);
-            if (answer == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), answerComment.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
-            var answerCommentViewModel = _mapper.Map<AnswerComment, AnswerCommentViewModel>(answerComment);
-            return View(answerCommentViewModel);
         }
 
         // POST: CommentsController/QuestionComments/5/Edit
