@@ -1608,9 +1608,107 @@ namespace Tests.Controller
             mockRepo.Verify(mr => mr.EditAnswerAccepted(It.IsAny<int>()), Times.Never);
         }
 
+        [Fact]
+        public async Task AcceptAnswer_ErrorViewOnNullQuestion()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Answer tempAnswer = new Answer { Id = 1, Body = "Test Body", UserId = "abcd" };
+            mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempAnswer).Verifiable();
+            Question tempQuestion = null;
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempQuestion).Verifiable();
+            mockRepo.Setup(repo => repo.EditAnswerAccepted(It.IsAny<int>())).Verifiable();
 
+            // mock ClaimsPrincipal
+            // https://stackoverflow.com/questions/38557942/mocking-iprincipal-in-asp-net-core
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, "example name"),
+                new Claim(ClaimTypes.NameIdentifier, "abcd"),
+                new Claim("custom-claim", "example claim value"),
+            }, "mock"));
 
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
 
+            //creates an instance of an asp.net mvc controller
+            var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+            // ClaimsPrincipal addition
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = user }
+            };
+
+            // Act
+            var result = await controller.AcceptAnswer(1, 1);
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockRepo.Verify(mr => mr.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(mr => mr.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(mr => mr.EditAnswerAccepted(It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task AcceptAnswer_ErrorViewOnException()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Answer tempAnswer = new Answer { Id = 1, Body = "Test Body", UserId = "abcd" };
+            mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempAnswer).Verifiable();
+            Question tempQuestion = new Question { Id = 1, Title = "Test Title", UserId = "abcd" };
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempQuestion).Verifiable();
+            mockRepo.Setup(repo => repo.EditAnswerAccepted(It.IsAny<int>())).Throws(new Exception()).Verifiable();
+
+            // mock ClaimsPrincipal
+            // https://stackoverflow.com/questions/38557942/mocking-iprincipal-in-asp-net-core
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, "example name"),
+                new Claim(ClaimTypes.NameIdentifier, "abcd"),
+                new Claim("custom-claim", "example claim value"),
+            }, "mock"));
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new AnswersController(mockRepo.Object, mapper, webHostEnvironment, fileOperations, userManager)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+            // ClaimsPrincipal addition
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = user }
+            };
+
+            // Act
+            var result = await controller.AcceptAnswer(1, 1);
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockRepo.Verify(mr => mr.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(mr => mr.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(mr => mr.EditAnswerAccepted(It.IsAny<int>()), Times.Once);
+        }
 
 
 
