@@ -352,26 +352,26 @@ namespace Web.Controllers
         [Route("answers/{answerId}/accept")]
         public async Task<IActionResult> AcceptAnswer(int answerId, int questionId)
         {
-            var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
-            if (answer == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             try
             {
+                var answer = await _repository.GetAnswerByIdWithoutDetailsAsync(answerId);
+                if (answer == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
                 await _repository.EditAnswerAccepted(answerId);
             }
             catch (DbUpdateException dbex)
