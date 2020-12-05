@@ -1764,7 +1764,64 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.EditAnswerCommentAsync(It.IsAny<AnswerComment>()), Times.Never);
         }
 
+        [Fact]
+        public async Task EditAnswerCommentPost_ReturnErrorViewOnException()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            AnswerComment tempAnswerComment = new AnswerComment { Id = 1, Body = "Test Body", UserId = "abcd" };
+            mockRepo.Setup(repo => repo.GetAnswerCommentById(It.IsAny<int>())).ReturnsAsync(tempAnswerComment).Verifiable();
+            Question tempQuestion = new Question { Id = 1, Title = "Test Title" };
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempQuestion).Verifiable();
+            Answer tempAnswer = new Answer { Id = 1, Body = "Test Body", UserId = "abcd" };
+            mockRepo.Setup(repo => repo.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempAnswer).Verifiable();
+            mockRepo.Setup(repo => repo.EditAnswerCommentAsync(It.IsAny<AnswerComment>())).Throws(new Exception()).Verifiable();
 
+            // mock ClaimsPrincipal
+            // https://stackoverflow.com/questions/38557942/mocking-iprincipal-in-asp-net-core
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, "example name"),
+                new Claim(ClaimTypes.NameIdentifier, "abcd"),
+                new Claim("custom-claim", "example claim value"),
+            }, "mock"));
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new CommentsController(realMapper, mockRepo.Object, userManager)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = user }
+            };
+            AnswerCommentViewModel answerCommentVM = new AnswerCommentViewModel() { Id = 1, AnswerId = 1, QuestionId = 1, UserId = "abcd" };
+
+            // Act
+            var result = await controller.EditAnswerComment(answerCommentVM);
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockRepo.Verify(x => x.GetAnswerCommentById(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(x => x.GetAnswerByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(x => x.EditAnswerCommentAsync(It.IsAny<AnswerComment>()), Times.Once);
+        }
 
 
 
