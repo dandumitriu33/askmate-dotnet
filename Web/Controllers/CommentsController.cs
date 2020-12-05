@@ -36,16 +36,29 @@ namespace Web.Controllers
         [Route("comments/addQuestionComment/{questionId}")]
         public async Task<IActionResult> AddQuestionComment(int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
+            try
             {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
+                return View("Error");
+            }
+            catch (Exception ex)
+            {
+                ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
             var questionCommentViewModel = new QuestionCommentViewModel();
             questionCommentViewModel.QuestionId = questionId;
-            return View(questionCommentViewModel);
+            return View("AddQuestionComment", questionCommentViewModel);
         }
 
         // Get: comments/addAnswerComment/{answerId}
