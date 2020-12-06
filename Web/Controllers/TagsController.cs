@@ -189,7 +189,7 @@ namespace Web.Controllers
                     var tempTag = allTags.Where(t => t.Id == item.Key).FirstOrDefault();
                     result.Add(tempTag.Name, item.Value);
                 }
-                return View(result);
+                return View("TagInfo", result);
             }
             catch (DbUpdateException dbex)
             {
