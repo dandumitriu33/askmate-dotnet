@@ -160,7 +160,7 @@ namespace Web.Controllers
                     QuestionId = questionId,
                     TagId = tagId
                 };
-                await _repository.AddQuestionTagAsync(newQuestionTag);
+                await _repository.AttachQuestionTagAsync(newQuestionTag);
                 return RedirectToAction("Details", "Questions", new { questionId = questionId });
             }
             catch (DbUpdateException dbex)
