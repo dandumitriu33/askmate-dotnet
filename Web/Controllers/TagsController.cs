@@ -30,19 +30,19 @@ namespace Web.Controllers
         [HttpGet]
         public async Task<IActionResult> AttachTag(int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 List<Tag> tagsFromDb = await _repository.GetAllTagsNoDuplicates(questionId);
                 List<TagViewModel> tagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
                 ViewData["questionId"] = questionId.ToString();
-                return View(tagsViewModel);
+                return View("AttachTag", tagsViewModel);
             }
             catch (DbUpdateException dbex)
             {

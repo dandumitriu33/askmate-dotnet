@@ -40,7 +40,6 @@ namespace Tests.Controller
             mockRepo.Setup(repo => repo.GetTagIdsForQuestionId(It.IsAny<int>())).ReturnsAsync(new List<int> { 1, 2, 3}).Verifiable();
             mockRepo.Setup(repo => repo.GetTagsFromListFromDb(It.IsAny<List<int>>())).ReturnsAsync(new List<Tag> { new Tag(), new Tag()}).Verifiable();
 
-
             // adding a real mapper
             var myProfile = new AskMateProfiles();
             var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
@@ -1547,14 +1546,6 @@ namespace Tests.Controller
             mockRepo.Verify(mr => mr.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
             mockRepo.Verify(x => x.VoteDownQuestionById(It.IsAny<int>()), Times.Once);
         }
-
-
-
-
-
-
-
-
 
     }
 }
