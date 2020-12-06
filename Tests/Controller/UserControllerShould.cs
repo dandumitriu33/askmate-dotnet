@@ -108,9 +108,41 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.GetUserAnswerComments(It.IsAny<string>()), Times.Once);
         }
 
+        [Fact]
+        public async Task UserActivity_ReturnErrorViewOnException()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetUserQuestions(It.IsAny<string>())).Throws(new Exception()).Verifiable();
+            mockRepo.Setup(repo => repo.GetUserAnswers(It.IsAny<string>())).ReturnsAsync(new List<Answer>()).Verifiable();
+            mockRepo.Setup(repo => repo.GetUserQuestionComments(It.IsAny<string>())).ReturnsAsync(new List<QuestionComment>()).Verifiable();
+            mockRepo.Setup(repo => repo.GetUserAnswerComments(It.IsAny<string>())).ReturnsAsync(new List<AnswerComment>()).Verifiable();
 
+            // mocking UserManager            
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            ApplicationUser tempUser = new ApplicationUser { Id = "abcd", Email = "test@email.com" };
+            mockUserManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(tempUser).Verifiable();
 
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
 
+            var controller = new UserController(mockRepo.Object, realMapper, mockUserManager.Object);
+
+            // Act
+
+            var result = await controller.UserActivity();
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockRepo.Verify(x => x.GetUserQuestions(It.IsAny<string>()), Times.Once);
+            mockRepo.Verify(x => x.GetUserAnswers(It.IsAny<string>()), Times.Never);
+            mockRepo.Verify(x => x.GetUserQuestionComments(It.IsAny<string>()), Times.Never);
+            mockRepo.Verify(x => x.GetUserAnswerComments(It.IsAny<string>()), Times.Never);
+        }
 
     }
 }
