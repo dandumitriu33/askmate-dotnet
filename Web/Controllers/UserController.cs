@@ -77,7 +77,7 @@ namespace Web.Controllers
                 allUserActivities.QuestionComments = userQuestionCommentsViewModel;
                 allUserActivities.AnswerComments = userAnswerCommentsViewModel;
 
-                return View(allUserActivities);
+                return View("UserActivity", allUserActivities);
             }
             catch (DbUpdateException dbex)
             {
