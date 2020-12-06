@@ -298,17 +298,17 @@ namespace Web.Controllers
         // Get: QuestionsController/5/VoteUp
         [HttpGet]
         [Route("questions/{questionId}/voteup")]
-        public async Task<IActionResult> VoteUpQuestion(int questionId, string redirection= "redirectToAllQuestions")
+        public async Task<IActionResult> VoteUpQuestion(int questionId, string redirection="redirectToAllQuestions")
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 await _repository.VoteUpQuestionById(questionId);
                 if (String.Equals("redirectToDetails", redirection))
                 {

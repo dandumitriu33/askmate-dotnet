@@ -1016,6 +1016,77 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.RemoveQuestionImageByQuestionId(It.IsAny<int>()), Times.Once);
         }
 
+        [Fact]
+        public async Task VoteUpQuestionGet_RdirectToAllQuestionsActionOnSuccess()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Question tempQuestion = new Question { Id = 1, Title = "Test Title", UserId = "abcd" };
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempQuestion).Verifiable();
+            mockRepo.Setup(repo => repo.VoteUpQuestionById(It.IsAny<int>())).Verifiable();
+
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            // mock ClaimsPrincipal
+            // https://stackoverflow.com/questions/38557942/mocking-iprincipal-in-asp-net-core
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.Name, "example name"),
+                new Claim(ClaimTypes.NameIdentifier, "abcd"),
+                new Claim("custom-claim", "example claim value"),
+            }, "mock"));
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new QuestionsController(mockRepo.Object, realMapper, webHostEnvironment, fileOperations, signInManager, userManager)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+            // ClaimsPrincipal component
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = user }
+            };
+
+            // Act
+            var result = await controller.VoteUpQuestion(1);
+
+            // Assert
+            var requestResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("AllQuestions", requestResult.ActionName);
+            mockRepo.Verify(mr => mr.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(x => x.VoteUpQuestionById(It.IsAny<int>()), Times.Once);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     }
