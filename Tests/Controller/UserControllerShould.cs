@@ -45,7 +45,30 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.GetAllUsers(), Times.Once);
         }
 
+        [Fact]
+        public async Task AllUsers_ReturnErrorViewOnException()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            mockRepo.Setup(repo => repo.GetAllUsers()).Throws(new Exception()).Verifiable();
 
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            var controller = new UserController(mockRepo.Object, realMapper, userManager);
+
+            // Act
+
+            var result = await controller.AllUsers();
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockRepo.Verify(x => x.GetAllUsers(), Times.Once);
+        }
 
 
 
