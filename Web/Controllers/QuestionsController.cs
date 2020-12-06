@@ -333,7 +333,6 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
-            
         }
 
         // Get: QuestionsController/5/VoteDown
@@ -341,15 +340,15 @@ namespace Web.Controllers
         [Route("questions/{questionId}/votedown")]
         public async Task<IActionResult> VoteDownQuestion(int questionId, string redirection="redirectToAllQuestions")
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 await _repository.VoteDownQuestionById(questionId);
                 if (String.Equals("redirectToDetails", redirection))
                 {
@@ -375,9 +374,6 @@ namespace Web.Controllers
                 return View("Error");
             }
         }
-
-
-
 
         // helper methods
         private async Task<string> SetPathAndUpload(QuestionViewModel questionViewModel)
