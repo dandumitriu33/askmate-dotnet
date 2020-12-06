@@ -42,7 +42,7 @@ namespace Web.Controllers
                 List<Tag> tagsFromDb = await _repository.GetAllTagsNoDuplicates(questionId);
                 List<TagViewModel> tagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
                 ViewData["questionId"] = questionId.ToString();
-                return View("AttachTag", tagsViewModel);
+                return View("AddTag", tagsViewModel);
             }
             catch (DbUpdateException dbex)
             {
@@ -58,7 +58,7 @@ namespace Web.Controllers
 
         // POST: TagsController/tags
         [HttpPost]
-        public async Task<IActionResult> AttachTag(TagViewModel tagViewModel, int questionId)
+        public async Task<IActionResult> AddTag(TagViewModel tagViewModel, int questionId)
         {
             if (ModelState.IsValid)
             {
@@ -92,7 +92,7 @@ namespace Web.Controllers
                 }
             }
             ViewData["questionId"] = questionId.ToString();
-            return View("AttachTag", tagViewModel);
+            return View("AddTag", tagViewModel);
         }
 
         // GET: TagsController/detach

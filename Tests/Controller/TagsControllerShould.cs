@@ -42,7 +42,7 @@ namespace Tests.Controller
 
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);
-            Assert.Equal("AttachTag", requestResult.ViewName);
+            Assert.Equal("AddTag", requestResult.ViewName);
             mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
             mockRepo.Verify(x => x.GetAllTagsNoDuplicates(It.IsAny<int>()), Times.Once);
         }
@@ -102,7 +102,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task AttachTagPost_RedirectToDetailsActionOnSuccessExistingTag()
+        public async Task AddTagPost_RedirectToDetailsActionOnSuccessExistingTag()
         {
             // Arrange
             // mocking repository
@@ -122,7 +122,7 @@ namespace Tests.Controller
             var controller = new TagsController(mockRepo.Object, realMapper);
 
             // Act
-            var result = await controller.AttachTag(new TagViewModel { Id = 1, Name = "Test Name" }, 1);
+            var result = await controller.AddTag(new TagViewModel { Id = 1, Name = "Test Name" }, 1);
 
             // Assert
             var requestResult = Assert.IsType<RedirectToActionResult>(result);
@@ -135,7 +135,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task AttachTagPost_RedirectToDetailsActionOnSuccessNewTag()
+        public async Task AddTagPost_RedirectToDetailsActionOnSuccessNewTag()
         {
             // Arrange
             // mocking repository
@@ -156,7 +156,7 @@ namespace Tests.Controller
             var controller = new TagsController(mockRepo.Object, realMapper);
 
             // Act
-            var result = await controller.AttachTag(new TagViewModel { Id = 1, Name = "Test Name" }, 1);
+            var result = await controller.AddTag(new TagViewModel { Id = 1, Name = "Test Name" }, 1);
 
             // Assert
             var requestResult = Assert.IsType<RedirectToActionResult>(result);
@@ -168,7 +168,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task AttachTagPost_ReturnAttachTagOnInvalidModel()
+        public async Task AddTagPost_ReturnAttachTagOnInvalidModel()
         {
             // Arrange
             // mocking repository
@@ -189,11 +189,11 @@ namespace Tests.Controller
             controller.ModelState.AddModelError("Name", "Required");
 
             // Act
-            var result = await controller.AttachTag(new TagViewModel { Id = 1 }, 1);
+            var result = await controller.AddTag(new TagViewModel { Id = 1 }, 1);
 
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);
-            Assert.Equal("AttachTag", requestResult.ViewName);
+            Assert.Equal("AddTag", requestResult.ViewName);
             mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Never);
             mockRepo.Verify(x => x.GetTagByIdAsync(It.IsAny<int>()), Times.Never);
             mockRepo.Verify(x => x.AddTagAsync(It.IsAny<Tag>()), Times.Never);
@@ -201,7 +201,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task AttachTagPost_ReturnErrorOnNullQuestion()
+        public async Task AddTagPost_ReturnErrorOnNullQuestion()
         {
             // Arrange
             // mocking repository
@@ -233,7 +233,7 @@ namespace Tests.Controller
             };
 
             // Act
-            var result = await controller.AttachTag(new TagViewModel { Id = 1, Name = "Test Tag" }, 1);
+            var result = await controller.AddTag(new TagViewModel { Id = 1, Name = "Test Tag" }, 1);
 
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);
@@ -245,7 +245,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task AttachTagPost_ReturnErrorOnException()
+        public async Task AddTagPost_ReturnErrorOnException()
         {
             // Arrange
             // mocking repository
@@ -277,7 +277,7 @@ namespace Tests.Controller
             };
 
             // Act
-            var result = await controller.AttachTag(new TagViewModel { Id = 1, Name = "Test Tag" }, 1);
+            var result = await controller.AddTag(new TagViewModel { Id = 1, Name = "Test Tag" }, 1);
 
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);
