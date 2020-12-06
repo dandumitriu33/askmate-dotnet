@@ -289,7 +289,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task DetachTagGet_RedirectToDetailsActionOnSuccess()
+        public async Task DetachQuestionTagGet_RedirectToDetailsActionOnSuccess()
         {
             // Arrange
             // mocking repository
@@ -319,7 +319,7 @@ namespace Tests.Controller
             };
 
             // Act
-            var result = await controller.DetachTag(1, 1);
+            var result = await controller.DetachQuestionTag(1, 1);
 
             // Assert
             var requestResult = Assert.IsType<RedirectToActionResult>(result);
@@ -331,7 +331,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task DetachTagGet_ReturnErrorViewOnNullQuestion()
+        public async Task DetachQuestionTagGet_ReturnErrorViewOnNullQuestion()
         {
             // Arrange
             // mocking repository
@@ -361,7 +361,7 @@ namespace Tests.Controller
             };
 
             // Act
-            var result = await controller.DetachTag(1, 1);
+            var result = await controller.DetachQuestionTag(1, 1);
 
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);
@@ -372,7 +372,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task DetachTagGet_ReturnErrorViewOnNullTag()
+        public async Task DetachQuestionTagGet_ReturnErrorViewOnNullTag()
         {
             // Arrange
             // mocking repository
@@ -402,7 +402,7 @@ namespace Tests.Controller
             };
 
             // Act
-            var result = await controller.DetachTag(1, 1);
+            var result = await controller.DetachQuestionTag(1, 1);
 
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);
@@ -413,7 +413,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task DetachTagGet_ReturnErrorViewOnException()
+        public async Task DetachQuestionTagGet_ReturnErrorViewOnException()
         {
             // Arrange
             // mocking repository
@@ -443,7 +443,7 @@ namespace Tests.Controller
             };
 
             // Act
-            var result = await controller.DetachTag(1, 1);
+            var result = await controller.DetachQuestionTag(1, 1);
 
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);
