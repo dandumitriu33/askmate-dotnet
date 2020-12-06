@@ -28,21 +28,21 @@ namespace Web.Controllers
 
         // GET: TagsController/tags
         [HttpGet]
-        public async Task<IActionResult> AttachTag(int questionId)
+        public async Task<IActionResult> AddTag(int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 List<Tag> tagsFromDb = await _repository.GetAllTagsNoDuplicates(questionId);
                 List<TagViewModel> tagsViewModel = _mapper.Map<List<Tag>, List<TagViewModel>>(tagsFromDb);
                 ViewData["questionId"] = questionId.ToString();
-                return View(tagsViewModel);
+                return View("AddTag", tagsViewModel);
             }
             catch (DbUpdateException dbex)
             {
@@ -58,36 +58,27 @@ namespace Web.Controllers
 
         // POST: TagsController/tags
         [HttpPost]
-        public async Task<IActionResult> AttachTag(TagViewModel tagViewModel, int questionId)
+        public async Task<IActionResult> AddTag(TagViewModel tagViewModel, int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            //var tag = await _repository.GetTagByIdAsync(tagViewModel.Id);
-            //if (tag == null)
-            //{
-            //    Response.StatusCode = 404;
-            //    ViewData["ErrorMessage"] = "404 Resource not found.";
-            //    return View("Error");
-            //}
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                    if (question == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
                     var tag = await _repository.GetTagByIdAsync(tagViewModel.Id);
                     if (tag == null)
                     {
-                        // create new tag 
                         Tag newTag = _mapper.Map<TagViewModel, Tag>(tagViewModel);
                         tag = await _repository.AddTagAsync(newTag);
                     }
-
-                    // attach the new tag to q
-                    await AddQuestionTag(tag.Id, questionId);
+                    await AttachQuestionTag(tag.Id, questionId);
+                    return RedirectToAction("Details", "Questions", new { questionId = questionId });
                 }
                 catch (DbUpdateException dbex)
                 {
@@ -100,36 +91,38 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return RedirectToAction("Details", "Questions", new { questionId = questionId });
+            ViewData["questionId"] = questionId.ToString();
+            return View("AddTag", tagViewModel);
         }
 
         // GET: TagsController/detach
         [HttpGet]
         [Route("detach")]
-        public async Task<IActionResult> DetachTag(int tagId, int questionId)
+        public async Task<IActionResult> DetachQuestionTag(int tagId, int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var tag = await _repository.GetTagByIdAsync(tagId);
-            if (tag == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var tag = await _repository.GetTagByIdAsync(tagId);
+                if (tag == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 QuestionTag newQuestionTag = new QuestionTag
                 {
                     QuestionId = questionId,
                     TagId = tagId
                 };
                 await _repository.DetachTag(newQuestionTag);
+                return RedirectToAction("Details", "Questions", new { questionId = questionId });
             }
             catch (DbUpdateException dbex)
             {
@@ -141,34 +134,34 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
-            return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
-        // GET: TagsController/addQuestionTag
-        public async Task<IActionResult> AddQuestionTag(int tagId, int questionId)
+        // GET: TagsController/AttachQuestionTag
+        public async Task<IActionResult> AttachQuestionTag(int tagId, int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var tag = await _repository.GetTagByIdAsync(tagId);
-            if (tag == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var tag = await _repository.GetTagByIdAsync(tagId);
+                if (tag == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 QuestionTag newQuestionTag = new QuestionTag
                 {
                     QuestionId = questionId,
                     TagId = tagId
                 };
-                await _repository.AddQuestionTagAsync(newQuestionTag);
+                await _repository.AttachQuestionTagAsync(newQuestionTag);
+                return RedirectToAction("Details", "Questions", new { questionId = questionId });
             }
             catch (DbUpdateException dbex)
             {
@@ -180,7 +173,6 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
-            return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
         // GET: TagsController/info
@@ -197,7 +189,7 @@ namespace Web.Controllers
                     var tempTag = allTags.Where(t => t.Id == item.Key).FirstOrDefault();
                     result.Add(tempTag.Name, item.Value);
                 }
-                return View(result);
+                return View("TagInfo", result);
             }
             catch (DbUpdateException dbex)
             {

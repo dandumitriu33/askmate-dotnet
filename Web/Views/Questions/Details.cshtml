@@ -73,7 +73,7 @@
                     @tag.Name
                     <a class="badge badge-danger"
                        asp-controller="Tags"
-                       asp-action="DetachTag"
+                       asp-action="DetachQuestionTag"
                        asp-route-tagId="@tag.Id"
                        asp-route-questionId="@Model.Id">
                         X
@@ -83,7 +83,7 @@
             }
             <a class="badge badge-light"
                asp-controller="Tags"
-               asp-action="AttachTag"
+               asp-action="AddTag"
                asp-route-questionId="@Model.Id">
                 Add Tag
             </a>

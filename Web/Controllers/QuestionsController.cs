@@ -127,12 +127,7 @@ namespace Web.Controllers
                     string uniqueFileName = null;
                     if (questionViewModel.Image != null && _fileOperations.ValidateImageType(questionViewModel.Image.FileName) == true)
                     {
-                        // for more advanced projects add a composite file provider - for now wwwroot
-                        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
-                        string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                        uniqueFileName = _fileOperations.AssembleQuestionUploadedFileName(questionViewModel.UserId, questionViewModel.Image.FileName);
-                        string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
-                        await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                        uniqueFileName = await SetPathAndUpload(questionViewModel);
                     }
                     var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
                     question.ImageNamePath = uniqueFileName;
@@ -151,7 +146,7 @@ namespace Web.Controllers
                 }
                 
             }
-            return View();
+            return View("AddQuestion");
         }
 
         // GET: QuestionsController/5/Edit
@@ -159,20 +154,32 @@ namespace Web.Controllers
         [Route("questions/{questionId}/edit")]
         public async Task<IActionResult> EditQuestion(int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
+            try
             {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
+                var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
+                return View("EditQuestion", questionViewModel);
+            }
+            catch (DbUpdateException dbex)
+            {
+                ViewData["ErrorMessage"] = "DB issue - " + dbex.Message;
                 return View("Error");
             }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+            catch (Exception ex)
             {
-                return RedirectToAction("AccessDenied", "Account");
+                ViewData["ErrorMessage"] = ex.Message;
+                return View("Error");
             }
-            var questionViewModel = _mapper.Map<Question, QuestionViewModel>(question);
-            //ViewData["ValidationErrorMessage"] = validationErrorMessage;
-            return View(questionViewModel);
         }
 
         // POST: QuestionsController/5/Edit
@@ -181,32 +188,27 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditQuestion(QuestionViewModel questionViewModel)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionViewModel.Id);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionViewModel.Id);
+                    if (question == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+                    {
+                        return RedirectToAction("AccessDenied", "Account");
+                    }
                     var currentlySignedInUser = await _userManager.GetUserAsync(User);
                     questionViewModel.UserId = currentlySignedInUser.Id;
                     string uniqueFileName = null;
                     if (questionViewModel.Image != null)
                     {
-                        // for more advanced projects add a composite file provider - for now wwwroot
-                        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
-                        string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                        uniqueFileName = _fileOperations.AssembleQuestionUploadedFileName(questionViewModel.UserId, questionViewModel.Image.FileName);
-                        string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
-                        await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                        uniqueFileName = await SetPathAndUpload(questionViewModel);
                     }
                     question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
                     question.ImageNamePath = uniqueFileName;
@@ -224,11 +226,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            // simply returning View somehow sends a Post request and parameter type error shows up as it expects a QVM
-            // did some research, stackoverflow old 6 and 3 yr questions - no answers
-            // also set up a custom error message via ViewData but this is more "expected behavior" as it sneds a Get, probably
-            // answers controller has no issues with this
-            return await EditQuestion(questionViewModel.Id);
+            return View("EditQuestion", questionViewModel);
         }
 
         // Get: QuestionsController/5/Remove
@@ -236,21 +234,21 @@ namespace Web.Controllers
         [Route("questions/remove/{questionId}")]
         public async Task<IActionResult> RemoveQuestion(int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
                 await _repository.RemoveQuestionById(questionId);
-                return RedirectToAction("Index", "List");
+                return RedirectToAction("AllQuestions", "Home");
             }
             catch (DbUpdateException dbex)
             {
@@ -269,19 +267,19 @@ namespace Web.Controllers
         [Route("questions/removeimage/{questionId}")]
         public async Task<IActionResult> RemoveImage(int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
                 await _repository.RemoveQuestionImageByQuestionId(questionId);
                 return RedirectToAction("Details", new { questionId = questionId });
             }
@@ -300,17 +298,17 @@ namespace Web.Controllers
         // Get: QuestionsController/5/VoteUp
         [HttpGet]
         [Route("questions/{questionId}/voteup")]
-        public async Task<IActionResult> VoteUpQuestion(int questionId, string redirection= "redirectToAllQuestions")
+        public async Task<IActionResult> VoteUpQuestion(int questionId, string redirection="redirectToAllQuestions")
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 await _repository.VoteUpQuestionById(questionId);
                 if (String.Equals("redirectToDetails", redirection))
                 {
@@ -335,7 +333,6 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
-            
         }
 
         // Get: QuestionsController/5/VoteDown
@@ -343,15 +340,15 @@ namespace Web.Controllers
         [Route("questions/{questionId}/votedown")]
         public async Task<IActionResult> VoteDownQuestion(int questionId, string redirection="redirectToAllQuestions")
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 await _repository.VoteDownQuestionById(questionId);
                 if (String.Equals("redirectToDetails", redirection))
                 {
@@ -376,6 +373,18 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
+        }
+
+        // helper methods
+        private async Task<string> SetPathAndUpload(QuestionViewModel questionViewModel)
+        {
+            // for more advanced projects add a composite file provider - for now wwwroot
+            // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
+            string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+            var uniqueFileName = _fileOperations.AssembleQuestionUploadedFileName(questionViewModel.UserId, questionViewModel.Image.FileName);
+            string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+            await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+            return uniqueFileName;
         }
     }
 }

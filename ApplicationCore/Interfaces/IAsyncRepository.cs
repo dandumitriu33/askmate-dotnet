@@ -38,7 +38,7 @@ namespace ApplicationCore.Interfaces
         Task<List<Tag>> GetAllTags();
         Task<Tag> GetTagByIdAsync(int tagId);
         Task<List<Tag>> GetAllTagsNoDuplicates(int questionId);
-        Task AddQuestionTagAsync(QuestionTag questionTag);
+        Task AttachQuestionTagAsync(QuestionTag questionTag);
         Task<Tag> AddTagAsync(Tag tag);
         Task<List<int>> GetTagIdsForQuestionId(int questionId);
         Task<List<Tag>> GetTagsFromListFromDb(List<int> tagIds);
