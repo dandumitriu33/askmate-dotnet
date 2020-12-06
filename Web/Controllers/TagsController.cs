@@ -60,34 +60,25 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> AttachTag(TagViewModel tagViewModel, int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            //var tag = await _repository.GetTagByIdAsync(tagViewModel.Id);
-            //if (tag == null)
-            //{
-            //    Response.StatusCode = 404;
-            //    ViewData["ErrorMessage"] = "404 Resource not found.";
-            //    return View("Error");
-            //}
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                    if (question == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
                     var tag = await _repository.GetTagByIdAsync(tagViewModel.Id);
                     if (tag == null)
                     {
-                        // create new tag 
                         Tag newTag = _mapper.Map<TagViewModel, Tag>(tagViewModel);
                         tag = await _repository.AddTagAsync(newTag);
                     }
-
-                    // attach the new tag to q
                     await AddQuestionTag(tag.Id, questionId);
+                    return RedirectToAction("Details", "Questions", new { questionId = questionId });
                 }
                 catch (DbUpdateException dbex)
                 {
@@ -100,7 +91,8 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            return RedirectToAction("Details", "Questions", new { questionId = questionId });
+            ViewData["questionId"] = questionId.ToString();
+            return View("AttachTag", tagViewModel);
         }
 
         // GET: TagsController/detach
