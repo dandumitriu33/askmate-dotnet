@@ -644,7 +644,31 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.GetAllTags(), Times.Once);
         }
 
+        [Fact]
+        public async Task TagInfo_ReturnTagInfoViewOnException()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Dictionary<int, int> tempTagInfo = new Dictionary<int, int>();
+            tempTagInfo.Add(1, 1);
+            mockRepo.Setup(repo => repo.GetTagInfo()).ReturnsAsync(tempTagInfo).Verifiable();
+            List<Tag> tempTags = new List<Tag>();
+            Tag tempTag = new Tag { Id = 1, Name = "Test Tag" };
+            tempTags.Add(tempTag);
+            mockRepo.Setup(repo => repo.GetAllTags()).Throws(new Exception()).Verifiable();
 
+            var controller = new TagsController(mockRepo.Object, mapper);
+
+            // Act
+            var result = await controller.TagInfo();
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("Error", requestResult.ViewName);
+            mockRepo.Verify(x => x.GetTagInfo(), Times.Once);
+            mockRepo.Verify(x => x.GetAllTags(), Times.Once);
+        }
 
     }
 }
