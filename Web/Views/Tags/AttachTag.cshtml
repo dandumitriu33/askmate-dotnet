@@ -11,15 +11,16 @@
 <p>
     @foreach (var tagVM in Model)
     {
-        <span>
-            @tagVM.Name (
-            <a asp-controller="Tags"
-               asp-action="AddQuestionTag"
+        <span class="badge badge-dark">
+            @tagVM.Name 
+            <a class="badge badge-success"
+               asp-controller="Tags"
+               asp-action="AttachQuestionTag"
                asp-route-questionId="@questionId"
                asp-route-tagId="@tagVM.Id">
                 +
             </a>
-            )
+            
 
         </span>
     }

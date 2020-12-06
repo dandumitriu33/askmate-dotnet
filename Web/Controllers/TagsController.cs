@@ -77,7 +77,7 @@ namespace Web.Controllers
                         Tag newTag = _mapper.Map<TagViewModel, Tag>(tagViewModel);
                         tag = await _repository.AddTagAsync(newTag);
                     }
-                    await AddQuestionTag(tag.Id, questionId);
+                    await AttachQuestionTag(tag.Id, questionId);
                     return RedirectToAction("Details", "Questions", new { questionId = questionId });
                 }
                 catch (DbUpdateException dbex)
@@ -136,8 +136,8 @@ namespace Web.Controllers
             }
         }
 
-        // GET: TagsController/addQuestionTag
-        public async Task<IActionResult> AddQuestionTag(int tagId, int questionId)
+        // GET: TagsController/AttachQuestionTag
+        public async Task<IActionResult> AttachQuestionTag(int tagId, int questionId)
         {
             try
             {
