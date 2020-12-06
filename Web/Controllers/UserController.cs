@@ -36,7 +36,7 @@ namespace Web.Controllers
             {
                 List<ApplicationUser> allUsersFromDb = await _repository.GetAllUsers();
                 var allUsersViewModel = _mapper.Map<List<ApplicationUser>, List<ApplicationUserViewModel>>(allUsersFromDb);
-                return View(allUsersViewModel);
+                return View("AllUsers", allUsersViewModel);
             }
             catch (DbUpdateException dbex)
             {
