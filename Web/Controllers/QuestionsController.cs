@@ -127,12 +127,7 @@ namespace Web.Controllers
                     string uniqueFileName = null;
                     if (questionViewModel.Image != null && _fileOperations.ValidateImageType(questionViewModel.Image.FileName) == true)
                     {
-                        // for more advanced projects add a composite file provider - for now wwwroot
-                        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
-                        string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                        uniqueFileName = _fileOperations.AssembleQuestionUploadedFileName(questionViewModel.UserId, questionViewModel.Image.FileName);
-                        string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
-                        await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                        uniqueFileName = await SetPathAndUpload(questionViewModel);
                     }
                     var question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
                     question.ImageNamePath = uniqueFileName;
@@ -151,8 +146,10 @@ namespace Web.Controllers
                 }
                 
             }
-            return View();
+            return View("AddQuestion");
         }
+
+        
 
         // GET: QuestionsController/5/Edit
         [HttpGet]
@@ -376,6 +373,21 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
+        }
+
+
+
+
+        // helper methods
+        private async Task<string> SetPathAndUpload(QuestionViewModel questionViewModel)
+        {
+            // for more advanced projects add a composite file provider - for now wwwroot
+            // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
+            string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+            var uniqueFileName = _fileOperations.AssembleQuestionUploadedFileName(questionViewModel.UserId, questionViewModel.Image.FileName);
+            string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
+            await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+            return uniqueFileName;
         }
     }
 }

@@ -8,10 +8,13 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Tests.Shared;
 using Web.AutomapperProfiles;
 using Web.Controllers;
+using Web.ViewModels;
 using Xunit;
 
 namespace Tests.Controller
@@ -169,6 +172,50 @@ namespace Tests.Controller
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);
             Assert.Equal("AddQuestion", requestResult.ViewName);
+        }
+
+        [Fact]
+        public async Task AddQuestionPost_RedirectToDetailsActionOnSuccess() // Not including IMAGE, too advanced for me at this time
+        {
+            // Arrange
+            // mocking UserManager
+            var mockUserManager = MockHelpers.MockUserManager<ApplicationUser>();
+            var userFromDb = new ApplicationUser { Email = "test@email.com" };
+            mockUserManager.Setup(um => um.GetUserAsync(It.IsAny<ClaimsPrincipal>())).ReturnsAsync(userFromDb);
+
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Question tempQuestion = new Question { Id = 1, Title = "Test Title" };
+            mockRepo.Setup(repo => repo.AddQuestionAsync(It.IsAny<Question>())).ReturnsAsync(tempQuestion).Verifiable();
+
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            //creates an instance of an asp.net mvc controller
+            var controller = new QuestionsController(mockRepo.Object, realMapper, webHostEnvironment, fileOperations, signInManager, mockUserManager.Object)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+            QuestionViewModel tempQuestionVM = new QuestionViewModel() { Title = "Test Title", Body = "Test Body" };
+
+            // Act
+            var result = await controller.AddQuestion(tempQuestionVM);
+
+            // Assert
+            var requestResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Details", requestResult.ActionName);
+            mockUserManager.Verify(mu => mu.GetUserAsync(It.IsAny<ClaimsPrincipal>()), Times.Once);
+            mockRepo.Verify(x => x.AddQuestionAsync(It.IsAny<Question>()), Times.Once);
         }
 
     }
