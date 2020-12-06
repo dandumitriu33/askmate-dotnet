@@ -166,7 +166,38 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.AddQuestionTagAsync(It.IsAny<QuestionTag>()), Times.Once);
         }
 
+        [Fact]
+        public async Task AttachTagPost_ReturnAttachTagOnInvalidModel()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Question tempQuestion = new Question { Id = 1, Title = "Test Title" };
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempQuestion).Verifiable();
+            Tag tempTag = new Tag { Id = 1, Name = "Test Tag" };
+            mockRepo.Setup(repo => repo.GetTagByIdAsync(It.IsAny<int>())).ReturnsAsync(tempTag).Verifiable();
+            mockRepo.Setup(repo => repo.AddTagAsync(It.IsAny<Tag>())).ReturnsAsync(tempTag).Verifiable();
+            mockRepo.Setup(repo => repo.AddQuestionTagAsync(It.IsAny<QuestionTag>())).Verifiable();
 
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            var controller = new TagsController(mockRepo.Object, realMapper);
+            controller.ModelState.AddModelError("Name", "Required");
+
+            // Act
+            var result = await controller.AttachTag(new TagViewModel { Id = 1 }, 1);
+
+            // Assert
+            var requestResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal("AttachTag", requestResult.ViewName);
+            mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Never);
+            mockRepo.Verify(x => x.GetTagByIdAsync(It.IsAny<int>()), Times.Never);
+            mockRepo.Verify(x => x.AddTagAsync(It.IsAny<Tag>()), Times.Never);
+            mockRepo.Verify(x => x.AddQuestionTagAsync(It.IsAny<QuestionTag>()), Times.Never);
+        }
 
 
 
