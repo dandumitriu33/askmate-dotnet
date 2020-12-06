@@ -21,7 +21,7 @@ namespace Tests.Controller
         private IMapper mapper { get; }
 
         [Fact]
-        public async Task AttachTagGet_ReturnAttachTagViewOnSuccess()
+        public async Task AddTagGet_ReturnAttachTagViewOnSuccess()
         {
             // Arrange
             // mocking repository
@@ -38,7 +38,7 @@ namespace Tests.Controller
             var controller = new TagsController(mockRepo.Object, realMapper);
 
             // Act
-            var result = await controller.AttachTag(1);
+            var result = await controller.AddTag(1);
 
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);
@@ -48,7 +48,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task AttachTagGet_ReturnErrorViewOnNullQuestion()
+        public async Task AddTagGet_ReturnErrorViewOnNullQuestion()
         {
             // Arrange
             // mocking repository
@@ -65,7 +65,7 @@ namespace Tests.Controller
             var controller = new TagsController(mockRepo.Object, realMapper);
 
             // Act
-            var result = await controller.AttachTag(1);
+            var result = await controller.AddTag(1);
 
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);
@@ -75,7 +75,7 @@ namespace Tests.Controller
         }
 
         [Fact]
-        public async Task AttachTagGet_ReturnErrorViewOnException()
+        public async Task AddTagGet_ReturnErrorViewOnException()
         {
             // Arrange
             // mocking repository
@@ -92,7 +92,7 @@ namespace Tests.Controller
             var controller = new TagsController(mockRepo.Object, realMapper);
 
             // Act
-            var result = await controller.AttachTag(1);
+            var result = await controller.AddTag(1);
 
             // Assert
             var requestResult = Assert.IsType<ViewResult>(result);

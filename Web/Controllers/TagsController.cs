@@ -28,7 +28,7 @@ namespace Web.Controllers
 
         // GET: TagsController/tags
         [HttpGet]
-        public async Task<IActionResult> AttachTag(int questionId)
+        public async Task<IActionResult> AddTag(int questionId)
         {
             try
             {
