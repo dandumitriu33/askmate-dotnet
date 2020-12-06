@@ -288,6 +288,59 @@ namespace Tests.Controller
             mockRepo.Verify(x => x.AddQuestionTagAsync(It.IsAny<QuestionTag>()), Times.Never);
         }
 
+        [Fact]
+        public async Task DetachTagGet_RedirectToDetailsActionOnSuccess()
+        {
+            // Arrange
+            // mocking repository
+            var mockRepo = new Mock<IAsyncRepository>();
+            Question tempQuestion = new Question { Id = 1, Title = "Test Title" };
+            mockRepo.Setup(repo => repo.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>())).ReturnsAsync(tempQuestion).Verifiable();
+            Tag tempTag = new Tag { Id = 1, Name = "Test Tag" };
+            mockRepo.Setup(repo => repo.GetTagByIdAsync(It.IsAny<int>())).ReturnsAsync(tempTag).Verifiable();
+            mockRepo.Setup(repo => repo.DetachTag(It.IsAny<QuestionTag>())).Verifiable();
+
+            // adding a real mapper
+            var myProfile = new AskMateProfiles();
+            var configuration = new MapperConfiguration(cfg => cfg.AddProfile(myProfile));
+            var realMapper = new Mapper(configuration);
+
+            // mocking Response.StatusCode = 404 setter
+            var mockHttpContext = new Mock<HttpContext>();
+            var response = new Mock<HttpResponse>();
+            mockHttpContext.SetupGet(x => x.Response).Returns(response.Object);
+
+            var controller = new TagsController(mockRepo.Object, realMapper)
+            {
+                ControllerContext = new ControllerContext()
+                {
+                    HttpContext = mockHttpContext.Object
+                }
+            };
+
+            // Act
+            var result = await controller.DetachTag(1, 1);
+
+            // Assert
+            var requestResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Details", requestResult.ActionName);
+            Assert.Equal("Questions", requestResult.ControllerName);
+            mockRepo.Verify(x => x.GetQuestionByIdWithoutDetailsAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(x => x.GetTagByIdAsync(It.IsAny<int>()), Times.Once);
+            mockRepo.Verify(x => x.DetachTag(It.IsAny<QuestionTag>()), Times.Once);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

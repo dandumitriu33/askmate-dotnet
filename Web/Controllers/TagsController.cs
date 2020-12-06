@@ -100,28 +100,29 @@ namespace Web.Controllers
         [Route("detach")]
         public async Task<IActionResult> DetachTag(int tagId, int questionId)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            var tag = await _repository.GetTagByIdAsync(tagId);
-            if (tag == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
             try
             {
+                var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionId);
+                if (question == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
+                var tag = await _repository.GetTagByIdAsync(tagId);
+                if (tag == null)
+                {
+                    Response.StatusCode = 404;
+                    ViewData["ErrorMessage"] = "404 Resource not found.";
+                    return View("Error");
+                }
                 QuestionTag newQuestionTag = new QuestionTag
                 {
                     QuestionId = questionId,
                     TagId = tagId
                 };
                 await _repository.DetachTag(newQuestionTag);
+                return RedirectToAction("Details", "Questions", new { questionId = questionId });
             }
             catch (DbUpdateException dbex)
             {
@@ -133,7 +134,6 @@ namespace Web.Controllers
                 ViewData["ErrorMessage"] = ex.Message;
                 return View("Error");
             }
-            return RedirectToAction("Details", "Questions", new { questionId = questionId });
         }
 
         // GET: TagsController/addQuestionTag
