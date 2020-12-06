@@ -188,32 +188,27 @@ namespace Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditQuestion(QuestionViewModel questionViewModel)
         {
-            var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionViewModel.Id);
-            if (question == null)
-            {
-                Response.StatusCode = 404;
-                ViewData["ErrorMessage"] = "404 Resource not found.";
-                return View("Error");
-            }
-            if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var question = await _repository.GetQuestionByIdWithoutDetailsAsync(questionViewModel.Id);
+                    if (question == null)
+                    {
+                        Response.StatusCode = 404;
+                        ViewData["ErrorMessage"] = "404 Resource not found.";
+                        return View("Error");
+                    }
+                    if (String.Equals(User.FindFirstValue(ClaimTypes.NameIdentifier), question.UserId) == false)
+                    {
+                        return RedirectToAction("AccessDenied", "Account");
+                    }
                     var currentlySignedInUser = await _userManager.GetUserAsync(User);
                     questionViewModel.UserId = currentlySignedInUser.Id;
                     string uniqueFileName = null;
                     if (questionViewModel.Image != null)
                     {
-                        // for more advanced projects add a composite file provider - for now wwwroot
-                        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/file-providers?view=aspnetcore-5.0#compositefileprovider
-                        string serverImagesDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-                        uniqueFileName = _fileOperations.AssembleQuestionUploadedFileName(questionViewModel.UserId, questionViewModel.Image.FileName);
-                        string filePath = Path.Combine(serverImagesDirectory, uniqueFileName);
-                        await questionViewModel.Image.CopyToAsync(new FileStream(filePath, FileMode.Create));
+                        uniqueFileName = await SetPathAndUpload(questionViewModel);
                     }
                     question = _mapper.Map<QuestionViewModel, Question>(questionViewModel);
                     question.ImageNamePath = uniqueFileName;
@@ -231,11 +226,7 @@ namespace Web.Controllers
                     return View("Error");
                 }
             }
-            // simply returning View somehow sends a Post request and parameter type error shows up as it expects a QVM
-            // did some research, stackoverflow old 6 and 3 yr questions - no answers
-            // also set up a custom error message via ViewData but this is more "expected behavior" as it sneds a Get, probably
-            // answers controller has no issues with this
-            return await EditQuestion(questionViewModel.Id);
+            return View("EditQuestion", questionViewModel);
         }
 
         // Get: QuestionsController/5/Remove
